@@ -1,0 +1,27 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
+         xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+
+    <f:section title="Checkmarx Server Settings"/>
+    <f:entry title="Checkmarx server URL" field="serverUrl">
+        <f:textbox default="${descriptor.serverUrl}" />
+    </f:entry>
+    <f:entry title="AST Key" field="key">
+        <f:textbox default="${descriptor.key}" />
+    </f:entry>
+    <f:entry title="AST Secret" field="key">
+        <f:textbox default="${descriptor.key}" />
+    </f:entry>
+
+    <f:entry title="Checkmarx project name" description="Project name in AST" field="projectName">
+        <f:textbox default="${descriptor.projectName}"/>
+    </f:entry>
+
+    <f:entry title="Scan Tags" field="scanTags">
+        <f:textbox default="${descriptor.scanTags}"/>
+    </f:entry>
+
+    <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
+                      with="serverUrl" />
+
+</j:jelly>

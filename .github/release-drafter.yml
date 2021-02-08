@@ -1,0 +1,2 @@
+_extends: .github
+tag-template: ast-scanner-$NEXT_MINOR_VERSION

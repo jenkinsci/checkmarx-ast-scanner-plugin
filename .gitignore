@@ -1,0 +1,53 @@
+#Gradle
+.gradle/
+build/
+/build/
+/bin/
+!gradle/wrapper/gradle-wrapper.jar
+application-secrets.yml
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/build/
+/out/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+cx-flow.log*
+
+### VSCode ###
+.vscode
+
+work/
+out/
+*-secrets.properties
+
+#Maven
+target/
+
+#Eclipse
+.classpath
+.project
+bin/
+.settings/
+
+#Jenkins specific out
+*.hpi
+classes/
+work/
