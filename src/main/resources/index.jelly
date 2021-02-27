@@ -1,4 +1,4 @@
 <?jelly escape-by-default='true'?>
 <div>
-    TODO
+    This plugin allows scanning the source code in new Checkmarx AST engine.
 </div>
