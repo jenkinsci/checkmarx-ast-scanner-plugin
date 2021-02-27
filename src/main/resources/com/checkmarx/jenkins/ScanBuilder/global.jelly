@@ -1,0 +1,33 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:c="/lib/credentials"
+         xmlns:f="/lib/form">
+
+    <f:section title="Checkmarx" name="checkmarx">
+
+        <!-- ********************** Server Settings ********************************************** -->
+        <f:section title="Checkmarx Server Settings"/>
+        <f:entry title="Checkmarx server URL" field="serverUrl">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="Checkmarx IAM URL" field="accessControlUrl">
+            <f:textbox/>
+        </f:entry>
+        <f:entry field="credentialsId" title="${%Credentials}">
+            <c:select/>
+        </f:entry>
+
+        <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
+                          with="serverUrl,key,secret,credentialsId"/>
+
+        <!-- *************************** Global Scan Settings ***************************************** -->
+        <f:section title="Checkmarx Parameters"/>
+
+        <f:entry title="Scan Preset" field="presetName">
+            <f:textbox/>
+        </f:entry>
+        <f:entry title="Default File Filters" field="filterPattern">
+            <f:textarea default="${descriptor.DEFAULT_FILTER_PATTERNS}"/>
+        </f:entry>
+
+    </f:section>
+</j:jelly>

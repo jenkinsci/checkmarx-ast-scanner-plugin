@@ -18,7 +18,7 @@
         <changelist>-SNAPSHOT</changelist>
 
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
-        <jenkins.version>2.235.1</jenkins.version>
+        <jenkins.version>2.263.3</jenkins.version>
         <java.level>8</java.level>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
     </properties>
@@ -38,7 +38,7 @@
     <!-- If you want this to appear on the plugin site page: -->
     <developers>
         <developer>
-             <id>MithileshPawar</id>
+             <id>mithilesh_pawar</id>
              <name>Mithilesh Pawar</name>
              <email>Mithilesh.Pawar@checkmarx.com</email>
         </developer>
@@ -59,6 +59,11 @@
     </dependencyManagement>
     <dependencies>
         <dependency>
+            <groupId>com.cx.ast</groupId>
+            <artifactId>sdk</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>structs</artifactId>
         </dependency>
@@ -73,6 +78,26 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>credentials</artifactId>
+            <version>2.1.19</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-step-api</artifactId>
+            <version>2.23</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.fasterxml.jackson.core</groupId>-->
+<!--            <artifactId>jackson-databind</artifactId>-->
+<!--            <version>2.12.1</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--        <groupId>org.jenkins-ci</groupId>-->
+<!--        <artifactId>symbol-annotation</artifactId>-->
+<!--        <version>1.20</version>-->
+<!--        </dependency>-->
+        <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-basic-steps</artifactId>
             <scope>test</scope>
@@ -81,11 +106,6 @@
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-durable-task-step</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>credentials</artifactId>
-            <version>2.1.19</version>
         </dependency>
     </dependencies>
 
