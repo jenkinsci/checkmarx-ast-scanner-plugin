@@ -1,5 +1,9 @@
 package com.checkmarx.jenkins;
 
+import com.checkmarx.ast.CxAuth;
+import com.checkmarx.ast.CxAuthType;
+import com.checkmarx.ast.CxParamType;
+import com.checkmarx.ast.CxScan;
 import com.checkmarx.jenkins.credentials.CheckmarxApiToken;
 import com.checkmarx.jenkins.credentials.DefaultCheckmarxApiToken;
 import com.checkmarx.jenkins.model.ScanConfig;
@@ -24,8 +28,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.cloudbees.plugins.credentials.CredentialsMatchers.withId;
@@ -221,7 +228,7 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
 
         //// Check for required version of CLI
         CheckmarxInstallation installation = findCheckmarxInstallation();
-        String cliExecutable;
+        String checkmarxCliExecutable;
         if (installation == null) {
             log.info("Checkmarx installation named '" + checkmarxInstallation + "' was not found. Please configure the build properly and retry.");
             run.setResult(Result.FAILURE);
@@ -240,14 +247,22 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
 
         installation = installation.forNode(node, listener);
         installation = installation.forEnvironment(envVars);
-        cliExecutable = installation.getCheckmarxExecutable(launcher);
+        checkmarxCliExecutable = installation.getCheckmarxExecutable(launcher);
 
-        if (cliExecutable == null) {
+        if (checkmarxCliExecutable == null) {
             log.info("Can't retrieve the Checkmarx executable.");
             run.setResult(Result.FAILURE);
             return;
         }
-        log.info("This is the executable: " + cliExecutable);
+        log.info("This is the executable: " + checkmarxCliExecutable);
+
+        // Check if the configured token is valid.
+        CheckmarxApiToken checkmarxToken = scanConfig.getCheckmarxToken();
+        if (checkmarxToken == null) {
+            log.error("Checkmarx API token with ID '" + credentialsId + "' was not found. Please configure the build properly and retry.");
+            run.setResult(Result.FAILURE);
+            return;
+        }
 
         if (installation != null) {
             VirtualChannel nodeChannel = node.getChannel();
@@ -264,7 +279,28 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
-        log.info("--------------- Execution ends here ---------------");
+        //Integration with the wrapper
+        CxAuth wrapper = new CxAuth(CxAuthType.KEYSECRET, scanConfig.getServerUrl(), scanConfig.getCheckmarxToken().getId(), scanConfig.getCheckmarxToken().getToken().getPlainText(), "");
+
+
+        //get the current workspace where the sourcecode is checked out.
+        File file = new File(workspace.getRemote());
+        String sourceDir = file.getAbsolutePath();
+
+        Map<CxParamType, String> params = new HashMap<>();
+        params.put(CxParamType.D, sourceDir.toString());
+        params.put(CxParamType.V, " ");
+        params.put(CxParamType.INCREMENTAL, "false");
+        params.put(CxParamType.PROJECT_NAME, scanConfig.getProjectName());
+        params.put(CxParamType.PROJECT_SOURCE_TYPE, "upload");
+        params.put(CxParamType.PROJECT_TYPE, "sast");
+        params.put(CxParamType.PRESET_NAME, scanConfig.getPresetName());
+        params.put(CxParamType.FILTERS, scanConfig.getZipFileFilters());
+
+        CxScan cxScan = wrapper.cxScanCreate(params);
+        log.info(cxScan.toString());
+
+        log.info("--------------- Checkmarx execution completed ---------------");
 
     }
 
@@ -291,11 +327,11 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
 
         if (getUseOwnServerCredentials()) {
             scanConfig.setServerUrl(getServerUrl());
-            scanConfig.setToken(getCheckmarxTokenCredential(getCredentialsId()));
+            scanConfig.setCheckmarxToken(getCheckmarxTokenCredential(getCredentialsId()));
 
         } else {
             scanConfig.setServerUrl(descriptor.getServerUrl());
-            scanConfig.setToken(getCheckmarxTokenCredential(descriptor.getCredentialsId()));
+            scanConfig.setCheckmarxToken(getCheckmarxTokenCredential(descriptor.getCredentialsId()));
         }
 
         scanConfig.setIncrementalScan(getIncrementalScan());

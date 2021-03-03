@@ -12,12 +12,13 @@
         <f:entry title="Checkmarx IAM URL" field="accessControlUrl">
             <f:textbox/>
         </f:entry>
+
         <f:entry field="credentialsId" title="${%Credentials}">
             <c:select/>
         </f:entry>
 
         <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-                          with="serverUrl,key,secret,credentialsId"/>
+                          with="serverUrl,credentialsId"/>
 
         <!-- *************************** Global Scan Settings ***************************************** -->
         <f:section title="Checkmarx Parameters"/>
