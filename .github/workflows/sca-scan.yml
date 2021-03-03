@@ -1,0 +1,31 @@
+name: Checkmarx SCA Scan
+on:
+  push:
+    branches:
+      - main
+      - master
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    # Scan code with Checkmarx
+    - name: Checkmarx CxFlow Action
+      uses: checkmarx-ts/checkmarx-cxflow-github-action@v1.1 #Github Action version
+      with:
+        project: ${{ github.event.repository.name }}
+        sca_api_url: https://api.scacheckmarx.com
+        sca_app_url: https://sca.scacheckmarx.com
+        sca_access_control_url: https://platform.checkmarx.net
+        sca_tenant: ${{ secrets.CX_SCA_TENANT }}
+        sca_username: ${{ secrets.CX_SCA_USERNAME }}
+        sca_password: ${{ secrets.CX_SCA_PASSWORD }}
+        break_build: true
+        scanners: sca 
+
+    - name: Upload SARIF file
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: cx.sarif
