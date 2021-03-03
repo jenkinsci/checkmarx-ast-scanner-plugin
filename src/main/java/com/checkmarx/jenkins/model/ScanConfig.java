@@ -12,7 +12,7 @@ public class ScanConfig implements Serializable {
 
     private String serverUrl;
     private String iamUrl;
-    private CheckmarxApiToken token;
+    private CheckmarxApiToken checkmarxToken;
     private String projectName;
     private String teamName;
     private String presetName;

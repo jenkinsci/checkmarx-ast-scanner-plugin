@@ -56,53 +56,53 @@ public final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
     public DescriptorImpl() {
         super(ScanBuilder.class); //to be confirmed
-        load();
+        this.load();
     }
 
     @Nullable
     public String getServerUrl() {
-        return serverUrl;
+        return this.serverUrl;
     }
 
-    public void setServerUrl(@Nullable String serverUrl) {
+    public void setServerUrl(@Nullable final String serverUrl) {
         this.serverUrl = serverUrl;
     }
 
     public String getAccessUrl() {
-        return accessControlUrl;
+        return this.accessControlUrl;
     }
 
-    public void setAccessControlUrlUrl(@Nullable String accessControlUrl) {
+    public void setAccessControlUrlUrl(@Nullable final String accessControlUrl) {
         this.accessControlUrl = accessControlUrl;
     }
 
     public String getPresetName() {
-        return presetName;
+        return this.presetName;
     }
 
-    public void setPresetName(@Nullable String presetName) {
+    public void setPresetName(@Nullable final String presetName) {
         this.presetName = presetName;
     }
 
     public String getCredentialsId() {
-        return credentialsId;
+        return this.credentialsId;
     }
 
-    public void setCredentialsId(String credentialsId) {
+    public void setCredentialsId(final String credentialsId) {
         this.credentialsId = credentialsId;
     }
 
     @Nullable
     public String getFilterPattern() {
-        return this.filterPattern;
+        return filterPattern;
     }
 
-    public void setFilterPattern(@Nullable final String filterPattern) {
+    public void setFilterPattern(@Nullable String filterPattern) {
         this.filterPattern = filterPattern;
     }
 
     @Override
-    public boolean isApplicable(Class<? extends AbstractProject> aClass) {
+    public boolean isApplicable(final Class<? extends AbstractProject> aClass) {
         return true;
     }
 
@@ -111,35 +111,35 @@ public final class DescriptorImpl extends BuildStepDescriptor<Builder> {
         return "Execute Checkmarx Scan";
     }
 
-    public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-        JSONObject pluginData = formData.getJSONObject("checkmarx");
+    public boolean configure(final StaplerRequest req, final JSONObject formData) throws FormException {
+        final JSONObject pluginData = formData.getJSONObject("checkmarx");
         req.bindJSON(this, pluginData);
-        save();
+        this.save();
         return false;
         //  return super.configure(req, formData);
     }
 
     @SuppressFBWarnings("EI_EXPOSE_REP")
     public CheckmarxInstallation[] getInstallations() {
-        return this.installations;
+        return installations;
     }
 
-    public void setInstallations(final CheckmarxInstallation... installations) {
+    public void setInstallations(CheckmarxInstallation... installations) {
         this.installations = installations;
-        this.save();
+        save();
     }
 
     public boolean hasInstallationsAvailable() {
-        if (DescriptorImpl.LOG.isTraceEnabled()) {
-            DescriptorImpl.LOG.trace("Available Checkmarx installations: {}",
-                    Arrays.stream(this.installations).map(CheckmarxInstallation::getName).collect(joining(",", "[", "]")));
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Available Checkmarx installations: {}",
+                    Arrays.stream(installations).map(CheckmarxInstallation::getName).collect(joining(",", "[", "]")));
         }
 
-        return this.installations.length > 0;
+        return installations.length > 0;
     }
 
-    public FormValidation doTestConnection(@QueryParameter final String serverUrl, @QueryParameter final String credentialsId, @AncestorInPath Item item,
-                                           @AncestorInPath final Job job) {
+    public FormValidation doTestConnection(@QueryParameter String serverUrl, @QueryParameter String credentialsId, @AncestorInPath final Item item,
+                                           @AncestorInPath Job job) {
         try {
             if (job == null) {
                 Jenkins.get().checkPermission(Jenkins.ADMINISTER);
@@ -148,15 +148,15 @@ public final class DescriptorImpl extends BuildStepDescriptor<Builder> {
             }
             // test logic here
             return FormValidation.ok("Success");
-        } catch (final Exception e) {
+        } catch (Exception e) {
             return FormValidation.error("Client error : " + e.getMessage());
         }
 
     }
 
-    public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String credentialsId) {
+    public ListBoxModel doFillCredentialsIdItems(@AncestorInPath final Item item, @QueryParameter final String credentialsId) {
 
-        StandardListBoxModel result = new StandardListBoxModel();
+        final StandardListBoxModel result = new StandardListBoxModel();
         if (item == null) {
             if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
                 return result.includeCurrentValue(credentialsId);
@@ -177,16 +177,16 @@ public final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 //                .includeMatchingAs(
 //                        item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
 //                        item,
-//                        DefaultCheckmarxApiToken.class,
+//                        CheckmarxApiToken.class,
 //                        new ArrayList<>(),
-//                        CredentialsMatchers.anyOf(CredentialsMatchers.instanceOf(DefaultCheckmarxApiToken.class)))
+//                        CredentialsMatchers.anyOf(CredentialsMatchers.instanceOf(CheckmarxApiToken.class)))
 //                .includeCurrentValue(credentialsId);
 
     }
 
     public FormValidation doCheckCredentialsId(
-            @AncestorInPath Item item,
-            @QueryParameter String value
+            @AncestorInPath final Item item,
+            @QueryParameter final String value
     ) {
         if (fixEmptyAndTrim(value) == null) {
             return FormValidation.error("Checkmarx API token is required.");
@@ -222,11 +222,11 @@ public final class DescriptorImpl extends BuildStepDescriptor<Builder> {
     }
 
     public String getCredentialsDescription() {
-        if (this.getServerUrl() == null || this.getServerUrl().isEmpty()) {
+        if (getServerUrl() == null || getServerUrl().isEmpty()) {
             return "not set";
         }
 
-        return "Server URL: " + this.getServerUrl();
+        return "Server URL: " + getServerUrl();
 
     }
 
