@@ -20,7 +20,7 @@
 
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
         <jenkins.version>2.263.4</jenkins.version>
-        <java.level>11</java.level>
+        <java.level>8</java.level>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
     </properties>
     <prerequisites>
@@ -57,7 +57,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <release>11</release>
+                    <release>8</release>
                 </configuration>
             </plugin>
             <plugin>
@@ -66,23 +66,23 @@
                 <extensions>true</extensions>
                 <version>3.17</version>
                 <configuration>
-                    <minimumJavaVersion>11</minimumJavaVersion>
+                    <minimumJavaVersion>8</minimumJavaVersion>
                 </configuration>
             </plugin>
-            <plugin>
-                <!-- This override has been skipped for building with Java 11 -->
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>animal-sniffer-maven-plugin</artifactId>
-                <version>${animal.sniffer.version}</version>
-                <configuration>
-                    <skip>true</skip> <!-- Skipped because the signature for java11 isn't available -->
-                    <signature>
-                        <groupId>org.codehaus.mojo.signature</groupId>
-                        <artifactId>java11</artifactId>
-                        <version>1.0</version>
-                    </signature>
-                </configuration>
-            </plugin>
+<!--            <plugin>-->
+<!--                &lt;!&ndash; This override has been skipped for building with Java 11 &ndash;&gt;-->
+<!--                <groupId>org.codehaus.mojo</groupId>-->
+<!--                <artifactId>animal-sniffer-maven-plugin</artifactId>-->
+<!--                <version>${animal.sniffer.version}</version>-->
+<!--                <configuration>-->
+<!--                    <skip>false</skip> &lt;!&ndash; Skipped because the signature for java11 isn't available &ndash;&gt;-->
+<!--                    <signature>-->
+<!--                        <groupId>org.codehaus.mojo.signature</groupId>-->
+<!--                        <artifactId>${java.level}</artifactId>-->
+<!--                        <version>1.0</version>-->
+<!--                    </signature>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
