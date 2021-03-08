@@ -45,11 +45,10 @@ public final class DescriptorImpl extends BuildStepDescriptor<Builder> {
     //  Persistent plugin global configuration parameters
     @Nullable
     private String serverUrl;
-    private String accessControlUrl;
-    private String presetName;
+    private String baseAuthUrl;
     private String credentialsId;
     @Nullable
-    private String filterPattern;
+    private String zipFileFilters;
 
     @CopyOnWrite
     private volatile CheckmarxInstallation[] installations = new CheckmarxInstallation[0];
@@ -68,20 +67,12 @@ public final class DescriptorImpl extends BuildStepDescriptor<Builder> {
         this.serverUrl = serverUrl;
     }
 
-    public String getAccessUrl() {
-        return this.accessControlUrl;
+    public String getBaseAuthUrl() {
+        return this.baseAuthUrl;
     }
 
-    public void setAccessControlUrlUrl(@Nullable final String accessControlUrl) {
-        this.accessControlUrl = accessControlUrl;
-    }
-
-    public String getPresetName() {
-        return this.presetName;
-    }
-
-    public void setPresetName(@Nullable final String presetName) {
-        this.presetName = presetName;
+    public void setBaseAuthUrl(@Nullable final String baseAuthUrl) {
+        this.baseAuthUrl = baseAuthUrl;
     }
 
     public String getCredentialsId() {
@@ -93,12 +84,12 @@ public final class DescriptorImpl extends BuildStepDescriptor<Builder> {
     }
 
     @Nullable
-    public String getFilterPattern() {
-        return filterPattern;
+    public String getZipFileFilters() {
+        return zipFileFilters;
     }
 
-    public void setFilterPattern(@Nullable String filterPattern) {
-        this.filterPattern = filterPattern;
+    public void setZipFileFilters(@Nullable String zipFileFilters) {
+        this.zipFileFilters = zipFileFilters;
     }
 
     @Override
