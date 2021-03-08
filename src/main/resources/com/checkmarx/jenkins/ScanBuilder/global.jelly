@@ -9,7 +9,7 @@
         <f:entry title="Checkmarx server URL" field="serverUrl">
             <f:textbox/>
         </f:entry>
-        <f:entry title="Checkmarx IAM URL" field="accessControlUrl">
+        <f:entry title="Checkmarx Base Authentication URL" field="baseAuthUrl">
             <f:textbox/>
         </f:entry>
 
@@ -21,12 +21,9 @@
                           with="serverUrl,credentialsId"/>
 
         <!-- *************************** Global Scan Settings ***************************************** -->
-        <f:section title="Checkmarx Parameters"/>
+        <f:section title="Checkmarx Scan Configuration"/>
 
-        <f:entry title="Scan Preset" field="presetName">
-            <f:textbox/>
-        </f:entry>
-        <f:entry title="Default File Filters" field="filterPattern">
+        <f:entry title="Default File Filters" field="zipFileFilters">
             <f:textarea default="${descriptor.DEFAULT_FILTER_PATTERNS}"/>
         </f:entry>
 

@@ -11,18 +11,19 @@ import java.io.Serializable;
 public class ScanConfig implements Serializable {
 
     private String serverUrl;
-    private String iamUrl;
+    private String baseAuthUrl;
     private CheckmarxApiToken checkmarxToken;
     private String projectName;
     private String teamName;
     private String presetName;
     private boolean sastEnabled;
     private boolean scaEnabled;
+    private boolean containerScanEnabled;
+    private boolean kicsEnabled;
     private boolean incrementalScan;
     private String zipFileFilters;
-    private String sastScanFilters;
-    private String scaScanFilters;
     private String additionalOptions;
+    private String sourceDirectory;
 
 
 }
