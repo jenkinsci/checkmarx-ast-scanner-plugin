@@ -46,6 +46,7 @@ public final class DescriptorImpl extends BuildStepDescriptor<Builder> {
     @Nullable
     private String serverUrl;
     private String baseAuthUrl;
+    private boolean useAuthenticationUrl;
     private String credentialsId;
     @Nullable
     private String zipFileFilters;
@@ -55,45 +56,53 @@ public final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
     public DescriptorImpl() {
         super(ScanBuilder.class); //to be confirmed
-        this.load();
+        load();
     }
 
     @Nullable
     public String getServerUrl() {
-        return this.serverUrl;
+        return serverUrl;
     }
 
-    public void setServerUrl(@Nullable final String serverUrl) {
+    public void setServerUrl(@Nullable String serverUrl) {
         this.serverUrl = serverUrl;
     }
 
     public String getBaseAuthUrl() {
-        return this.baseAuthUrl;
+        return baseAuthUrl;
     }
 
-    public void setBaseAuthUrl(@Nullable final String baseAuthUrl) {
+    public void setBaseAuthUrl(@Nullable String baseAuthUrl) {
         this.baseAuthUrl = baseAuthUrl;
     }
 
-    public String getCredentialsId() {
-        return this.credentialsId;
+    public boolean getUseAuthenticationUrl() {
+        return this.useAuthenticationUrl;
     }
 
-    public void setCredentialsId(final String credentialsId) {
+    public void setUseAuthenticationUrl(final boolean useAuthenticationUrl) {
+        this.useAuthenticationUrl = useAuthenticationUrl;
+    }
+
+    public String getCredentialsId() {
+        return credentialsId;
+    }
+
+    public void setCredentialsId(String credentialsId) {
         this.credentialsId = credentialsId;
     }
 
     @Nullable
     public String getZipFileFilters() {
-        return zipFileFilters;
+        return this.zipFileFilters;
     }
 
-    public void setZipFileFilters(@Nullable String zipFileFilters) {
+    public void setZipFileFilters(@Nullable final String zipFileFilters) {
         this.zipFileFilters = zipFileFilters;
     }
 
     @Override
-    public boolean isApplicable(final Class<? extends AbstractProject> aClass) {
+    public boolean isApplicable(Class<? extends AbstractProject> aClass) {
         return true;
     }
 
@@ -102,35 +111,35 @@ public final class DescriptorImpl extends BuildStepDescriptor<Builder> {
         return "Execute Checkmarx Scan";
     }
 
-    public boolean configure(final StaplerRequest req, final JSONObject formData) throws FormException {
-        final JSONObject pluginData = formData.getJSONObject("checkmarx");
+    public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
+        JSONObject pluginData = formData.getJSONObject("checkmarx");
         req.bindJSON(this, pluginData);
-        this.save();
+        save();
         return false;
         //  return super.configure(req, formData);
     }
 
     @SuppressFBWarnings("EI_EXPOSE_REP")
     public CheckmarxInstallation[] getInstallations() {
-        return installations;
+        return this.installations;
     }
 
-    public void setInstallations(CheckmarxInstallation... installations) {
+    public void setInstallations(final CheckmarxInstallation... installations) {
         this.installations = installations;
-        save();
+        this.save();
     }
 
     public boolean hasInstallationsAvailable() {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Available Checkmarx installations: {}",
-                    Arrays.stream(installations).map(CheckmarxInstallation::getName).collect(joining(",", "[", "]")));
+        if (DescriptorImpl.LOG.isTraceEnabled()) {
+            DescriptorImpl.LOG.trace("Available Checkmarx installations: {}",
+                    Arrays.stream(this.installations).map(CheckmarxInstallation::getName).collect(joining(",", "[", "]")));
         }
 
-        return installations.length > 0;
+        return this.installations.length > 0;
     }
 
-    public FormValidation doTestConnection(@QueryParameter String serverUrl, @QueryParameter String credentialsId, @AncestorInPath final Item item,
-                                           @AncestorInPath Job job) {
+    public FormValidation doTestConnection(@QueryParameter final String serverUrl, @QueryParameter final String credentialsId, @AncestorInPath Item item,
+                                           @AncestorInPath final Job job) {
         try {
             if (job == null) {
                 Jenkins.get().checkPermission(Jenkins.ADMINISTER);
@@ -139,15 +148,15 @@ public final class DescriptorImpl extends BuildStepDescriptor<Builder> {
             }
             // test logic here
             return FormValidation.ok("Success");
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return FormValidation.error("Client error : " + e.getMessage());
         }
 
     }
 
-    public ListBoxModel doFillCredentialsIdItems(@AncestorInPath final Item item, @QueryParameter final String credentialsId) {
+    public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String credentialsId) {
 
-        final StandardListBoxModel result = new StandardListBoxModel();
+        StandardListBoxModel result = new StandardListBoxModel();
         if (item == null) {
             if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
                 return result.includeCurrentValue(credentialsId);
@@ -158,26 +167,15 @@ public final class DescriptorImpl extends BuildStepDescriptor<Builder> {
                 return result.includeCurrentValue(credentialsId);
             }
         }
-
         return result.includeEmptyValue()
                 .includeAs(ACL.SYSTEM, item, CheckmarxApiToken.class)
                 .includeCurrentValue(credentialsId);
 
-//        return result
-//                .includeEmptyValue()
-//                .includeMatchingAs(
-//                        item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
-//                        item,
-//                        CheckmarxApiToken.class,
-//                        new ArrayList<>(),
-//                        CredentialsMatchers.anyOf(CredentialsMatchers.instanceOf(CheckmarxApiToken.class)))
-//                .includeCurrentValue(credentialsId);
-
     }
 
     public FormValidation doCheckCredentialsId(
-            @AncestorInPath final Item item,
-            @QueryParameter final String value
+            @AncestorInPath Item item,
+            @QueryParameter String value
     ) {
         if (fixEmptyAndTrim(value) == null) {
             return FormValidation.error("Checkmarx API token is required.");
@@ -189,38 +187,15 @@ public final class DescriptorImpl extends BuildStepDescriptor<Builder> {
         }
         return FormValidation.ok();
 
-//        if (item == null) {
-//            if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
-//                return FormValidation.ok();
-//            }
-//        } else {
-//            if (!item.hasPermission(Item.EXTENDED_READ)
-//                    && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
-//                return FormValidation.ok();
-//            }
-//        }
-//        if (StringUtils.isBlank(value)) {
-//            return FormValidation.ok(); //print message in case of blank ?
-//        }
-
-//        if (CredentialsProvider.listCredentials(DefaultCheckmarxApiToken.class, item, item instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) item) : ACL.SYSTEM,
-//                new ArrayList<>(),
-//                CredentialsMatchers.anyOf(CredentialsMatchers.instanceOf(DefaultCheckmarxApiToken.class))).isEmpty()) {
-//            return FormValidation.error("Cannot find currently selected credentials");
-//        }
-
-        //       return FormValidation.ok();
     }
 
     public String getCredentialsDescription() {
-        if (getServerUrl() == null || getServerUrl().isEmpty()) {
+        if (this.getServerUrl() == null || this.getServerUrl().isEmpty()) {
             return "not set";
         }
 
-        return "Server URL: " + getServerUrl();
+        return "Server URL: " + this.getServerUrl();
 
     }
 
-
 }
-

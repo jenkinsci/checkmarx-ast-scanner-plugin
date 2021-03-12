@@ -10,6 +10,9 @@ import java.io.Serializable;
 @Setter
 public class ScanConfig implements Serializable {
 
+    public static final String SAST_SCAN_TYPE = "sast";
+    public static final String PROJECT_SOURCE_UPLOAD = "upload";
+
     private String serverUrl;
     private String baseAuthUrl;
     private CheckmarxApiToken checkmarxToken;
@@ -20,7 +23,6 @@ public class ScanConfig implements Serializable {
     private boolean scaEnabled;
     private boolean containerScanEnabled;
     private boolean kicsEnabled;
-    private boolean incrementalScan;
     private String zipFileFilters;
     private String additionalOptions;
     private String sourceDirectory;

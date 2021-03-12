@@ -5,42 +5,42 @@
     <!-- ********************** Server Settings ********************************************** -->
 
 
-        <f:optionalBlock title="Use global server credentials (${descriptor.credentialsDescription})" inline="true"
-                         field="useOwnServerCredentials" negative="true"
-                         checked="${instance == null ? false : !instance.getUseOwnServerCredentials()}">
-            <f:entry title="Checkmarx Server URL" field="serverUrl">
-                <f:textbox/>
-            </f:entry>
-            <f:entry field="credentialsId" title="${%Credentials}">
-                <c:select/>
-            </f:entry>
-            <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-                              with="serverUrl,credentialsId"/>
-        </f:optionalBlock>
+    <f:optionalBlock title="Use global server credentials (${descriptor.credentialsDescription})" inline="true"
+                     field="useOwnServerCredentials" negative="true"
+                     checked="${instance == null ? false : !instance.getUseOwnServerCredentials()}">
+        <f:entry title="Checkmarx Server URL" field="serverUrl">
+            <f:textbox/>
+        </f:entry>
+        <f:entry field="credentialsId" title="${%Credentials}">
+            <c:select/>
+        </f:entry>
+        <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
+                          with="serverUrl,credentialsId"/>
+    </f:optionalBlock>
 
     <!-- *************************** Checkmarx SAST ***************************************** -->
 
-        <f:optionalBlock name="sastEnabled" title="Enable SAST Scan" field="sastEnabled" inline="true"
-                         checked="${instance == null || instance.sastEnabled == null || instance.sastEnabled}">
-            <f:entry title="Scan Preset (To be removed)">
-                <f:textbox name="presetName" value="${instance.presetName}" field="presetName"/>
-            </f:entry>
-        </f:optionalBlock>
+    <f:optionalBlock name="sastEnabled" title="Enable SAST Scan" field="sastEnabled" inline="true"
+                     checked="${instance == null || instance.sastEnabled == null || instance.sastEnabled}">
+        <f:entry title="Scan Preset (To be removed)">
+            <f:textbox name="presetName" value="${instance.presetName}" field="presetName"/>
+        </f:entry>
+    </f:optionalBlock>
 
-        <!-- *************************** Checkmarx SCA ***************************************** -->
-        <f:optionalBlock name="scaEnabled" title="Enable SCA Scan" field="scaEnabled" inline="true"
-                         checked="${instance == null || instance.scaEnabled == null || instance.scaEnabled}">
-        </f:optionalBlock>
-        <!-- *************************** Checkmarx Container Scan ***************************************** -->
-        <f:optionalBlock name="containerScanEnabled" title="Enable Container Scan" field="containerScanEnabled"
-                         inline="true"
-                         checked="${instance == null || instance.containerScanEnabled == null || instance.containerScanEnabled}">
-        </f:optionalBlock>
-        <!-- *************************** Checkmarx KICS ***************************************** -->
+    <!-- *************************** Checkmarx SCA ***************************************** -->
+    <f:optionalBlock name="scaEnabled" title="Enable SCA Scan" field="scaEnabled" inline="true"
+                     checked="${instance == null || instance.scaEnabled == null || instance.scaEnabled}">
+    </f:optionalBlock>
+    <!-- *************************** Checkmarx Container Scan ***************************************** -->
+    <f:optionalBlock name="containerScanEnabled" title="Enable Container Scan" field="containerScanEnabled"
+                     inline="true"
+                     checked="${instance == null || instance.containerScanEnabled == null || instance.containerScanEnabled}">
+    </f:optionalBlock>
+    <!-- *************************** Checkmarx KICS ***************************************** -->
 
-        <f:optionalBlock title="Enable KICS" field="kicsEnabled" inline="true"
+    <f:optionalBlock title="Enable KICS" field="kicsEnabled" inline="true"
                      checked="${instance == null || instance.kicsEnabled == null || instance.kicsEnabled}">
-        </f:optionalBlock>
+    </f:optionalBlock>
 
 
     <!-- *********************** AST Repo Settings ********************************************* -->
@@ -56,11 +56,8 @@
 
     <!-- *************************** Common Scan Settings ***************************************** -->
     <f:section title="Advanced Options">
-        <f:entry title="Use Global Filters for zip file" field="useGlobalFileFilters">
-            <f:checkbox checked="${instance == null || instance.useGlobalFileFilters == true}"/>
-        </f:entry>
-        <f:entry title="Incremental Scan" field="incrementalScan">
-            <f:checkbox checked="${instance == null || instance.incrementalScan == true}"/>
+        <f:entry title="Use Job Specific file filters for zip file" field="useFileFiltersFromJobConfig">
+            <f:checkbox checked="${instance == null || instance.useFileFiltersFromJobConfig == true}"/>
         </f:entry>
 
         <f:entry title="Additional Arguments" field="additionalOptions">

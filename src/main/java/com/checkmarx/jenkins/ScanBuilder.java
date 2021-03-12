@@ -1,16 +1,10 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.ast.CxAuth;
-import com.checkmarx.ast.CxAuthType;
-import com.checkmarx.ast.CxParamType;
-import com.checkmarx.ast.CxScan;
+import com.checkmarx.ast.*;
 import com.checkmarx.jenkins.credentials.CheckmarxApiToken;
-import com.checkmarx.jenkins.credentials.DefaultCheckmarxApiToken;
 import com.checkmarx.jenkins.model.ScanConfig;
 import com.checkmarx.jenkins.tools.CheckmarxInstallation;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
-import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -18,7 +12,6 @@ import hudson.model.*;
 import hudson.remoting.VirtualChannel;
 import hudson.security.ACL;
 import hudson.tasks.Builder;
-import hudson.util.ArgumentListBuilder;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import lombok.SneakyThrows;
@@ -52,12 +45,12 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
     private String credentialsId;
     private String checkmarxInstallation;
     private String additionalOptions;
-    private boolean incrementalScan;
+    private String zipFileFilters;
     private boolean sastEnabled;
     private boolean scaEnabled;
     private boolean containerScanEnabled;
     private boolean kicsEnabled;
-    private boolean useGlobalFileFilters;
+    private boolean useFileFiltersFromJobConfig;
     private boolean useOwnServerCredentials;
 
     @DataBoundConstructor
@@ -70,11 +63,12 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
                        boolean incrementalScan,
                        String sastFileFilters,
                        String scaFileFilters,
+                       String zipFileFilters,
                        boolean sastEnabled,
                        boolean scaEnabled,
                        boolean containerScanEnabled,
                        boolean kicsEnabled,
-                       boolean useGlobalFileFilters,
+                       boolean useFileFiltersFromJobConfig,
                        String additionalOptions
     ) {
         this.useOwnServerCredentials = useOwnServerCredentials;
@@ -83,21 +77,13 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
         this.presetName = presetName;
         this.teamName = teamName;
         this.credentialsId = credentialsId;
-        this.incrementalScan = incrementalScan;
         this.sastEnabled = sastEnabled;
         this.scaEnabled = scaEnabled;
         this.containerScanEnabled = containerScanEnabled;
         this.kicsEnabled = kicsEnabled;
-        this.useGlobalFileFilters = useGlobalFileFilters;
+        this.useFileFiltersFromJobConfig = useFileFiltersFromJobConfig;
         this.additionalOptions = additionalOptions;
-    }
-
-    static StandardCredentials getCredentialsById(String credentialsId, Run<?, ?> run) {
-        return CredentialsProvider.findCredentialById(
-                credentialsId,
-                DefaultCheckmarxApiToken.class,
-                run,
-                Collections.emptyList());
+        this.zipFileFilters = zipFileFilters;
     }
 
     public boolean getUseOwnServerCredentials() {
@@ -154,16 +140,6 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
         this.credentialsId = credentialsId;
     }
 
-    public boolean getIncrementalScan() {
-        return incrementalScan;
-    }
-
-    @DataBoundSetter
-    public void setIncrementalScan(boolean incrementalScan) {
-        this.incrementalScan = incrementalScan;
-    }
-
-
     public boolean getSastEnabled() {
         return sastEnabled;
     }
@@ -200,13 +176,22 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
         this.kicsEnabled = kicsEnabled;
     }
 
-    public boolean getUseGlobalFileFilters() {
-        return useGlobalFileFilters;
+    public boolean getUseFileFiltersFromJobConfig() {
+        return useFileFiltersFromJobConfig;
     }
 
     @DataBoundSetter
-    public void setUseGlobalFileFilters(boolean useGlobalFileFilters) {
-        this.useGlobalFileFilters = useGlobalFileFilters;
+    public void setUseFileFiltersFromJobConfig(boolean useFileFiltersFromJobConfig) {
+        this.useFileFiltersFromJobConfig = useFileFiltersFromJobConfig;
+    }
+
+    public String getZipFileFilters() {
+        return zipFileFilters;
+    }
+
+    @DataBoundSetter
+    public void setZipFileFilters(@Nullable String zipFileFilters) {
+        this.zipFileFilters = zipFileFilters;
     }
 
     public String getAdditionalOptions() {
@@ -263,6 +248,7 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
         installation = installation.forEnvironment(envVars);
         checkmarxCliExecutable = installation.getCheckmarxExecutable(launcher);
 
+
         if (checkmarxCliExecutable == null) {
             log.info("Can't retrieve the Checkmarx executable.");
             run.setResult(Result.FAILURE);
@@ -293,121 +279,54 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
-        //Integration with the wrapper
-        CxAuth wrapper = new CxAuth(CxAuthType.KEYSECRET, scanConfig.getServerUrl(), scanConfig.getCheckmarxToken().getId(), scanConfig.getCheckmarxToken().getToken().getPlainText(), checkmarxCliExecutable);
+        //----------Integration with the wrapper------------
+
+        CxScanConfig scan = new CxScanConfig();
+        scan.setBaseuri(scanConfig.getServerUrl());
+        scan.setAuthType(CxAuthType.KEYSECRET);
+        scan.setKey(scanConfig.getCheckmarxToken().getId());
+        scan.setSecret(scanConfig.getCheckmarxToken().getToken().getPlainText());
+        scan.setPathToExecutable(checkmarxCliExecutable);
+
+        CxAuth wrapper = new CxAuth(scan, log);
 
         Map<CxParamType, String> params = new HashMap<>();
         params.put(CxParamType.D, scanConfig.getSourceDirectory());
-        params.put(CxParamType.V, " ");
+        params.put(CxParamType.V, "");
         params.put(CxParamType.INCREMENTAL, "false");
         params.put(CxParamType.PROJECT_NAME, scanConfig.getProjectName());
-        params.put(CxParamType.PROJECT_SOURCE_TYPE, "upload");
-        params.put(CxParamType.PROJECT_TYPE, "sast");
+        params.put(CxParamType.PROJECT_SOURCE_TYPE, ScanConfig.PROJECT_SOURCE_UPLOAD);
+        params.put(CxParamType.PROJECT_TYPE, ScanConfig.SAST_SCAN_TYPE);
         params.put(CxParamType.PRESET_NAME, scanConfig.getPresetName());
         params.put(CxParamType.FILTER, scanConfig.getZipFileFilters());
 
         CxScan cxScan = wrapper.cxScanCreate(params);
         log.info(cxScan.toString());
 
-
-        //Directly using the cli from here
-
-//        ArgumentListBuilder argsForTestCommand = buildArgumentList(checkmarxCliExecutable, "scan create", scanConfig);
-//
-//        FilePath cxTestReport = workspace.child("checkmarx_report.json");
-//        FilePath cxTestDebug = workspace.child("checkmarx_report.json" + ".debug");
-//        OutputStream cxTestOutput = null;
-//        OutputStream cxTestDebugOutput = null;
-//
-//        log.info("Argument List: " + argsForTestCommand.toString());
-//
-//
-//        try{
-//
-//            cxTestOutput = cxTestReport.write();
-//            cxTestDebugOutput = cxTestDebug.write();
-//
-//            int exitCode = launcher.launch().cmds(argsForTestCommand).envs(envVars).stdout(cxTestOutput)
-//                    .stderr(cxTestDebugOutput).quiet(true).pwd(workspace).join();
-//
-//            log.info("Exit code : " + exitCode);
-//        }
-//        catch (IOException ex) {
-//            Util.displayIOException(ex, listener);
-//            log.error("Checkmarx CLI command execution failed");
-//            run.setResult(Result.FAILURE);
-//            return ;
-//        }finally {
-//            if (cxTestOutput != null) {
-//                cxTestOutput.close();
-//            }
-//            if (cxTestDebugOutput != null) {
-//                cxTestDebugOutput.close();
-//            }
-//        }
-
-
         log.info("--------------- Checkmarx execution completed ---------------");
 
     }
 
-    ArgumentListBuilder buildArgumentList(String checkmarxCliExecutable, String command, ScanConfig scanConfig) throws IOException, InterruptedException {
-        ArgumentListBuilder args = new ArgumentListBuilder(checkmarxCliExecutable);
-
-        args.add("scan");
-        args.add("create");
-        args.add("--key");
-        args.add(scanConfig.getCheckmarxToken().getId());
-
-        if (fixEmptyAndTrim(scanConfig.getCheckmarxToken().getToken().getPlainText()) != null) {
-            args.add("--secret");
-            args.add(scanConfig.getCheckmarxToken().getToken().getPlainText());
-        }
-
-        args.add("--base-uri");
-        args.addQuoted(scanConfig.getServerUrl());
-
-        args.add("--preset-name");
-        args.add(scanConfig.getPresetName());
-
-        args.add("--project-name");
-        args.add(scanConfig.getProjectName());
-
-        args.add("--filter");
-        args.addQuoted(scanConfig.getZipFileFilters());
-
-        args.add("--directory");
-        args.addQuoted(scanConfig.getSourceDirectory());
-
-        args.add("--project-source-type");
-        args.addQuoted("upload");
-
-        args.add("--incremental");
-        args.add(scanConfig.isIncrementalScan());
-
-        args.add("--project-type");
-        args.add("sast");
-
-        return args;
-    }
-
     private void printConfiguration(ScanConfig scanConfig, CxLoggerAdapter log) {
 
-        log.info("--**** Checkmarx Scan Configuration ****--");
+        log.info("----**** Checkmarx Scan Configuration ****----");
 
+        log.info("--- Global Configuration ---"); //Job Config
         if (!getDescriptor().getBaseAuthUrl().isEmpty()) {
             log.info("Checkmarx Access Control Url: " + scanConfig.getBaseAuthUrl());
         }
+        log.info("Checkmarx Server Url: " + getDescriptor().getServerUrl());
+        log.info("Global zip file filters: " + getDescriptor().getZipFileFilters());
 
+        log.info("--- Build configuration---");   //Local Config
         log.info("Checkmarx Server Url: " + scanConfig.getServerUrl());
         log.info("Project Name: " + scanConfig.getProjectName());
         log.info("Team Name: " + scanConfig.getTeamName());
         log.info("Preset Name: " + scanConfig.getPresetName());
-        log.info("Incremental Scan: " + scanConfig.isIncrementalScan());
-        log.info("Using Global Zip File Filters: " + getUseGlobalFileFilters());
+        log.info("Using Job Specific File filters: " + getUseFileFiltersFromJobConfig());
 
-        if (getUseGlobalFileFilters()) {
-            log.info("Using Global Zip File Filters: " + scanConfig.getZipFileFilters());
+        if (getUseFileFiltersFromJobConfig()) {
+            log.info("Using File Filters: " + scanConfig.getZipFileFilters());
         }
 
         log.info("Additional Options: " + scanConfig.getAdditionalOptions());
@@ -428,6 +347,7 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
             log.info((scanEngines++) + ") Checkmarx KICS Scan");
         }
 
+        log.info("-----------------------------------");
     }
 
     private ScanConfig resolveConfiguration(Run<?, ?> run, FilePath workspace, DescriptorImpl descriptor, EnvVars envVars, CxLoggerAdapter log) {
@@ -443,9 +363,9 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
             scanConfig.setPresetName(getPresetName());
         }
 
-//        if (descriptor.getUsebaseAuthUrl()) {
+        if (descriptor.getUseAuthenticationUrl()) {
             scanConfig.setBaseAuthUrl(descriptor.getBaseAuthUrl());
-//        }
+        }
 
         if (this.getUseOwnServerCredentials()) {
             scanConfig.setServerUrl(getServerUrl());
@@ -456,14 +376,14 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
             scanConfig.setCheckmarxToken(getCheckmarxTokenCredential(descriptor.getCredentialsId()));
         }
 
-        scanConfig.setIncrementalScan(getIncrementalScan());
-
         scanConfig.setSastEnabled(getSastEnabled());
         scanConfig.setScaEnabled(getScaEnabled());
         scanConfig.setKicsEnabled(getKicsEnabled());
         scanConfig.setContainerScanEnabled(getContainerScanEnabled());
 
-        if (getUseGlobalFileFilters()) {
+        if (getUseFileFiltersFromJobConfig()) {
+            scanConfig.setZipFileFilters(this.getZipFileFilters());
+        } else {
             scanConfig.setZipFileFilters(descriptor.getZipFileFilters());
         }
         scanConfig.setAdditionalOptions(getAdditionalOptions());
@@ -481,18 +401,9 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
                 .findFirst().orElse(null);
     }
 
-    private void printStoredCredentials(Run<?, ?> run, DescriptorImpl descriptor, CxLoggerAdapter logger) {
-
-        String credentialsId = descriptor.getCredentialsId();
-        StandardCredentials creds = getCredentialsById(credentialsId, run);
-        log.info(creds.getDescription());
-        log.info(creds.toString());
-
-    }
-
     private CheckmarxApiToken getCheckmarxTokenCredential(String credentialsId) {
         return CredentialsMatchers.firstOrNull(lookupCredentials(CheckmarxApiToken.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.emptyList()),
-                withId(this.credentialsId));
+                withId(credentialsId));
     }
 
     @Override
