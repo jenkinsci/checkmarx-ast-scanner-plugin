@@ -264,21 +264,6 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        if (installation != null) {
-            VirtualChannel nodeChannel = node.getChannel();
-
-            if (nodeChannel != null) {
-                String toolHome = installation.getHome();
-                if (fixEmptyAndTrim(toolHome) != null) {
-                    FilePath checkmarxToolHome = new FilePath(nodeChannel, toolHome);
-                    String customBuildPath = checkmarxToolHome.act(new CustomBuildToolPathCallable());
-                    envVars.put("PATH", customBuildPath);
-
-                    LOG.info("Custom build tool path: '{}'", customBuildPath);
-                }
-            }
-        }
-
         //----------Integration with the wrapper------------
 
         CxScanConfig scan = new CxScanConfig();
