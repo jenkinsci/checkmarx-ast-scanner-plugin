@@ -40,7 +40,6 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String serverUrl;
     private String projectName;
-    private String presetName;
     private String teamName;
     private String credentialsId;
     private String checkmarxInstallation;
@@ -57,7 +56,6 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
     public ScanBuilder(boolean useOwnServerCredentials,
                        String serverUrl,
                        String projectName,
-                       String presetName,
                        String teamName,
                        String credentialsId,
                        boolean incrementalScan,
@@ -74,7 +72,6 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.projectName = (projectName == null) ? "TakefromBuildStep" : projectName;
-        this.presetName = presetName;
         this.teamName = teamName;
         this.credentialsId = credentialsId;
         this.sastEnabled = sastEnabled;
@@ -111,15 +108,6 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setProjectName(String projectName) {
         this.projectName = projectName;
-    }
-
-    public String getPresetName() {
-        return presetName;
-    }
-
-    @DataBoundSetter
-    public void setPresetName(String presetName) {
-        this.presetName = presetName;
     }
 
     public String getTeamName() {
@@ -217,7 +205,6 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
 
-
         final DescriptorImpl descriptor = getDescriptor();
         log = new CxLoggerAdapter(listener.getLogger());
         EnvVars envVars = run.getEnvironment(listener);
@@ -284,6 +271,7 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
         params.put(CxParamType.PROJECT_TYPE, ScanConfig.SAST_SCAN_TYPE);
         params.put(CxParamType.PRESET_NAME, scanConfig.getPresetName());
         params.put(CxParamType.FILTER, scanConfig.getZipFileFilters());
+        params.put(CxParamType.ADDITIONAL_PARAMETERS, scanConfig.getAdditionalOptions());
 
         CxScan cxScan = wrapper.cxScanCreate(params);
         log.info(cxScan.toString());
@@ -344,9 +332,6 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
         if (fixEmptyAndTrim(getTeamName()) != null) {
             scanConfig.setTeamName(getTeamName());
         }
-        if (fixEmptyAndTrim(getPresetName()) != null) {
-            scanConfig.setPresetName(getPresetName());
-        }
 
         if (descriptor.getUseAuthenticationUrl()) {
             scanConfig.setBaseAuthUrl(descriptor.getBaseAuthUrl());
@@ -371,7 +356,10 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
         } else {
             scanConfig.setZipFileFilters(descriptor.getZipFileFilters());
         }
-        scanConfig.setAdditionalOptions(getAdditionalOptions());
+
+        if (fixEmptyAndTrim(getAdditionalOptions()) != null) {
+            scanConfig.setAdditionalOptions(getAdditionalOptions());
+        }
 
         File file = new File(workspace.getRemote());
         String sourceDir = file.getAbsolutePath();

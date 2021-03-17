@@ -22,9 +22,6 @@
 
     <f:optionalBlock name="sastEnabled" title="Enable SAST Scan" field="sastEnabled" inline="true"
                      checked="${instance == null || instance.sastEnabled == null || instance.sastEnabled}">
-        <f:entry title="Scan Preset (To be removed)">
-            <f:textbox name="presetName" value="${instance.presetName}" field="presetName"/>
-        </f:entry>
     </f:optionalBlock>
 
     <!-- *************************** Checkmarx SCA ***************************************** -->
