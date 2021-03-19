@@ -18,7 +18,6 @@ public class ScanConfig implements Serializable {
     private CheckmarxApiToken checkmarxToken;
     private String projectName;
     private String teamName;
-    private String presetName;
     private boolean sastEnabled;
     private boolean scaEnabled;
     private boolean containerScanEnabled;

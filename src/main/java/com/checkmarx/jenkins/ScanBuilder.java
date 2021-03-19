@@ -58,7 +58,6 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
                        String projectName,
                        String teamName,
                        String credentialsId,
-                       boolean incrementalScan,
                        String sastFileFilters,
                        String scaFileFilters,
                        String zipFileFilters,
@@ -265,11 +264,9 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
         Map<CxParamType, String> params = new HashMap<>();
         params.put(CxParamType.D, scanConfig.getSourceDirectory());
         params.put(CxParamType.V, "");
-        params.put(CxParamType.INCREMENTAL, "false");
         params.put(CxParamType.PROJECT_NAME, scanConfig.getProjectName());
         params.put(CxParamType.PROJECT_SOURCE_TYPE, ScanConfig.PROJECT_SOURCE_UPLOAD);
         params.put(CxParamType.PROJECT_TYPE, ScanConfig.SAST_SCAN_TYPE);
-        params.put(CxParamType.PRESET_NAME, scanConfig.getPresetName());
         params.put(CxParamType.FILTER, scanConfig.getZipFileFilters());
         params.put(CxParamType.ADDITIONAL_PARAMETERS, scanConfig.getAdditionalOptions());
 
@@ -284,18 +281,17 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
 
         log.info("----**** Checkmarx Scan Configuration ****----");
 
-        log.info("--- Global Configuration ---"); //Job Config
+        log.info("------ Global Configuration ------"); //Job Config
         if (!getDescriptor().getBaseAuthUrl().isEmpty()) {
             log.info("Checkmarx Access Control Url: " + scanConfig.getBaseAuthUrl());
         }
         log.info("Checkmarx Server Url: " + getDescriptor().getServerUrl());
         log.info("Global zip file filters: " + getDescriptor().getZipFileFilters());
 
-        log.info("--- Build configuration---");   //Local Config
+        log.info("------ Build (Job) Configuration ------");   //Job Config
         log.info("Checkmarx Server Url: " + scanConfig.getServerUrl());
         log.info("Project Name: " + scanConfig.getProjectName());
         log.info("Team Name: " + scanConfig.getTeamName());
-        log.info("Preset Name: " + scanConfig.getPresetName());
         log.info("Using Job Specific File filters: " + getUseFileFiltersFromJobConfig());
 
         if (getUseFileFiltersFromJobConfig()) {
