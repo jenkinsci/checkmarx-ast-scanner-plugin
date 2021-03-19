@@ -40,7 +40,6 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
     @Nullable
     private String serverUrl;
     private String projectName;
-    private String presetName;
     private String teamName;
     private String credentialsId;
     private String checkmarxInstallation;
@@ -57,10 +56,8 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
     public ScanBuilder(boolean useOwnServerCredentials,
                        String serverUrl,
                        String projectName,
-                       String presetName,
                        String teamName,
                        String credentialsId,
-                       boolean incrementalScan,
                        String sastFileFilters,
                        String scaFileFilters,
                        String zipFileFilters,
@@ -74,7 +71,6 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
         this.projectName = (projectName == null) ? "TakefromBuildStep" : projectName;
-        this.presetName = presetName;
         this.teamName = teamName;
         this.credentialsId = credentialsId;
         this.sastEnabled = sastEnabled;
@@ -111,15 +107,6 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setProjectName(String projectName) {
         this.projectName = projectName;
-    }
-
-    public String getPresetName() {
-        return presetName;
-    }
-
-    @DataBoundSetter
-    public void setPresetName(String presetName) {
-        this.presetName = presetName;
     }
 
     public String getTeamName() {
@@ -217,7 +204,6 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
 
-
         final DescriptorImpl descriptor = getDescriptor();
         log = new CxLoggerAdapter(listener.getLogger());
         EnvVars envVars = run.getEnvironment(listener);
@@ -264,21 +250,6 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        if (installation != null) {
-            VirtualChannel nodeChannel = node.getChannel();
-
-            if (nodeChannel != null) {
-                String toolHome = installation.getHome();
-                if (fixEmptyAndTrim(toolHome) != null) {
-                    FilePath checkmarxToolHome = new FilePath(nodeChannel, toolHome);
-                    String customBuildPath = checkmarxToolHome.act(new CustomBuildToolPathCallable());
-                    envVars.put("PATH", customBuildPath);
-
-                    LOG.info("Custom build tool path: '{}'", customBuildPath);
-                }
-            }
-        }
-
         //----------Integration with the wrapper------------
 
         CxScanConfig scan = new CxScanConfig();
@@ -293,12 +264,11 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
         Map<CxParamType, String> params = new HashMap<>();
         params.put(CxParamType.D, scanConfig.getSourceDirectory());
         params.put(CxParamType.V, "");
-        params.put(CxParamType.INCREMENTAL, "false");
         params.put(CxParamType.PROJECT_NAME, scanConfig.getProjectName());
         params.put(CxParamType.PROJECT_SOURCE_TYPE, ScanConfig.PROJECT_SOURCE_UPLOAD);
         params.put(CxParamType.PROJECT_TYPE, ScanConfig.SAST_SCAN_TYPE);
-        params.put(CxParamType.PRESET_NAME, scanConfig.getPresetName());
         params.put(CxParamType.FILTER, scanConfig.getZipFileFilters());
+        params.put(CxParamType.ADDITIONAL_PARAMETERS, scanConfig.getAdditionalOptions());
 
         CxScan cxScan = wrapper.cxScanCreate(params);
         log.info(cxScan.toString());
@@ -311,18 +281,17 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
 
         log.info("----**** Checkmarx Scan Configuration ****----");
 
-        log.info("--- Global Configuration ---"); //Job Config
+        log.info("------ Global Configuration ------"); //Job Config
         if (!getDescriptor().getBaseAuthUrl().isEmpty()) {
             log.info("Checkmarx Access Control Url: " + scanConfig.getBaseAuthUrl());
         }
         log.info("Checkmarx Server Url: " + getDescriptor().getServerUrl());
         log.info("Global zip file filters: " + getDescriptor().getZipFileFilters());
 
-        log.info("--- Build configuration---");   //Local Config
+        log.info("------ Build (Job) Configuration ------");   //Job Config
         log.info("Checkmarx Server Url: " + scanConfig.getServerUrl());
         log.info("Project Name: " + scanConfig.getProjectName());
         log.info("Team Name: " + scanConfig.getTeamName());
-        log.info("Preset Name: " + scanConfig.getPresetName());
         log.info("Using Job Specific File filters: " + getUseFileFiltersFromJobConfig());
 
         if (getUseFileFiltersFromJobConfig()) {
@@ -359,9 +328,6 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
         if (fixEmptyAndTrim(getTeamName()) != null) {
             scanConfig.setTeamName(getTeamName());
         }
-        if (fixEmptyAndTrim(getPresetName()) != null) {
-            scanConfig.setPresetName(getPresetName());
-        }
 
         if (descriptor.getUseAuthenticationUrl()) {
             scanConfig.setBaseAuthUrl(descriptor.getBaseAuthUrl());
@@ -386,7 +352,10 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
         } else {
             scanConfig.setZipFileFilters(descriptor.getZipFileFilters());
         }
-        scanConfig.setAdditionalOptions(getAdditionalOptions());
+
+        if (fixEmptyAndTrim(getAdditionalOptions()) != null) {
+            scanConfig.setAdditionalOptions(getAdditionalOptions());
+        }
 
         File file = new File(workspace.getRemote());
         String sourceDir = file.getAbsolutePath();

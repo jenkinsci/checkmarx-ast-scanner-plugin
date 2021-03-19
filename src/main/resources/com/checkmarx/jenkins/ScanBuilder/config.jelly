@@ -4,7 +4,6 @@
 
     <!-- ********************** Server Settings ********************************************** -->
 
-
     <f:optionalBlock title="Use global server credentials (${descriptor.credentialsDescription})" inline="true"
                      field="useOwnServerCredentials" negative="true"
                      checked="${instance == null ? false : !instance.getUseOwnServerCredentials()}">
@@ -18,13 +17,13 @@
                           with="serverUrl,credentialsId"/>
     </f:optionalBlock>
 
+
     <!-- *************************** Checkmarx SAST ***************************************** -->
+
+   <f:section title="Scan Engines"/> <!-- Remove this section tag if the UI is inconsistent-->
 
     <f:optionalBlock name="sastEnabled" title="Enable SAST Scan" field="sastEnabled" inline="true"
                      checked="${instance == null || instance.sastEnabled == null || instance.sastEnabled}">
-        <f:entry title="Scan Preset (To be removed)">
-            <f:textbox name="presetName" value="${instance.presetName}" field="presetName"/>
-        </f:entry>
     </f:optionalBlock>
 
     <!-- *************************** Checkmarx SCA ***************************************** -->
@@ -42,7 +41,6 @@
                      checked="${instance == null || instance.kicsEnabled == null || instance.kicsEnabled}">
     </f:optionalBlock>
 
-
     <!-- *********************** AST Repo Settings ********************************************* -->
 
     <f:section title="Checkmarx AST Repo Settings">
@@ -55,11 +53,18 @@
     </f:section>
 
     <!-- *************************** Common Scan Settings ***************************************** -->
-    <f:section title="Advanced Options">
-        <f:entry title="Use Job Specific file filters for zip file" field="useFileFiltersFromJobConfig">
-            <f:checkbox checked="${instance == null || instance.useFileFiltersFromJobConfig == true}"/>
-        </f:entry>
 
+    <f:section title="Scan Filters"/>
+    <f:optionalBlock title="Use Job specific file filters (Overrides the global filters)" inline="true"
+                     field="useFileFiltersFromJobConfig"
+                     checked="${instance == null ? false : instance.getUseFileFiltersFromJobConfig()}">
+        <f:entry title="Zip file filters for this job" field="zipFileFilters">
+            <f:textarea/>
+        </f:entry>
+    </f:optionalBlock>
+
+    <!-- *************************** Common Scan Settings ***************************************** -->
+    <f:section title="Advanced Options">
         <f:entry title="Additional Arguments" field="additionalOptions">
             <f:textarea/>
         </f:entry>
