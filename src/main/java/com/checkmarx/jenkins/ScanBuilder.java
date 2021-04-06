@@ -265,7 +265,6 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
         params.put(CxParamType.D, scanConfig.getSourceDirectory());
         params.put(CxParamType.V, "");
         params.put(CxParamType.PROJECT_NAME, scanConfig.getProjectName());
-        params.put(CxParamType.PROJECT_SOURCE_TYPE, ScanConfig.PROJECT_SOURCE_UPLOAD);
         params.put(CxParamType.PROJECT_TYPE, ScanConfig.SAST_SCAN_TYPE);
         params.put(CxParamType.FILTER, scanConfig.getZipFileFilters());
         params.put(CxParamType.ADDITIONAL_PARAMETERS, scanConfig.getAdditionalOptions());
@@ -280,15 +279,6 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
     private void printConfiguration(ScanConfig scanConfig, CxLoggerAdapter log) {
 
         log.info("----**** Checkmarx Scan Configuration ****----");
-
-        log.info("------ Global Configuration ------"); //Job Config
-        if (!getDescriptor().getBaseAuthUrl().isEmpty()) {
-            log.info("Checkmarx Access Control Url: " + scanConfig.getBaseAuthUrl());
-        }
-        log.info("Checkmarx Server Url: " + getDescriptor().getServerUrl());
-        log.info("Global zip file filters: " + getDescriptor().getZipFileFilters());
-
-        log.info("------ Build (Job) Configuration ------");   //Job Config
         log.info("Checkmarx Server Url: " + scanConfig.getServerUrl());
         log.info("Project Name: " + scanConfig.getProjectName());
         log.info("Team Name: " + scanConfig.getTeamName());

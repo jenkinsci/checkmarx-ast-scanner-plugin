@@ -174,7 +174,6 @@ public final class DescriptorImpl extends BuildStepDescriptor<Builder> {
     }
 
     public FormValidation doCheckCredentialsId(
-            @AncestorInPath Item item,
             @QueryParameter String value
     ) {
         if (fixEmptyAndTrim(value) == null) {
