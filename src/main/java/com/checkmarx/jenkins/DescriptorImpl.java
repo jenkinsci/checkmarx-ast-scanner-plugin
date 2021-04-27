@@ -30,8 +30,7 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static com.cloudbees.plugins.credentials.CredentialsMatchers.allOf;
-import static com.cloudbees.plugins.credentials.CredentialsMatchers.withId;
+import static com.cloudbees.plugins.credentials.CredentialsMatchers.*;
 import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
 import static hudson.Util.fixEmptyAndTrim;
 import static java.util.stream.Collectors.joining;
@@ -173,20 +172,28 @@ public final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
     }
 
-    public FormValidation doCheckCredentialsId(
-            @AncestorInPath Item item,
+    public FormValidation doCheckCredentialsId(@AncestorInPath Item item,
             @QueryParameter String value
     ) {
-        if (fixEmptyAndTrim(value) == null) {
-            return FormValidation.error("Checkmarx API token is required.");
+        if (item == null) {
+            if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+                return FormValidation.ok();
+            }
         } else {
-            if (null == CredentialsMatchers.firstOrNull(lookupCredentials(CheckmarxApiToken.class, Jenkins.get(), ACL.SYSTEM, Collections.emptyList()),
-                    allOf(withId(value), CredentialsMatchers.instanceOf(CheckmarxApiToken.class)))) {
-                return FormValidation.error("Cannot find currently selected Checkmarx API token.");
+            if (!item.hasPermission(Item.EXTENDED_READ) && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                return FormValidation.ok();
             }
         }
-        return FormValidation.ok();
 
+        if (fixEmptyAndTrim(value) == null) {
+            return FormValidation.error("Checkmarx API token is required.");
+        }
+
+        if (null == CredentialsMatchers.firstOrNull(lookupCredentials(CheckmarxApiToken.class, Jenkins.get(), ACL.SYSTEM, Collections.emptyList()),
+                anyOf(withId(value), CredentialsMatchers.instanceOf(CheckmarxApiToken.class)))) {
+                return FormValidation.error("Cannot find currently selected Checkmarx API token.");
+            }
+        return FormValidation.ok();
     }
 
     public String getCredentialsDescription() {
