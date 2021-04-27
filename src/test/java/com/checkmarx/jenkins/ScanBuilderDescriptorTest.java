@@ -42,14 +42,14 @@ public class ScanBuilderDescriptorTest {
 
     @Test
     public void doCheckCheckmarxTokenId_shouldReturnError_ifTokenIsEmpty() {
-        FormValidation.Kind checkmarxTokenIdValidation = instance.doCheckCredentialsId(null).kind;
+        FormValidation.Kind checkmarxTokenIdValidation = instance.doCheckCredentialsId(null,null).kind;
 
         assertEquals(FormValidation.Kind.ERROR,checkmarxTokenIdValidation);
     }
 
     @Test
     public void doCheckCheckmarxTokenId_shouldReturnError_ifTokenNotFound() {
-        FormValidation.Kind checkmarxTokenIdValidation = instance.doCheckCredentialsId("any-token").kind;
+        FormValidation.Kind checkmarxTokenIdValidation = instance.doCheckCredentialsId(null,"any-token").kind;
 
         assertEquals(FormValidation.Kind.ERROR,checkmarxTokenIdValidation);
     }
@@ -59,7 +59,7 @@ public class ScanBuilderDescriptorTest {
         DefaultCheckmarxApiToken checkmarxToken = new DefaultCheckmarxApiToken(CredentialsScope.GLOBAL, "id", "", "checkmarx-token");
         CredentialsProvider.lookupStores(jenkins.getInstance()).iterator().next().addCredentials(Domain.global(), checkmarxToken);
 
-        FormValidation.Kind checkmarxTokenIdValidation = instance.doCheckCredentialsId("id").kind;
+        FormValidation.Kind checkmarxTokenIdValidation = instance.doCheckCredentialsId(null,"id").kind;
 
         assertEquals(FormValidation.Kind.OK,checkmarxTokenIdValidation);
     }

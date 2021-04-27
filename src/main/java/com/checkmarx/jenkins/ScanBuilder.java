@@ -4,15 +4,11 @@ import com.checkmarx.ast.*;
 import com.checkmarx.jenkins.credentials.CheckmarxApiToken;
 import com.checkmarx.jenkins.model.ScanConfig;
 import com.checkmarx.jenkins.tools.CheckmarxInstallation;
-import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
-import hudson.remoting.VirtualChannel;
-import hudson.security.ACL;
 import hudson.tasks.Builder;
-import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import lombok.SneakyThrows;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -24,13 +20,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static com.cloudbees.plugins.credentials.CredentialsMatchers.withId;
-import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials;
+import static com.cloudbees.plugins.credentials.CredentialsProvider.findCredentialById;
 import static hudson.Util.fixEmptyAndTrim;
 
 public class ScanBuilder extends Builder implements SimpleBuildStep {
@@ -325,11 +319,11 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
 
         if (this.getUseOwnServerCredentials()) {
             scanConfig.setServerUrl(getServerUrl());
-            scanConfig.setCheckmarxToken(getCheckmarxTokenCredential(getCredentialsId()));
+            scanConfig.setCheckmarxToken(getCheckmarxTokenCredential(run, getCredentialsId()));
 
         } else {
             scanConfig.setServerUrl(descriptor.getServerUrl());
-            scanConfig.setCheckmarxToken(getCheckmarxTokenCredential(descriptor.getCredentialsId()));
+            scanConfig.setCheckmarxToken(getCheckmarxTokenCredential(run, descriptor.getCredentialsId()));
         }
 
         scanConfig.setSastEnabled(getSastEnabled());
@@ -360,14 +354,12 @@ public class ScanBuilder extends Builder implements SimpleBuildStep {
                 .findFirst().orElse(null);
     }
 
-    private CheckmarxApiToken getCheckmarxTokenCredential(String credentialsId) {
-        return CredentialsMatchers.firstOrNull(lookupCredentials(CheckmarxApiToken.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.emptyList()),
-                withId(credentialsId));
+    private CheckmarxApiToken getCheckmarxTokenCredential(Run<?, ?> run, String credentialsId) {
+        return findCredentialById(credentialsId, CheckmarxApiToken.class, run);
     }
 
     @Override
     public DescriptorImpl getDescriptor() {
-
         return (DescriptorImpl) super.getDescriptor();
     }
 }
