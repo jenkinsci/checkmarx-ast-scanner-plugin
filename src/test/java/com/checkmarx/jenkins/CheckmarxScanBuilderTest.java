@@ -11,23 +11,22 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
-public class ScanBuilderTest {
+public class CheckmarxScanBuilderTest {
 
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
 
     @Test
-    public void freeStyleProject_shouldFail_ifNoSnykInstallationExist() throws Exception {
+    public void freeStyleProject_shouldFail_ifNoCheckmarxInstallationExist() throws Exception {
 
         DefaultCheckmarxApiToken checkmarxToken = new DefaultCheckmarxApiToken(CredentialsScope.GLOBAL, "creds-id", "", "checkmarx-token");
         CredentialsProvider.lookupStores(jenkins.getInstance()).iterator().next().addCredentials(Domain.global(), checkmarxToken);
 
         final FreeStyleProject freeStyleProject = this.jenkins.createFreeStyleProject("freestyle-project-without-checkmarxInstallation");
-        final ScanBuilder checkmarxBuilder = new ScanBuilder(true,
-                "serverUrl", "projectName", "teamName", "creds-id", "sastFileFilters",
-                "scaFileFilters", "zipFileFilters", true, false,
-                false, false, true,
-                "additionalOptions");
+        final CheckmarxScanBuilder checkmarxBuilder = new CheckmarxScanBuilder(true,
+                "serverUrl", "projectName", "teamName", "creds-id", "zipFileFilters",
+                true, false, false, false,
+                false,                "additionalOptions");
         checkmarxBuilder.setCheckmarxInstallation(null);
         freeStyleProject.getBuildersList().add(checkmarxBuilder);
 

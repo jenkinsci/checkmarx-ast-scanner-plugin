@@ -14,15 +14,15 @@ import org.jvnet.hudson.test.JenkinsRule;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
 
-public class ScanBuilderDescriptorTest {
+public class CheckmarxScanBuilderDescriptorTest {
 
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
 
-    private DescriptorImpl instance;
+    private CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor instance;
 
     @Before
-    public void setUp() { instance = new DescriptorImpl(); }
+    public void setUp() { instance = new  CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor(); }
 
     @Test
     public void doFillCheckmarxTokenItems_shouldAddCurrentValue_ifPresent() {

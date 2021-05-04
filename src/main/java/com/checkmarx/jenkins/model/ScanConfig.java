@@ -11,6 +11,9 @@ import java.io.Serializable;
 public class ScanConfig implements Serializable {
 
     public static final String SAST_SCAN_TYPE = "sast";
+    public static final String SCA_SCAN_TYPE = "sca";
+    public static final String KICS_SCAN_TYPE = "kics";
+    public static final String CONTAINER_SCAN_TYPE = "container";
     public static final String PROJECT_SOURCE_UPLOAD = "upload";
 
     private String serverUrl;
