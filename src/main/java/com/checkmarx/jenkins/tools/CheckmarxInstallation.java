@@ -1,6 +1,6 @@
 package com.checkmarx.jenkins.tools;
 
-import com.checkmarx.jenkins.DescriptorImpl;
+import com.checkmarx.jenkins.CheckmarxScanBuilder;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -119,12 +119,12 @@ public class CheckmarxInstallation extends ToolInstallation implements Environme
 
         public CheckmarxInstallation[] getInstallations() {
             final Jenkins instance = Jenkins.get();
-            return instance.getDescriptorByType(DescriptorImpl.class).getInstallations();
+            return instance.getDescriptorByType(CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor.class).getInstallations();
         }
 
         public void setInstallations(final CheckmarxInstallation... installations) {
             final Jenkins instance = Jenkins.get();
-            instance.getDescriptorByType(DescriptorImpl.class).setInstallations(installations);
+            instance.getDescriptorByType(CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor.class).setInstallations(installations);
         }
     }
 }
