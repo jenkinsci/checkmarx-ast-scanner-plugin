@@ -17,15 +17,10 @@
     <properties> <!-- Override the needed properties from the parent pom -->
         <revision>1.0</revision>
         <changelist>-SNAPSHOT</changelist>
-
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
         <jenkins.version>2.263.4</jenkins.version>
         <java.level>8</java.level>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.organization>checkmarxdev</sonar.organization>
-        <sonar.projectKey>CheckmarxDev_checkmarx-ast-scanner-plugin</sonar.projectKey>
-
     </properties>
     <prerequisites>
         <maven>3.6.3</maven>

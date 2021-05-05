@@ -19,8 +19,6 @@ jobs:
       with:
         java-version: 11
         distribution: 'adopt'
-    - name: Sonar Scan with Maven
-      run: mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar    
     - name: Build with Maven
       run: mvn -B package --file pom.xml
       
