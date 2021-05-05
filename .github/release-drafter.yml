@@ -1,2 +1,2 @@
 _extends: .github
-tag-template: ast-scanner-$NEXT_MINOR_VERSION
+tag-template: checkmarx-ast-scanner-$NEXT_MINOR_VERSION
