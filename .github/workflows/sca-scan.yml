@@ -1,5 +1,7 @@
 name: Checkmarx SCA Scan
 on:
+  pull_request:
+    types: [opened, reopened, synchronize]
   push:
     branches:
       - main
