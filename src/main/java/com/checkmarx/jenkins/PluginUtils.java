@@ -42,9 +42,9 @@ public class PluginUtils {
         log.info("Submitting the scan details to the CLI wrapper.");
         CxScanConfig scan = new CxScanConfig();
         scan.setBaseuri(scanConfig.getServerUrl());
-        scan.setAuthType(CxAuthType.KEYSECRET);
-        scan.setKey(scanConfig.getCheckmarxToken().getId());
-        scan.setSecret(scanConfig.getCheckmarxToken().getToken().getPlainText());
+
+        scan.setAuthType(CxAuthType.TOKEN);
+        scan.setToken(scanConfig.getCheckmarxToken().getToken().getPlainText());
         scan.setPathToExecutable(checkmarxCliExecutable);
         CxAuth wrapper = new CxAuth(scan, log);
 
@@ -91,7 +91,7 @@ public class PluginUtils {
         }
         if(scanConfig.isContainerScanEnabled())
         {
-            log.error("Container Scan is not yet supported.");
+            log.warn("Container Scan is not yet supported.");
         }
         if(scanConfig.isKicsEnabled())
         {

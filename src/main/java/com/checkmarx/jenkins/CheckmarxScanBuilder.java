@@ -43,8 +43,6 @@ import static java.util.stream.Collectors.joining;
 
 public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
-  // private static final Logger LOG = LoggerFactory.getLogger(CheckmarxScanBuilder.class.getName());
-
     CxLoggerAdapter log;
     @Nullable
     private String serverUrl;
@@ -355,7 +353,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         return (CheckmarxScanBuilderDescriptor) super.getDescriptor();
     }
 
-    @Symbol("checkmarxPlugin")
+    @Symbol("checkmarxASTScanner")
     @Extension
     public static class CheckmarxScanBuilderDescriptor extends BuildStepDescriptor<Builder> {
 
@@ -380,7 +378,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         @NonNull
         @Override
         public String getDisplayName() {
-            return "Execute Checkmarx Scan";
+            return "Execute Checkmarx AST Scan";
         }
 
         @Override

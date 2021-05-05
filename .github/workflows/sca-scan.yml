@@ -1,5 +1,7 @@
 name: Checkmarx SCA Scan
 on:
+  pull_request:
+    types: [opened, reopened, synchronize]
   push:
     branches:
       - main
@@ -23,9 +25,11 @@ jobs:
         sca_username: ${{ secrets.CX_SCA_USERNAME }}
         sca_password: ${{ secrets.CX_SCA_PASSWORD }}
         break_build: true
-        scanners: sca 
+        scanners: sca
+        bug_tracker: GITHUBPULL
+        params: --namespace=${{ github.repository_owner }} --repo-name=${{ github.event.repository.name }} --branch=${{ github.head_ref }} --merge-id=${{ github.event.number }}        
 
-    - name: Upload SARIF file
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: cx.sarif
+#    - name: Upload SARIF file
+#      uses: github/codeql-action/upload-sarif@v1
+#      with:
+#        sarif_file: cx.sarif
