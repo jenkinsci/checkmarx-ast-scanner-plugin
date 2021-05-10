@@ -21,6 +21,8 @@ import static com.cloudbees.plugins.credentials.CredentialsProvider.findCredenti
 
 public class PluginUtils {
 
+    private static String JENKINS ="Jenkins";
+
     public static CheckmarxInstallation findCheckmarxInstallation(String checkmarxInstallation) {
         CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor descriptor = Jenkins.get().getDescriptorByType(CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor.class);
         return Stream.of((descriptor).getInstallations())
@@ -49,12 +51,13 @@ public class PluginUtils {
         CxAuth wrapper = new CxAuth(scan, log);
 
         Map<CxParamType, String> params = new HashMap<>();
+        params.put(CxParamType.AGENT, JENKINS);
         params.put(CxParamType.D, scanConfig.getSourceDirectory());
-        params.put(CxParamType.V, "");
+//        params.put(CxParamType.V, "");
         params.put(CxParamType.PROJECT_NAME, scanConfig.getProjectName());
         params.put(CxParamType.FILTER, scanConfig.getZipFileFilters());
         params.put(CxParamType.ADDITIONAL_PARAMETERS, scanConfig.getAdditionalOptions());
-        params.put(CxParamType.PROJECT_TYPE, getScanType(scanConfig,log));
+        params.put(CxParamType.SCAN_TYPES, getScanType(scanConfig,log));
 
         CxScan cxScan = wrapper.cxScanCreate(params);
 
