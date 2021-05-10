@@ -108,7 +108,7 @@
     <dependencies>
         <dependency>
             <groupId>com.checkmarx.ast</groupId>
-            <artifactId>ast-cli-wrapper</artifactId>
+            <artifactId>ast-cli-java-wrapper</artifactId>
             <version>1.0.0</version>
         </dependency>
         <dependency>
