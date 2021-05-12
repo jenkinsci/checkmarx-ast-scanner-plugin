@@ -15,7 +15,7 @@
     <packaging>hpi</packaging>
 
     <properties> <!-- Override the needed properties from the parent pom -->
-        <revision>1.0</revision>
+        <revision>2.0.2</revision>
         <changelist>-SNAPSHOT</changelist>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
         <jenkins.version>2.263.4</jenkins.version>
@@ -169,6 +169,12 @@
         <repository>
             <id>repo.jenkins-ci.org</id>
             <url>https://repo.jenkins-ci.org/public/</url>
+        </repository>
+        <repository>
+            <id>github</id>
+            <name>CheckmarxDev</name>
+            <url>https://maven.pkg.github.com/CheckmarxDev/ast-cli-java-wrapper</url>
+            <releases><enabled>true</enabled></releases>
         </repository>
     </repositories>
     <pluginRepositories>
