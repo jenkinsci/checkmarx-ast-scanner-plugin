@@ -1,6 +1,5 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.ast.*;
 import com.checkmarx.jenkins.config.CheckmarxConstants;
 import com.checkmarx.jenkins.credentials.CheckmarxApiToken;
 import com.checkmarx.jenkins.model.ScanConfig;
@@ -30,9 +29,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.*;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 import static com.cloudbees.plugins.credentials.CredentialsMatchers.anyOf;
 import static com.cloudbees.plugins.credentials.CredentialsMatchers.withId;
@@ -218,8 +217,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         //Check for enabled scanners by the user.
         ArrayList<String> enabledScanners = PluginUtils.getEnabledScannersList(scanConfig, log);
-        if(enabledScanners.isEmpty())
-        {
+        if (enabledScanners.isEmpty()) {
             log.info("None of the scanners are enabled. Aborting the build.");
             run.setResult(Result.FAILURE);
             return;
@@ -262,7 +260,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         //----------Integration with the wrapper------------
-        PluginUtils.submitScanDetailsToWrapper(scanConfig,checkmarxCliExecutable,log);
+        PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, log);
 
     }
 
