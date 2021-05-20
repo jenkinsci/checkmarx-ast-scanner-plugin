@@ -4,9 +4,19 @@
 # https://help.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
 version: 2
+
+registries:
+  maven-ghp-octocat:
+    type: maven-checkmarxdev
+    url: https://maven.pkg.github.com/CheckmarxDev/ast-cli-java-wrappe
+    token: ${{secrets.MVN_PACKAGE_PAT_TOKEN}} # make sure to store this in your Dependabot secrets!
+
+
 updates:
   - package-ecosystem: "maven" # See documentation for possible values
     directory: "/" # Location of package manifests
+    registries:
+      - maven-checkmarxdev
     schedule:
       interval: "daily"
 
