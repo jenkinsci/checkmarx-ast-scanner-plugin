@@ -6,8 +6,8 @@
 version: 2
 
 registries:
-  maven-ghp-octocat:
-    type: maven-checkmarxdev
+  maven-checkmarxdev:
+    type: maven-repository
     url: https://maven.pkg.github.com/CheckmarxDev/ast-cli-java-wrappe
     token: ${{secrets.MVN_PACKAGE_PAT_TOKEN}} # make sure to store this in your Dependabot secrets!
 
