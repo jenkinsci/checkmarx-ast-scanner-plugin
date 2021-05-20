@@ -125,16 +125,6 @@
             <artifactId>workflow-step-api</artifactId>
             <version>2.23</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.fasterxml.jackson.core</groupId>-->
-<!--            <artifactId>jackson-databind</artifactId>-->
-<!--            <version>2.12.1</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--        <groupId>org.jenkins-ci</groupId>-->
-<!--        <artifactId>symbol-annotation</artifactId>-->
-<!--        <version>1.20</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-basic-steps</artifactId>
@@ -155,6 +145,11 @@
             <artifactId>workflow-job</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.6</version>
+        </dependency>
     </dependencies>
 
     <!-- Environment Settings -->
@@ -167,14 +162,13 @@
 
     <repositories>
         <repository>
-            <id>repo.jenkins-ci.org</id>
-            <url>https://repo.jenkins-ci.org/public/</url>
-        </repository>
-        <repository>
             <id>github</id>
-            <name>CheckmarxDev</name>
             <url>https://maven.pkg.github.com/CheckmarxDev/ast-cli-java-wrapper</url>
             <releases><enabled>true</enabled></releases>
+        </repository>
+        <repository>
+            <id>repo.jenkins-ci.org</id>
+            <url>https://repo.jenkins-ci.org/public/</url>
         </repository>
     </repositories>
     <pluginRepositories>
