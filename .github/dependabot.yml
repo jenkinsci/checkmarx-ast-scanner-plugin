@@ -9,8 +9,8 @@ registries:
   maven-checkmarxdev:
     type: maven-repository
     url: https://maven.pkg.github.com/CheckmarxDev/ast-cli-java-wrapper
-    user: ${{secrets.MVN_PACKAGE_USER}}
-    token: ${{secrets.MVN_PACKAGE_PAT_TOKEN}}
+    username: ${{secrets.MVN_PACKAGE_USER}}
+    password: ${{secrets.MVN_PACKAGE_PAT_TOKEN}}
 
 updates:
   - package-ecosystem: "maven" # See documentation for possible values
