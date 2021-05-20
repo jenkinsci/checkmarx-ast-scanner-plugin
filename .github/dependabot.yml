@@ -9,8 +9,8 @@ registries:
   maven-checkmarxdev:
     type: maven-repository
     url: https://maven.pkg.github.com/CheckmarxDev/ast-cli-java-wrapper
-    token: ${{secrets.MVN_PACKAGE_PAT_TOKEN}} # make sure to store this in your Dependabot secrets!
-
+    user: ${{secrets.MVN_PACKAGE_USER}}
+    token: ${{secrets.MVN_PACKAGE_PAT_TOKEN}}
 
 updates:
   - package-ecosystem: "maven" # See documentation for possible values
