@@ -9,23 +9,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-          uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v2.3.4
 
       - name: Build with Maven
-          run: mvn -B package --file pom.xml -s $GITHUB_WORKSPACE/settings.xml
-          env:
-            GITHUB_TOKEN: ${{ github.token }}
+        run: mvn -B package --file pom.xml -s $GITHUB_WORKSPACE/settings.xml
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - uses: release-drafter/release-drafter@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Release
-          uses: xresloader/upload-to-github-release@master
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            file: "./target/checkmarx-ast-scanner.hpi"
-            draft: true
-            verbose: true
-            overwrite: true
+        uses: xresloader/upload-to-github-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+           file: "./target/checkmarx-ast-scanner.hpi"
+           draft: true
+           verbose: true
+          overwrite: true
