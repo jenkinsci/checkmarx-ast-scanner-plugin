@@ -27,15 +27,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-      - uses: release-drafter/release-drafter@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload Release
-        uses: xresloader/upload-to-github-release@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: marvinpinto/action-automatic-releases@latest
         with:
-          file: "./target/checkmarx-ast-scanner.hpi"
-          verbose: true
-          overwrite: true
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: latest
+          prerelease: true
+          title: "Development Build"
+          files: |
+            ./target/checkmarx-ast-scanner.hpi
