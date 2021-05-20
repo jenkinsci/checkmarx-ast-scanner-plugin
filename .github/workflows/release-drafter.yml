@@ -1,6 +1,4 @@
-# Automates creation of Release Drafts using Release Drafter
-# More Info: https://github.com/jenkinsci/.github/blob/master/.github/release-drafter.adoc
-
+name: Create draft release
 on:
   push:
     branches:
@@ -10,7 +8,23 @@ jobs:
   update_release_draft:
     runs-on: ubuntu-latest
     steps:
-      # Drafts your next Release notes as Pull Requests are merged into "master"
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml -s $GITHUB_WORKSPACE/settings.xml
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
       - uses: release-drafter/release-drafter@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release
+        uses: xresloader/upload-to-github-release@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          file: "./target/checkmarx-ast-scanner.hpi"
+          verbose: true
+          overwrite: true

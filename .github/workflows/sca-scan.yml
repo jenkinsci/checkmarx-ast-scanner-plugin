@@ -12,9 +12,9 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2.3.4
-    # Scan code with Checkmarx
+
     - name: Checkmarx CxFlow Action
-      uses: checkmarx-ts/checkmarx-cxflow-github-action@v1.1 #Github Action version
+      uses: checkmarx-ts/checkmarx-cxflow-github-action@v1.1
       with:
         project: ${{ github.event.repository.name }}
         sca_api_url: https://api.scacheckmarx.com
