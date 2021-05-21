@@ -22,14 +22,9 @@ jobs:
           server-id: github
           settings-path: ${{ github.workspace }}
 
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml -s $GITHUB_WORKSPACE/settings.xml
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
       - name: Create Release
         id: draf_release
-        uses: release-drafter/release-drafter@v5
+        uses: release-drafter/release-drafter@v5.15.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
