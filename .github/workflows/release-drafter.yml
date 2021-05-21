@@ -30,12 +30,12 @@ jobs:
 
       - name: Create Draft Release
         uses: marvinpinto/action-automatic-releases@latest
-          with:
-            repo_token:  ${{ secrets.PAT }}
-            automatic_release_tag: latest
-            prerelease: true
-            draft: true
-            title: Development Build
-            files: |
-              LICENSE.md
-              ./target/checkmarx-ast-scanner.hpi
+        with:
+          repo_token:  ${{ secrets.PAT }}
+          automatic_release_tag: latest
+          prerelease: true
+          draft: true
+          title: Development Build
+          files: |
+            LICENSE.md
+            ./target/checkmarx-ast-scanner.hpi
