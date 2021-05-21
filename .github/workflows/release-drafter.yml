@@ -38,4 +38,5 @@ jobs:
           title: Development Build
           files: |
             LICENSE.md
+            README.md
             ./target/checkmarx-ast-scanner.hpi
