@@ -29,18 +29,13 @@ jobs:
           GITHUB_TOKEN: ${{ github.token}}
 
       - name: Create Draft Release
-        id: draf_release
-        uses: release-drafter/release-drafter@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-
-      - name: Upload artifact and release
-        uses: nanoufo/action-upload-artifacts-and-release-assets@main
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-        with:
-          path: |
-            ./target/checkmarx-ast-scanner.hpi
-            LICENSE.md
-          upload-release-files: true
-          release-upload-url: ${{ steps.draf_release.outputs.upload_url }}
+        uses: marvinpinto/action-automatic-releases@latest
+          with:
+            repo_token:  ${{ secrets.PAT }}
+            automatic_release_tag: latest
+            prerelease: true
+            draft: true
+            title: Development Build
+            files: |
+              LICENSE.md
+              ./target/checkmarx-ast-scanner.hpi
