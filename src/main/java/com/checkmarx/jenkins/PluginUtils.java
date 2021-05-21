@@ -52,7 +52,9 @@ public class PluginUtils {
 
         Map<CxParamType, String> params = new HashMap<>();
         params.put(CxParamType.AGENT, JENKINS);
-        params.put(CxParamType.D, scanConfig.getSourceDirectory());
+        params.put(CxParamType.S, scanConfig.getSourceDirectory());
+//        params.put(CxParamType.V, "");
+
         params.put(CxParamType.PROJECT_NAME, scanConfig.getProjectName());
         params.put(CxParamType.FILTER, scanConfig.getZipFileFilters());
         params.put(CxParamType.ADDITIONAL_PARAMETERS, scanConfig.getAdditionalOptions());
