@@ -22,13 +22,13 @@ jobs:
           server-id: github
           settings-path: ${{ github.workspace }}
 
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - uses: marvinpinto/action-automatic-releases@latest
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          repo_token: ${{ secrets.PAT }}
           automatic_release_tag: "latest"
           prerelease: true
           draft: true
-          title: "Development Build"
+          title: Development Build
           files: |
             LICENSE.md
             README.md
