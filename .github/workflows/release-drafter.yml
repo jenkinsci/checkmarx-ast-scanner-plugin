@@ -27,14 +27,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-      - name: Create Release
-        id: draf_release
-        uses: release-drafter/release-drafter@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: shogo82148/actions-upload-release-asset@v1
+      - name: Pre-release
+        uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          upload_url: ${{ steps.draft_release.outputs.upload_url }}
-          asset_path: ./target/checkmarx-ast-scanner.hpi
-          overwrite: true
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Development Build"
+          files: |
+            LICENSE.md
+            ./target/checkmarx-ast-scanner.hpi
