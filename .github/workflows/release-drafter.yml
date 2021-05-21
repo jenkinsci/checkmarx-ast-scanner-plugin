@@ -1,4 +1,4 @@
-name: Create Draft Release
+name: Create draft release
 on:
   push:
     branches:
@@ -6,7 +6,6 @@ on:
 
 jobs:
   update_release_draft:
-    name: Create Draft Release
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -28,15 +27,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token}}
 
-      - name: Create Draft Release
-        uses: marvinpinto/action-automatic-releases@latest
+      - name: Create Release
+        id: draf_release
+        uses: release-drafter/release-drafter@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
-          repo_token:  ${{ secrets.PAT }}
-          automatic_release_tag: latest
-          prerelease: true
-          draft: true
-          title: Development Build
-          files: |
-            LICENSE.md
-            README.md
-            ./target/checkmarx-ast-scanner.hpi
+          upload_url: ${{ steps.draf_release.outputs.upload_url }}
+          asset_path: ./target/checkmarx-ast-scanner.hpi
+          asset_name: checkmarx-ast-scanner.hpi
+          asset_content_type: application/multipart-core
