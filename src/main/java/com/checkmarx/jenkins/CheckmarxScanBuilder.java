@@ -45,6 +45,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     CxLoggerAdapter log;
     @Nullable
     private String serverUrl;
+    private String tenantName;
     private String projectName;
     private String teamName;
     private String credentialsId;
@@ -61,6 +62,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     @DataBoundConstructor
     public CheckmarxScanBuilder(boolean useOwnServerCredentials,
                                 String serverUrl,
+                                String tenantName,
                                 String projectName,
                                 String teamName,
                                 String credentialsId,
@@ -74,6 +76,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     ) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
+        this.tenantName = tenantName;
         this.projectName = projectName;
         this.teamName = teamName;
         this.credentialsId = credentialsId;
@@ -102,6 +105,15 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setServerUrl(@Nullable String serverUrl) {
         this.serverUrl = serverUrl;
+    }
+
+    public String getTenantName() {
+        return tenantName;
+    }
+
+    @DataBoundSetter
+    public void setTenantName(@Nullable String tenantName) {
+        this.tenantName = tenantName;
     }
 
     public String getProjectName() {
@@ -268,6 +280,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         log.info("----**** Checkmarx Scan Configuration ****----");
         log.info("Checkmarx Server Url: " + scanConfig.getServerUrl());
+        log.info("Tenant Name: " + scanConfig.getTenantName());
         log.info("Project Name: " + scanConfig.getProjectName());
         log.info("Team Name: " + scanConfig.getTeamName());
         log.info("Using Job Specific File filters: " + getUseFileFiltersFromJobConfig());
@@ -313,10 +326,12 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         if (this.getUseOwnServerCredentials()) {
             scanConfig.setServerUrl(getServerUrl());
+            scanConfig.setTeamName(getTenantName());
             scanConfig.setCheckmarxToken(getCheckmarxTokenCredential(run, getCredentialsId()));
 
         } else {
             scanConfig.setServerUrl(descriptor.getServerUrl());
+            scanConfig.setTenantName(descriptor.getTenantName());
             scanConfig.setCheckmarxToken(getCheckmarxTokenCredential(run, descriptor.getCredentialsId()));
         }
 
@@ -360,6 +375,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         //  Persistent plugin global configuration parameters
         @Nullable
         private String serverUrl;
+        private String tenantName;
         private String baseAuthUrl;
         private boolean useAuthenticationUrl;
         private String credentialsId;
@@ -417,6 +433,14 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         public void setUseAuthenticationUrl(final boolean useAuthenticationUrl) {
             this.useAuthenticationUrl = useAuthenticationUrl;
+        }
+
+        public String getTenantName() {
+            return tenantName;
+        }
+
+        public void setTenantNameUrl(@Nullable String tenantName) {
+            this.tenantName = tenantName;
         }
 
         public String getCredentialsId() {

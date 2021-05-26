@@ -18,6 +18,7 @@ public class ScanConfig implements Serializable {
 
     private String serverUrl;
     private String baseAuthUrl;
+    private String tenantName;
     private CheckmarxApiToken checkmarxToken;
     private String projectName;
     private String teamName;

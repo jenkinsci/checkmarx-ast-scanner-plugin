@@ -18,6 +18,10 @@
         </f:entry>
         </f:optionalBlock>
 
+        <f:entry title="Tenant Name" field="tenantName">
+            <f:textbox/>
+        </f:entry>
+
         <f:entry field="credentialsId" title="${%Credentials}">
             <c:select/>
         </f:entry>

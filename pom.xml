@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <!-- The Basics -->
@@ -7,7 +8,7 @@
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
     <version>4.18</version>
-    <relativePath></relativePath>
+        <relativePath/>
   </parent>
   <groupId>com.checkmarx.jenkins</groupId>
   <artifactId>checkmarx-ast-scanner</artifactId>
@@ -19,7 +20,7 @@
   <description>This allows scanning the source code via Checkmarx AST.</description>
   <url>https://github.com/jenkinsci/${project.artifactId}-plugin</url>
   <inceptionYear>2021</inceptionYear>
-  <organization></organization>
+    <organization/>
   <licenses>
     <license>
       <name>MIT License</name>
@@ -34,12 +35,7 @@
       <email>Mithilesh.Pawar@checkmarx.com</email>
     </developer>
   </developers>
-
-  <contributors></contributors>
-
-  <prerequisites>
-    <maven>3.6.3</maven>
-  </prerequisites>
+    <contributors/>
 
   <!-- Environment Settings -->
   <scm>
@@ -58,6 +54,9 @@
     <java.level>8</java.level>
     <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
   </properties>
+    <prerequisites>
+        <maven>3.6.3</maven>
+    </prerequisites>
 
   <dependencyManagement>
     <dependencies>
@@ -93,6 +92,16 @@
       <version>2.23</version>
     </dependency>
     <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20210307</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jodd</groupId>
+            <artifactId>jodd-lagarto</artifactId>
+            <version>5.0.11</version>
+        </dependency>
+        <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-basic-steps</artifactId>
       <scope>test</scope>
@@ -144,8 +153,7 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <!-- This override has been added for building with Java 11 -->
+                <groupId>org.apache.maven.plugins</groupId>  <!-- This override has been added for building with Java 11 -->
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
         <configuration>
@@ -153,8 +161,7 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.jenkins-ci.tools</groupId>
-        <!-- This override has been added for building with Java 11 -->
+                <groupId>org.jenkins-ci.tools</groupId>  <!-- This override has been added for building with Java 11 -->
         <artifactId>maven-hpi-plugin</artifactId>
         <version>3.17</version>
         <extensions>true</extensions>
@@ -163,7 +170,7 @@
         </configuration>
       </plugin>
       <!--            <plugin>-->
-      <!--                &lt;!&ndash; This override has been skipped for building with Java 11 &ndash;&gt;-->
+            <!--                 This override has been skipped for building with Java 11-->
       <!--                <groupId>org.codehaus.mojo</groupId>-->
       <!--                <artifactId>animal-sniffer-maven-plugin</artifactId>-->
       <!--                <version>${animal.sniffer.version}</version>-->
