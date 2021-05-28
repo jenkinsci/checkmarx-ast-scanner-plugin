@@ -11,6 +11,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.*;
 import hudson.model.*;
 import hudson.security.ACL;
+import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
@@ -218,11 +219,10 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
     @SneakyThrows
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
+    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, EnvVars envVars, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
 
         final CheckmarxScanBuilderDescriptor descriptor = getDescriptor();
         log = new CxLoggerAdapter(listener.getLogger());
-        EnvVars envVars = run.getEnvironment(listener);
 
         ScanConfig scanConfig = resolveConfiguration(run, workspace, descriptor, envVars, log);
         printConfiguration(scanConfig, log);
@@ -271,9 +271,24 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        //----------Integration with the wrapper------------
-        PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, log);
+        if (run.getActions(CheckmarxScanResultsAction.class).isEmpty()) {
+            run.addAction(new CheckmarxScanResultsAction(run));
+        }
 
+        //----------Integration with the wrapper------------
+        final boolean result = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
+
+        if (result) {
+            PluginUtils.generateHTMLReport(workspace);
+
+            ArtifactArchiver artifactArchiver = new ArtifactArchiver(workspace.getName() + "_" + PluginUtils.CHECKMARX_AST_RESULTS_HTML);
+            artifactArchiver.perform(run, workspace, envVars, launcher, listener);
+
+            run.setResult(Result.SUCCESS);
+        } else {
+            run.setResult(Result.FAILURE);
+        }
+        return;
     }
 
     private void printConfiguration(ScanConfig scanConfig, CxLoggerAdapter log) {
@@ -326,7 +341,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         if (this.getUseOwnServerCredentials()) {
             scanConfig.setServerUrl(getServerUrl());
-            scanConfig.setTeamName(getTenantName());
+            scanConfig.setTenantName(getTenantName());
             scanConfig.setCheckmarxToken(getCheckmarxTokenCredential(run, getCredentialsId()));
 
         } else {

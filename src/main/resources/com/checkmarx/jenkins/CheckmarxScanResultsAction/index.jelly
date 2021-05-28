@@ -1,0 +1,16 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:l="/lib/layout" xmlns:st="jelly:stapler">
+    <l:layout title="Checkmarx Scan Results">
+
+        <l:side-panel>
+            <st:include page="sidepanel.jelly" it="${it.run}" optional="true"/>
+        </l:side-panel>
+
+        <l:main-panel>
+            <h3>Checkmarx Scan Results</h3>
+            <style><j:out value="${it.reportCss}"/></style>
+            <script><j:out value="${it.reportScript}"/></script>
+            <j:out value="${it.reportHtml}"/>
+        </l:main-panel>
+    </l:layout>
+</j:jelly>
