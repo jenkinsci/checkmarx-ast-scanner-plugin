@@ -459,6 +459,10 @@ public class PluginUtils {
                 "                        </svg></div>\n" +
                 "                    <div>25/05/212021, 07:05:42</div>\n" +
                 "                </div>\n" +
+                "                \n" +
+                "                <div class=\"data\">\n" +
+                "                    <a href=\"\" target=\"_blank\">More details</a>\n" +
+                "                </div>\n" +
                 "            </div>\n" +
                 "\n" +
                 "        </div>\n" +
@@ -515,5 +519,4 @@ public class PluginUtils {
                 "    </div>\n" +
                 "</body>";
     }
-
 }

@@ -20,9 +20,8 @@ public interface CheckmarxApiToken extends StandardCredentials {
         @Override
         public String getName(@Nonnull final CheckmarxApiToken credentials) {
             final String description = Util.fixEmptyAndTrim(credentials.getDescription());
-            //return description != null ? description : credentials.getId();
-            return credentials.getId() + (description != null ? " (" + description + ")" : "");
 
+            return credentials.getId() + (description != null ? " (" + description + ")" : "");
         }
     }
 }

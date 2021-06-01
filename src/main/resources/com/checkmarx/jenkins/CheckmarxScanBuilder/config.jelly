@@ -10,6 +10,13 @@
         <f:entry title="Checkmarx Server URL" field="serverUrl">
             <f:textbox/>
         </f:entry>
+        <f:optionalBlock title="Use Authentication Url" inline="true"
+                                 field="useAuthenticationUrl"
+                                 checked="${instance == null ? false : descriptor.getUseAuthenticationUrl()}">
+                <f:entry title="Checkmarx Base Authentication URL" field="baseAuthUrl">
+                    <f:textbox/>
+                </f:entry>
+        </f:optionalBlock>
         <f:entry title="Tenant Name" field="tenantName">
             <f:textbox/>
         </f:entry>

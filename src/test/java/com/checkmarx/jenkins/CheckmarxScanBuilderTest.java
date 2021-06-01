@@ -24,7 +24,7 @@ public class CheckmarxScanBuilderTest {
 
         final FreeStyleProject freeStyleProject = this.jenkins.createFreeStyleProject("freestyle-project-without-checkmarxInstallation");
         final CheckmarxScanBuilder checkmarxBuilder = new CheckmarxScanBuilder(true,
-                "serverUrl","noTenant", "projectName", "teamName", "creds-id", "zipFileFilters",
+                "serverUrl", false, "", "noTenant", "projectName", "teamName", "creds-id", "zipFileFilters",
                 true, false, false, false,
                 false,                "additionalOptions");
         checkmarxBuilder.setCheckmarxInstallation(null);

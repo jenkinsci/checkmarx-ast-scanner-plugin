@@ -41,6 +41,4 @@ public class DefaultCheckmarxApiToken extends BaseStandardCredentials implements
             return "Checkmarx API token";
         }
     }
-
-
 }

@@ -29,6 +29,4 @@ public class ScanConfig implements Serializable {
     private String zipFileFilters;
     private String additionalOptions;
     private String sourceDirectory;
-
-
 }

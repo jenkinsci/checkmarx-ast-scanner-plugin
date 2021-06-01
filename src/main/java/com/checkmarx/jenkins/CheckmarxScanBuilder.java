@@ -21,6 +21,7 @@ import jenkins.tasks.SimpleBuildStep;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.*;
 import org.slf4j.Logger;
@@ -46,6 +47,8 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     CxLoggerAdapter log;
     @Nullable
     private String serverUrl;
+    private boolean useAuthenticationUrl;
+    private String baseAuthUrl;
     private String tenantName;
     private String projectName;
     private String teamName;
@@ -63,6 +66,8 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     @DataBoundConstructor
     public CheckmarxScanBuilder(boolean useOwnServerCredentials,
                                 String serverUrl,
+                                boolean useAuthenticationUrl,
+                                String baseAuthUrl,
                                 String tenantName,
                                 String projectName,
                                 String teamName,
@@ -77,6 +82,8 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     ) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
+        this.useAuthenticationUrl = useAuthenticationUrl;
+        this.baseAuthUrl = baseAuthUrl;
         this.tenantName = tenantName;
         this.projectName = projectName;
         this.teamName = teamName;
@@ -217,6 +224,22 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         this.checkmarxInstallation = checkmarxInstallation;
     }
 
+    public boolean isUseAuthenticationUrl() {
+        return useAuthenticationUrl;
+    }
+    @DataBoundSetter
+    public void setUseAuthenticationUrl(boolean useAuthenticationUrl) {
+        this.useAuthenticationUrl = useAuthenticationUrl;
+    }
+
+    public String getBaseAuthUrl() {
+        return baseAuthUrl;
+    }
+    @DataBoundSetter
+    public void setBaseAuthUrl(String baseAuthUrl) {
+        this.baseAuthUrl = baseAuthUrl;
+    }
+
     @SneakyThrows
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, EnvVars envVars, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
@@ -292,9 +315,11 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void printConfiguration(ScanConfig scanConfig, CxLoggerAdapter log) {
-
         log.info("----**** Checkmarx Scan Configuration ****----");
         log.info("Checkmarx Server Url: " + scanConfig.getServerUrl());
+        if (StringUtils.isNotEmpty(scanConfig.getBaseAuthUrl())) {
+            log.info("Checkmarx Auth Server Url: " + scanConfig.getBaseAuthUrl());
+        }
         log.info("Tenant Name: " + scanConfig.getTenantName());
         log.info("Project Name: " + scanConfig.getProjectName());
         log.info("Team Name: " + scanConfig.getTeamName());
@@ -331,6 +356,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         if (fixEmptyAndTrim(getProjectName()) != null) {
             scanConfig.setProjectName(getProjectName());
         }
+
         if (fixEmptyAndTrim(getTeamName()) != null) {
             scanConfig.setTeamName(getTeamName());
         }
@@ -341,12 +367,15 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         if (this.getUseOwnServerCredentials()) {
             scanConfig.setServerUrl(getServerUrl());
-            scanConfig.setTenantName(getTenantName());
+            scanConfig.setTenantName(fixEmptyAndTrim(getTenantName()));
+            if (this.isUseAuthenticationUrl()) {
+                scanConfig.setBaseAuthUrl(this.getBaseAuthUrl());
+            }
             scanConfig.setCheckmarxToken(getCheckmarxTokenCredential(run, getCredentialsId()));
 
         } else {
             scanConfig.setServerUrl(descriptor.getServerUrl());
-            scanConfig.setTenantName(descriptor.getTenantName());
+            scanConfig.setTenantName(fixEmptyAndTrim(descriptor.getTenantName()));
             scanConfig.setCheckmarxToken(getCheckmarxTokenCredential(run, descriptor.getCredentialsId()));
         }
 
@@ -387,7 +416,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         public static final String DEFAULT_FILTER_PATTERNS = CheckmarxConstants.DEFAULT_FILTER_PATTERNS;
         private static final Logger LOG = LoggerFactory.getLogger(CheckmarxScanBuilderDescriptor.class.getName());
-        //  Persistent plugin global configuration parameters
+
         @Nullable
         private String serverUrl;
         private String tenantName;
@@ -454,7 +483,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return tenantName;
         }
 
-        public void setTenantNameUrl(@Nullable String tenantName) {
+        public void setTenantName(@Nullable String tenantName) {
             this.tenantName = tenantName;
         }
 
