@@ -6,7 +6,7 @@
 
     <f:optionalBlock title="Use global server credentials (${descriptor.credentialsDescription})" inline="true"
                      field="useOwnServerCredentials" negative="true"
-                     checked="${instance == null ? false : !instance.getUseOwnServerCredentials()}">
+                     checked="${instance == null ? true : !instance.getUseOwnServerCredentials()}">
         <f:entry title="Checkmarx Server URL" field="serverUrl">
             <f:textbox/>
         </f:entry>
