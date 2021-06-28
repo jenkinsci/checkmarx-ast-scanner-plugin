@@ -47,19 +47,18 @@ public class PluginUtils {
         log.info("Submitting the scan details to the CLI wrapper.");
         final CxScanConfig scan = new CxScanConfig();
         scan.setBaseUri(scanConfig.getServerUrl());
-
-        scan.setAuthType(CxAuthType.TOKEN);
+        scan.setBaseAuthUri(scanConfig.getBaseAuthUrl());
+        if(fixEmptyAndTrim(scanConfig.getTenantName())!= null) {
+            scan.setTenant(scanConfig.getTenantName());
+        }
         scan.setApiKey(scanConfig.getCheckmarxToken().getToken().getPlainText());
         scan.setPathToExecutable(checkmarxCliExecutable);
+
         final CxAuth wrapper = new CxAuth(scan, log);
 
         final Map<CxParamType, String> params = new HashMap<>();
         params.put(CxParamType.AGENT, PluginUtils.JENKINS);
         params.put(CxParamType.S, scanConfig.getSourceDirectory());
-        if(fixEmptyAndTrim(scanConfig.getTenantName())!= null) {
-            params.put(CxParamType.TENANT, scanConfig.getTenantName());
-        }
-
         params.put(CxParamType.PROJECT_NAME, scanConfig.getProjectName());
         params.put(CxParamType.FILTER, scanConfig.getZipFileFilters());
         params.put(CxParamType.ADDITIONAL_PARAMETERS, scanConfig.getAdditionalOptions());
