@@ -21,6 +21,7 @@ public class ScanConfig implements Serializable {
     private String tenantName;
     private CheckmarxApiToken checkmarxToken;
     private String projectName;
+    private String branchName;
     private String teamName;
     private boolean sastEnabled;
     private boolean scaEnabled;

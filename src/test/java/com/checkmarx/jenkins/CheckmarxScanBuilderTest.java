@@ -18,7 +18,6 @@ public class CheckmarxScanBuilderTest {
 
     @Test
     public void freeStyleProject_shouldFail_ifNoCheckmarxInstallationExist() throws Exception {
-
         DefaultCheckmarxApiToken checkmarxToken = new DefaultCheckmarxApiToken(CredentialsScope.GLOBAL, "creds-id", "", "checkmarx-token");
         CredentialsProvider.lookupStores(jenkins.getInstance()).iterator().next().addCredentials(Domain.global(), checkmarxToken);
 
@@ -35,5 +34,4 @@ public class CheckmarxScanBuilderTest {
         this.jenkins.assertBuildStatus(Result.FAILURE, build);
         this.jenkins.assertLogContains("Please configure the build properly and retry.", build);
     }
-
 }

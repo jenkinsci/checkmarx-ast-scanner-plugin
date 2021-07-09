@@ -45,6 +45,10 @@ import static java.util.stream.Collectors.joining;
 
 public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
+    public static final String GIT_BRANCH = "GIT_BRANCH";
+    public static final String CVS_BRANCH = "CVS_BRANCH";
+    public static final String SVN_REVISION = "SVN_REVISION";
+
     CxLoggerAdapter log;
     @Nullable
     private String serverUrl;
@@ -317,6 +321,14 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         return;
     }
 
+    private String getDefaultBranchName(EnvVars envVars) {
+        if (!StringUtils.isEmpty(envVars.get(GIT_BRANCH))) return envVars.get(GIT_BRANCH).replaceAll("^([^/]+)/", "");
+        if (!StringUtils.isEmpty(envVars.get(CVS_BRANCH))) return envVars.get(CVS_BRANCH);
+        if (!StringUtils.isEmpty(envVars.get(SVN_REVISION))) return envVars.get(SVN_REVISION);
+
+        return null;
+    }
+
     private void printConfiguration(ScanConfig scanConfig, CxLoggerAdapter log) {
         log.info("----**** Checkmarx Scan Configuration ****----");
         log.info("Checkmarx Server Url: " + scanConfig.getServerUrl());
@@ -331,6 +343,8 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         if (getUseFileFiltersFromJobConfig()) {
             log.info("Using File Filters: " + scanConfig.getZipFileFilters());
         }
+
+        log.info("Default branch name: " + Optional.ofNullable(scanConfig.getBranchName()).orElse(""));
 
         log.info("Additional Options: " + Optional.ofNullable(scanConfig.getAdditionalOptions()).orElse(""));
 
@@ -393,6 +407,8 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             scanConfig.setZipFileFilters(cleanFilters(descriptor.getZipFileFilters()));
         }
 
+        String defaultBranchName = getDefaultBranchName(envVars);
+        if (!StringUtils.isEmpty(defaultBranchName)) scanConfig.setBranchName(defaultBranchName);
 
         if (fixEmptyAndTrim(getAdditionalOptions()) != null) {
             scanConfig.setAdditionalOptions(getAdditionalOptions());

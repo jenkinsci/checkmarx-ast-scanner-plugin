@@ -63,6 +63,7 @@ public class PluginUtils {
         params.put(CxParamType.FILTER, scanConfig.getZipFileFilters());
         params.put(CxParamType.ADDITIONAL_PARAMETERS, scanConfig.getAdditionalOptions());
         params.put(CxParamType.SCAN_TYPES, PluginUtils.getScanType(scanConfig, log));
+        params.put(CxParamType.BRANCH, scanConfig.getBranchName());
 
         final CxScan cxScan = wrapper.cxScanCreate(params);
 
