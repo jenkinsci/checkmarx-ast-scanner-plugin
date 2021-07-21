@@ -4,23 +4,16 @@ import javax.annotation.Nonnull;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * Supported platform.
- */
 public enum Platform {
-    LINUX("node", "npm", "bin", "cx"),
-    MAC_OS("node", "npm", "bin", "cx-mac"),
-    WINDOWS("node.exe", "npm.cmd", "", "cx.exe");
+    LINUX( "linux_x64.tar.gz", "cx"),
+    MAC_OS( "darwin_x64.tar.gz", "cx"),
+    WINDOWS( "windows_x64.zip", "cx.exe");
 
-    public final String nodeFileName;
-    public final String npmFileName;
-    public final String binFolder;
+    public final String packageExtension;
     public final String checkmarxWrapperFileName;
 
-    Platform(final String nodeFileName, final String npmFileName, final String binFolder, final String checkmarxWrapperFileName) {
-        this.nodeFileName = nodeFileName;
-        this.npmFileName = npmFileName;
-        this.binFolder = binFolder;
+    Platform(final String packageExtension, final String checkmarxWrapperFileName) {
+        this.packageExtension = packageExtension;
         this.checkmarxWrapperFileName = checkmarxWrapperFileName;
     }
 

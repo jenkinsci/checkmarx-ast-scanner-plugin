@@ -13,26 +13,30 @@ import static java.lang.String.format;
 
 public class DownloadService {
 
-    private static final String CHECKMARX_CLI_RELEASES_LATEST = "https://api.github.com/repos/CheckmarxDev/ast-cli/releases/latest";
-    private static final String CHECKMARX_RELEASES_TAGS = "https://api.github.com/repos/CheckmarxDev/ast-cli/releases/tags/v%s";
+    private static final String CHECKMARX_FILE_NAME = "ast-cli";
+    private static final String CHECKMARX_CLI_REPO = "https://api.github.com/repos/CheckmarxDev/ast-cli";
+    private static final String CHECKMARX_CLI_RELEASES_LATEST = CHECKMARX_CLI_REPO + "/releases/latest";
+    private static final String CHECKMARX_RELEASES_TAGS = CHECKMARX_CLI_REPO +  "/releases/tags/%s";
+    private static final String CHECKMARX_DOWNLOAD = "https://github.com/CheckmarxDev/ast-cli/releases/download/%s/%s";
 
     private DownloadService() {
         // squid:S1118
     }
 
     public static URL getDownloadUrlForCli(@Nonnull final String version, @Nonnull final Platform platform) throws IOException {
-        final String jsonString;
-        final String tagName;
+        final String jsonString = DownloadService.loadJSON("latest".equals(version) ?
+                DownloadService.CHECKMARX_CLI_RELEASES_LATEST :
+                format(DownloadService.CHECKMARX_RELEASES_TAGS, version));
 
-        // latest version needed different url
-        if ("latest".equals(version)) {
-            jsonString = DownloadService.loadJSON(DownloadService.CHECKMARX_CLI_RELEASES_LATEST);
-        } else {
-            jsonString = DownloadService.loadJSON(format(DownloadService.CHECKMARX_RELEASES_TAGS, version));
-        }
         final JSONObject release = JSONObject.fromObject(jsonString);
-        tagName = (String) release.get("tag_name");
-        return new URL(format("https://github.com/CheckmarxDev/ast-cli/releases/download/%s/%s", tagName, platform.checkmarxWrapperFileName));
+        final String tagName = (String) release.get("tag_name");
+
+        String url = format(CHECKMARX_DOWNLOAD, tagName, buildFileName(tagName, platform));
+        return new URL(url);
+    }
+
+    public static String buildFileName(String tagName, Platform platform) {
+        return String.format("%s_%s_%s", CHECKMARX_FILE_NAME, tagName, platform.packageExtension);
     }
 
     private static String loadJSON(final String source) throws IOException {

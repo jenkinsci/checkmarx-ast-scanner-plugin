@@ -46,13 +46,6 @@ public class CheckmarxInstallation extends ToolInstallation implements Environme
         return new CheckmarxInstallation(this.getName(), this.translateFor(node, taskListener), this.getProperties().toList());
     }
 
-    @Override
-    public void buildEnvVars(final EnvVars env) {
-        final String root = this.getHome();
-        if (root != null) {
-            env.put("PATH+CHECKMARX_HOME", new File(root, "node_modules/.bin").toString());
-        }
-    }
 
     public String getCheckmarxExecutable(@Nonnull final Launcher launcher) throws IOException, InterruptedException {
         final VirtualChannel channel = launcher.getChannel();
@@ -65,14 +58,6 @@ public class CheckmarxInstallation extends ToolInstallation implements Environme
     }
 
     private String resolveExecutable(final String file, final Platform platform) throws IOException {
-//        final Path nodeModulesBin = getNodeModulesBin();
-//        if (nodeModulesBin != null) {
-//            final Path executable = nodeModulesBin.resolve(file);
-//            if (!executable.toFile().exists()) {
-//                throw new IOException(format("Could not find executable <%s>", executable));
-//            }
-//            return executable.toAbsolutePath().toString();
-//        } else {
         final String root = this.getHome();
         if (root == null) {
             return null;
@@ -82,25 +67,9 @@ public class CheckmarxInstallation extends ToolInstallation implements Environme
         if (!executable.toFile().exists()) {
             throw new IOException(format("Could not find executable <%s>", wrapperFileName));
         }
+
         return executable.toAbsolutePath().toString();
-//        }
-
     }
-
-
-//    private Path getNodeModulesBin() {
-//        String root = getHome();
-//        if (root == null) {
-//            return null;
-//        }
-//
-//        Path nodeModules = Paths.get(root).resolve("node_modules").resolve(".bin");
-//        if (!nodeModules.toFile().exists()) {
-//            return null;
-//        }
-//
-//        return nodeModules;
-//    }
 
     @Extension
     @Symbol("checkmarx")
