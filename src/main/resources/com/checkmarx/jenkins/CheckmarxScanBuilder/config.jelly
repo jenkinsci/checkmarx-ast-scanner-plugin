@@ -10,7 +10,7 @@
         <f:entry title="Checkmarx Server URL" field="serverUrl">
             <f:textbox/>
         </f:entry>
-        <f:optionalBlock title="Use Authentication Url" inline="true"
+        <f:optionalBlock title="Use Authentication URL" inline="true"
                                  field="useAuthenticationUrl"
                                  checked="${instance == null ? false : descriptor.getUseAuthenticationUrl()}">
                 <f:entry title="Checkmarx Base Authentication URL" field="baseAuthUrl">
@@ -52,7 +52,7 @@
 
     <!-- *************************** Checkmarx SAST ***************************************** -->
 
-   <f:section title="Scan Engines"/> <!-- Remove this section tag if the UI is inconsistent-->
+   <f:section title="Scanners"/> <!-- Remove this section tag if the UI is inconsistent-->
 
     <f:optionalBlock name="sastEnabled" title="Enable SAST Scan" field="sastEnabled" inline="true"
                      checked="${instance == null || instance.sastEnabled == null || instance.sastEnabled}">
@@ -76,10 +76,10 @@
     <!-- *********************** AST Repo Settings ********************************************* -->
 
     <f:section title="Checkmarx AST Repo Settings">
-        <f:entry title="AST Project/Repository Name" field="projectName">
+        <f:entry title="CxAST Project Name" field="projectName">
             <f:textbox/>
         </f:entry>
-        <f:entry title="Team Name" field="teamName">
+        <f:entry title="Group Name" field="groupName">
             <f:textbox/>
         </f:entry>
     </f:section>
@@ -87,10 +87,10 @@
     <!-- *************************** Common Scan Settings ***************************************** -->
 
     <f:section title="Scan Filters"/>
-    <f:optionalBlock title="Use Job specific file filters (Overrides the global filters)" inline="true"
+    <f:optionalBlock title="Use Project specific file and folder filters (Overrides global filters)" inline="true"
                      field="useFileFiltersFromJobConfig"
                      checked="${instance == null ? false : instance.getUseFileFiltersFromJobConfig()}">
-        <f:entry title="Zip file filters for this job" field="zipFileFilters">
+        <f:entry title="File and folder filters for this project" field="zipFileFilters">
             <f:textarea/>
         </f:entry>
     </f:optionalBlock>

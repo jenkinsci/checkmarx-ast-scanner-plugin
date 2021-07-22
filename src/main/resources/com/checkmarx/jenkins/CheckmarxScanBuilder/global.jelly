@@ -10,7 +10,7 @@
             <f:textbox/>
         </f:entry>
 
-        <f:optionalBlock title="Use Authentication Url" inline="true"
+        <f:optionalBlock title="Use Authentication URL" inline="true"
                          field="useAuthenticationUrl"
                          checked="${instance == null ? false : descriptor.getUseAuthenticationUrl()}">
         <f:entry title="Checkmarx Base Authentication URL" field="baseAuthUrl">

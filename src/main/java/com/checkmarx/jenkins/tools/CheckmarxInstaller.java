@@ -67,7 +67,7 @@ public class CheckmarxInstaller extends ToolInstaller {
 
     private boolean isUpToDate(FilePath expectedLocation, CxLoggerAdapter log) throws IOException, InterruptedException {
         FilePath marker = expectedLocation.child(TIMESTAMP_FILE);
-        if (marker.exists()) {
+        if (!marker.exists()) {
             return false;
         }
 
