@@ -49,30 +49,6 @@
         </f:entry>
     </f:section>
 
-
-    <!-- *************************** Checkmarx SAST ***************************************** -->
-
-   <f:section title="Scanners"/> <!-- Remove this section tag if the UI is inconsistent-->
-
-    <f:optionalBlock name="sastEnabled" title="Enable SAST Scan" field="sastEnabled" inline="true"
-                     checked="${instance == null || instance.sastEnabled == null || instance.sastEnabled}">
-    </f:optionalBlock>
-
-    <!-- *************************** Checkmarx SCA ***************************************** -->
-    <f:optionalBlock name="scaEnabled" title="Enable SCA Scan" field="scaEnabled" inline="true"
-                     checked="${instance == null || instance.scaEnabled == null || instance.scaEnabled}">
-    </f:optionalBlock>
-    <!-- *************************** Checkmarx Container Scan ***************************************** -->
-    <f:optionalBlock name="containerScanEnabled" title="Enable Container Scan" field="containerScanEnabled"
-                     inline="true"
-                     checked="${instance == null || instance.containerScanEnabled == null || instance.containerScanEnabled}">
-    </f:optionalBlock>
-    <!-- *************************** Checkmarx KICS ***************************************** -->
-
-    <f:optionalBlock title="Enable KICS" field="kicsEnabled" inline="true"
-                     checked="${instance == null || instance.kicsEnabled == null || instance.kicsEnabled}">
-    </f:optionalBlock>
-
     <!-- *********************** AST Repo Settings ********************************************* -->
 
     <f:section title="Checkmarx AST Repo Settings">

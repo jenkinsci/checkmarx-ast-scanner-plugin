@@ -62,7 +62,6 @@ public class PluginUtils {
         params.put(CxParamType.PROJECT_NAME, scanConfig.getProjectName());
         params.put(CxParamType.FILTER, scanConfig.getZipFileFilters());
         params.put(CxParamType.ADDITIONAL_PARAMETERS, scanConfig.getAdditionalOptions());
-        params.put(CxParamType.SCAN_TYPES, PluginUtils.getScanType(scanConfig, log));
         params.put(CxParamType.BRANCH, scanConfig.getBranchName());
 
         final CxScan cxScan = wrapper.cxScanCreate(params);
@@ -74,37 +73,6 @@ public class PluginUtils {
         }
 
         return false;
-    }
-
-    private static String getScanType(final ScanConfig scanConfig, final CxLoggerAdapter log) {
-        String scanType = "";
-        final ArrayList<String> scannerList = PluginUtils.getEnabledScannersList(scanConfig, log);
-
-        for (final String item : scannerList) {
-            scanType = scanType.concat(item).concat(" ");
-        }
-        scanType = scanType.trim();
-        scanType = scanType.replace(" ", ",");
-
-        return scanType;
-    }
-
-    public static ArrayList<String> getEnabledScannersList(final ScanConfig scanConfig, final CxLoggerAdapter log) {
-        final ArrayList<String> scannerList = new ArrayList<String>();
-
-        if (scanConfig.isScaEnabled()) {
-            scannerList.add(ScanConfig.SCA_SCAN_TYPE);
-        }
-        if (scanConfig.isSastEnabled()) {
-            scannerList.add(ScanConfig.SAST_SCAN_TYPE);
-        }
-        if (scanConfig.isContainerScanEnabled()) {
-            log.warn("Container Scan is not yet supported.");
-        }
-        if (scanConfig.isKicsEnabled()) {
-            scannerList.add(ScanConfig.KICS_SCAN_TYPE);
-        }
-        return scannerList;
     }
 
     public static String getCheckmarxResultsOverviewUrl() {

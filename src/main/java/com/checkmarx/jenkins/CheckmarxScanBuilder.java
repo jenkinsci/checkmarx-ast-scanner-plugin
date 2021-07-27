@@ -61,10 +61,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     private String checkmarxInstallation;
     private String additionalOptions;
     private String zipFileFilters;
-    private boolean sastEnabled;
-    private boolean scaEnabled;
-    private boolean containerScanEnabled;
-    private boolean kicsEnabled;
     private boolean useFileFiltersFromJobConfig;
     private boolean useOwnServerCredentials;
 
@@ -78,10 +74,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                                 String teamName,
                                 String credentialsId,
                                 String zipFileFilters,
-                                boolean sastEnabled,
-                                boolean scaEnabled,
-                                boolean containerScanEnabled,
-                                boolean kicsEnabled,
                                 boolean useFileFiltersFromJobConfig,
                                 String additionalOptions
     ) {
@@ -93,10 +85,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         this.projectName = projectName;
         this.teamName = teamName;
         this.credentialsId = credentialsId;
-        this.sastEnabled = sastEnabled;
-        this.scaEnabled = scaEnabled;
-        this.containerScanEnabled = containerScanEnabled;
-        this.kicsEnabled = kicsEnabled;
         this.useFileFiltersFromJobConfig = useFileFiltersFromJobConfig;
         this.additionalOptions = additionalOptions;
         this.zipFileFilters = zipFileFilters;
@@ -154,42 +142,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setCredentialsId(String credentialsId) {
         this.credentialsId = credentialsId;
-    }
-
-    public boolean getSastEnabled() {
-        return sastEnabled;
-    }
-
-    @DataBoundSetter
-    public void setSastEnabled(boolean sastEnabled) {
-        this.sastEnabled = sastEnabled;
-    }
-
-    public boolean getScaEnabled() {
-        return scaEnabled;
-    }
-
-    @DataBoundSetter
-    public void setScaEnabled(boolean scaEnabled) {
-        this.scaEnabled = scaEnabled;
-    }
-
-    public boolean getContainerScanEnabled() {
-        return containerScanEnabled;
-    }
-
-    @DataBoundSetter
-    public void setContainerScanEnabled(boolean containerScanEnabled) {
-        this.containerScanEnabled = containerScanEnabled;
-    }
-
-    public boolean getKicsEnabled() {
-        return kicsEnabled;
-    }
-
-    @DataBoundSetter
-    public void setKicsEnabled(boolean kicsEnabled) {
-        this.kicsEnabled = kicsEnabled;
     }
 
     public boolean getUseFileFiltersFromJobConfig() {
@@ -256,14 +208,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         ScanConfig scanConfig = resolveConfiguration(run, workspace, descriptor, envVars, log);
         printConfiguration(scanConfig, log);
-
-        //Check for enabled scanners by the user.
-        ArrayList<String> enabledScanners = PluginUtils.getEnabledScannersList(scanConfig, log);
-        if (enabledScanners.isEmpty()) {
-            log.info("None of the scanners are enabled. Aborting the build.");
-            run.setResult(Result.FAILURE);
-            return;
-        }
 
         //// Check for required version of CLI
         CheckmarxInstallation installation = PluginUtils.findCheckmarxInstallation(checkmarxInstallation);
@@ -348,23 +292,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         log.info("Additional Options: " + Optional.ofNullable(scanConfig.getAdditionalOptions()).orElse(""));
 
-        log.info("Enabled Scan Engines: ");
-
-        int scanEngines = 1;
-        if (scanConfig.isSastEnabled()) {
-            log.info((scanEngines++) + ") Checkmarx SAST");
-        }
-        if (scanConfig.isScaEnabled()) {
-            log.info((scanEngines++) + ") Checkmarx SCA");
-        }
-        if (scanConfig.isContainerScanEnabled()) {
-            log.info((scanEngines++) + ") Checkmarx Container Scan");
-        }
-        if (scanConfig.isKicsEnabled()) {
-            log.info((scanEngines++) + ") Checkmarx KICS Scan");
-        }
-
-        log.info("-----------------------------------");
     }
 
     private ScanConfig resolveConfiguration(Run<?, ?> run, FilePath workspace, CheckmarxScanBuilderDescriptor descriptor, EnvVars envVars, CxLoggerAdapter log) throws IOException, InterruptedException {
@@ -395,11 +322,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             scanConfig.setTenantName(fixEmptyAndTrim(descriptor.getTenantName()));
             scanConfig.setCheckmarxToken(getCheckmarxTokenCredential(run, descriptor.getCredentialsId()));
         }
-
-        scanConfig.setSastEnabled(getSastEnabled());
-        scanConfig.setScaEnabled(getScaEnabled());
-        scanConfig.setKicsEnabled(getKicsEnabled());
-        scanConfig.setContainerScanEnabled(getContainerScanEnabled());
 
         if (getUseFileFiltersFromJobConfig()) {
             scanConfig.setZipFileFilters(cleanFilters(this.getZipFileFilters()));
