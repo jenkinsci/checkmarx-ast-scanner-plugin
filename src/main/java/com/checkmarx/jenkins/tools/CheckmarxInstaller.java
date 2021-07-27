@@ -55,13 +55,14 @@ public class CheckmarxInstaller extends ToolInstaller {
     public FilePath performInstallation(ToolInstallation toolInstallation, Node node, TaskListener taskListener) throws IOException, InterruptedException {
         log = new CxLoggerAdapter(taskListener.getLogger());
 
-        FilePath expected = preferredLocation(tool, node);
+        FilePath expected = preferredLocation(toolInstallation, node);
 
         if (isUpToDate(expected, log)) {
             log.info("Checkmarx installation is UP-TO-DATE");
             return expected;
         }
         log.info("Installing Checkmarx AST CLI tool (version '" + fixEmptyAndTrim(version) + "')");
+
         return installCheckmarxCliAsSingleBinary(expected, node, taskListener);
     }
 
@@ -89,7 +90,6 @@ public class CheckmarxInstaller extends ToolInstaller {
         long updateInterval = TimeUnit.HOURS.toMillis(updatePolicyIntervalHours);
         return timestampDifference < updateInterval;
     }
-
 
     private FilePath installCheckmarxCliAsSingleBinary(FilePath expected, Node node, TaskListener log) throws IOException, InterruptedException {
         final VirtualChannel nodeChannel = node.getChannel();
@@ -176,6 +176,7 @@ public class CheckmarxInstaller extends ToolInstaller {
         public Void call() throws IOException {
             final File downloadedFile = new File(output.getRemote());
             FileUtils.copyURLToFile(downloadUrl, downloadedFile, 10000, 10000);
+
             try {
                 extract(downloadedFile.getAbsolutePath(), downloadedFile.getParent());
             } catch (ArchiveException | CompressorException e) {
@@ -186,6 +187,7 @@ public class CheckmarxInstaller extends ToolInstaller {
             // set execute permission
             if (!Functions.isWindows() && cxExecutable.isFile()) {
                 boolean result = cxExecutable.setExecutable(true, false);
+
                 if (!result) {
                     throw new IOException(format("Could not set executable flag for the file: %s", downloadedFile.getAbsolutePath()));
                 }

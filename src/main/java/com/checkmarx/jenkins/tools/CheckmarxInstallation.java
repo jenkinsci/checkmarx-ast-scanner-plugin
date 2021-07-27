@@ -48,6 +48,8 @@ public class CheckmarxInstallation extends ToolInstallation implements Environme
 
 
     public String getCheckmarxExecutable(@Nonnull final Launcher launcher) throws IOException, InterruptedException {
+        if (this.getProperties().size() == 0) return this.getHome();
+
         final VirtualChannel channel = launcher.getChannel();
         return channel == null ? null : channel.call(new MasterToSlaveCallable<String, IOException>() {
             @Override

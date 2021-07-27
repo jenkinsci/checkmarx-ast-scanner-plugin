@@ -13,9 +13,9 @@
         <f:optionalBlock title="Use Authentication URL" inline="true"
                          field="useAuthenticationUrl"
                          checked="${instance == null ? false : descriptor.getUseAuthenticationUrl()}">
-        <f:entry title="Checkmarx Base Authentication URL" field="baseAuthUrl">
-            <f:textbox/>
-        </f:entry>
+            <f:entry title="Checkmarx Base Authentication URL" field="baseAuthUrl">
+                <f:textbox/>
+            </f:entry>
         </f:optionalBlock>
 
         <f:entry title="Tenant Name" field="tenantName">
@@ -26,8 +26,29 @@
             <c:select/>
         </f:entry>
 
+        <!-- CLI Installation Config -->
+
+               <j:choose>
+                    <j:when test="${descriptor.hasInstallationsAvailable()}">
+                        <f:entry title="Checkmarx installation" field="checkmarxInstallation">
+                            <j:set var="tools" value="${descriptor.installations}"/>
+                            <select name="_.checkmarxInstallation" class="setting-input">
+                                <j:forEach var="tool" items="${tools}">
+                                    <f:option value="${tool.name}" selected="${tool.name == descriptor.checkmarxInstallation}">${tool.name}</f:option>
+                                </j:forEach>
+                            </select>
+                        </f:entry>
+                    </j:when>
+                <j:otherwise>
+                    <f:entry title="Checkmarx installation">
+                    <f:readOnlyTextbox value="Please define a Checkmarx installation in the Jenkins Global Tool Configuration."/>
+                    </f:entry>
+                </j:otherwise>
+        </j:choose>
+
+
         <f:validateButton title="Test Connection" progress="Testing..." method="testConnection"
-                          with="serverUrl,credentialsId"/>
+                          with="serverUrl,useAuthenticationUrl,baseAuthUrl,tenantName,credentialsId,checkmarxInstallation"/>
 
         <!-- *************************** Global Scan Settings ***************************************** -->
         <f:section title="Checkmarx Scan Configuration"/>

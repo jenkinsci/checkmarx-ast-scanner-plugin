@@ -1,6 +1,7 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.jenkins.config.CheckmarxConstants;
+import com.checkmarx.ast.CxAuth;
+import com.checkmarx.ast.CxScanConfig;
 import com.checkmarx.jenkins.credentials.CheckmarxApiToken;
 import com.checkmarx.jenkins.model.ScanConfig;
 import com.checkmarx.jenkins.tools.CheckmarxInstallation;
@@ -171,7 +172,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         this.additionalOptions = additionalOptions;
     }
 
-    @SuppressWarnings("unused")
     public String getCheckmarxInstallation() {
         return checkmarxInstallation;
     }
@@ -209,6 +209,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         ScanConfig scanConfig = resolveConfiguration(run, workspace, descriptor, envVars, log);
         printConfiguration(scanConfig, log);
 
+        if (useOwnServerCredentials) checkmarxInstallation = descriptor.getCheckmarxInstallation();
         //// Check for required version of CLI
         CheckmarxInstallation installation = PluginUtils.findCheckmarxInstallation(checkmarxInstallation);
         if (installation == null) {
@@ -363,14 +364,15 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     @Extension
     public static class CheckmarxScanBuilderDescriptor extends BuildStepDescriptor<Builder> {
 
-        public static final String DEFAULT_FILTER_PATTERNS = CheckmarxConstants.DEFAULT_FILTER_PATTERNS;
         private static final Logger LOG = LoggerFactory.getLogger(CheckmarxScanBuilderDescriptor.class.getName());
+        private static final int authValid = 0;
 
         @Nullable
         private String serverUrl;
         private String tenantName;
         private String baseAuthUrl;
         private boolean useAuthenticationUrl;
+        private String checkmarxInstallation;
         private String credentialsId;
         @Nullable
         private String zipFileFilters;
@@ -453,17 +455,25 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             this.zipFileFilters = zipFileFilters;
         }
 
+        public String getCheckmarxInstallation() {
+            return checkmarxInstallation;
+        }
+
+        public void setCheckmarxInstallation(String checkmarxInstallation) {
+            this.checkmarxInstallation = checkmarxInstallation;
+        }
+
+
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             JSONObject pluginData = formData.getJSONObject("checkmarx");
             req.bindJSON(this, pluginData);
             save();
             return false;
-            //  return super.configure(req, formData);
         }
 
         public boolean hasInstallationsAvailable() {
             if (LOG.isTraceEnabled()) {
-                LOG.trace("Available : {}",
+                LOG.trace("Available Checkmarx installations: {}",
                         Arrays.stream(this.installations).map(CheckmarxInstallation::getName).collect(joining(",", "[", "]")));
             }
 
@@ -477,7 +487,13 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
-        public FormValidation doTestConnection(@QueryParameter final String serverUrl, @QueryParameter final String credentialsId, @AncestorInPath Item item,
+        public FormValidation doTestConnection(@QueryParameter final String serverUrl,
+                                               @QueryParameter final boolean useAuthenticationUrl,
+                                               @QueryParameter final String baseAuthUrl,
+                                               @QueryParameter final String tenantName,
+                                               @QueryParameter final String credentialsId,
+                                               @QueryParameter final String checkmarxInstallation,
+                                               @AncestorInPath Item item,
                                                @AncestorInPath final Job job) {
             try {
                 if (job == null) {
@@ -485,11 +501,51 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 } else {
                     job.checkPermission(Item.CONFIGURE);
                 }
-                // test logic here
-                return FormValidation.ok("Success");
+
+                String cxInstallationPath = getCheckmarxInstallationPath(checkmarxInstallation);
+                CheckmarxApiToken checkmarxApiToken = getCheckmarxApiToken(credentialsId);
+
+                CxScanConfig config = new CxScanConfig();
+                config.setBaseUri(serverUrl);
+                config.setTenant(tenantName);
+                config.setApiKey(checkmarxApiToken.getToken().getPlainText());
+                config.setPathToExecutable(cxInstallationPath);
+
+                if (useAuthenticationUrl) {
+                    config.setBaseAuthUri(baseAuthUrl);
+                }
+
+                CxAuth cxAuth = new CxAuth(config, LOG);
+                Integer valid = cxAuth.cxAuthValidate();
+
+                return valid != null && valid.intValue() == authValid ? FormValidation.ok("Success") : FormValidation.ok("Failed");
             } catch (final Exception e) {
-                return FormValidation.error("Client error : " + e.getMessage());
+                return FormValidation.ok("Error: " + e.getMessage());
             }
+        }
+
+        private String getCheckmarxInstallationPath(String checkmarxInstallation) throws Exception {
+            if (StringUtils.isEmpty(checkmarxInstallation)) throw new Exception("Checkmarx installation not provided");
+
+            TaskListener taskListener = () -> System.out;
+            Launcher launcher = Jenkins.get().createLauncher(taskListener);
+            Computer computer = Arrays.stream(Jenkins.get().getComputers()).findFirst().orElseThrow(() -> new Exception("Error getting runner"));
+            Node node = Optional.ofNullable(computer.getNode()).orElseThrow(() -> new Exception("Error getting runner"));
+
+            CheckmarxInstallation cxInstallation = PluginUtils
+                    .findCheckmarxInstallation(checkmarxInstallation)
+                    .forNode(node, taskListener);
+
+            return cxInstallation.getCheckmarxExecutable(launcher);
+        }
+
+        private CheckmarxApiToken getCheckmarxApiToken(String credentialsId) throws Exception {
+            CheckmarxApiToken checkmarxApiToken =
+                    CredentialsMatchers.firstOrNull(
+                            lookupCredentials(CheckmarxApiToken.class, Jenkins.get(), ACL.SYSTEM, Collections.emptyList()),
+                            withId(credentialsId));
+
+            return Optional.ofNullable(checkmarxApiToken).orElseThrow(() -> new Exception("Error getting credentials"));
         }
 
         public FormValidation doCheckProjectName(@QueryParameter String value) {
@@ -500,7 +556,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String credentialsId) {
-
             StandardListBoxModel result = new StandardListBoxModel();
             if (item == null) {
                 if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
