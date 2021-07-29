@@ -63,6 +63,4 @@ public class CheckmarxScanBuilderDescriptorTest {
 
         assertEquals(FormValidation.Kind.OK,checkmarxTokenIdValidation);
     }
-
-
 }

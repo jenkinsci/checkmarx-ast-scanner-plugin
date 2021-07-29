@@ -91,6 +91,10 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         this.zipFileFilters = zipFileFilters;
     }
 
+    public CheckmarxScanBuilder() {
+
+    }
+
     public boolean getUseOwnServerCredentials() {
         return useOwnServerCredentials;
     }
@@ -202,14 +206,21 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     @SneakyThrows
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, EnvVars envVars, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
-
         final CheckmarxScanBuilderDescriptor descriptor = getDescriptor();
         log = new CxLoggerAdapter(listener.getLogger());
 
-        ScanConfig scanConfig = resolveConfiguration(run, workspace, descriptor, envVars, log);
+        ScanConfig scanConfig;
+        try {
+            scanConfig = resolveConfiguration(run, workspace, descriptor, envVars, log);
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            run.setResult(Result.FAILURE);
+            return;
+        }
+
         printConfiguration(scanConfig, log);
 
-        if (useOwnServerCredentials) checkmarxInstallation = descriptor.getCheckmarxInstallation();
+        if (!getUseOwnServerCredentials()) checkmarxInstallation = descriptor.getCheckmarxInstallation();
         //// Check for required version of CLI
         CheckmarxInstallation installation = PluginUtils.findCheckmarxInstallation(checkmarxInstallation);
         if (installation == null) {
@@ -252,7 +263,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         //----------Integration with the wrapper------------
         final boolean result = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
-
         if (result) {
             PluginUtils.generateHTMLReport(workspace);
 
@@ -271,7 +281,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         if (!StringUtils.isEmpty(envVars.get(CVS_BRANCH))) return envVars.get(CVS_BRANCH);
         if (!StringUtils.isEmpty(envVars.get(SVN_REVISION))) return envVars.get(SVN_REVISION);
 
-        return null;
+        return "";
     }
 
     private void printConfiguration(ScanConfig scanConfig, CxLoggerAdapter log) {
@@ -295,12 +305,17 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
     }
 
-    private ScanConfig resolveConfiguration(Run<?, ?> run, FilePath workspace, CheckmarxScanBuilderDescriptor descriptor, EnvVars envVars, CxLoggerAdapter log) throws IOException, InterruptedException {
+    private ScanConfig resolveConfiguration(Run<?, ?> run, FilePath workspace, CheckmarxScanBuilderDescriptor descriptor, EnvVars envVars, CxLoggerAdapter log) throws Exception {
         ScanConfig scanConfig = new ScanConfig();
 
-        if (fixEmptyAndTrim(getProjectName()) != null) {
-            scanConfig.setProjectName(getProjectName());
-        }
+        if (fixEmptyAndTrim(getProjectName()) == null)
+            throw new Exception("Please provide a valid project name.");
+        if (!getUseOwnServerCredentials() && fixEmptyAndTrim(descriptor.getServerUrl()) == null)
+            throw new Exception("Please setup the server url in the global settings.");
+        if (!getUseOwnServerCredentials() && fixEmptyAndTrim(descriptor.getCredentialsId()) == null)
+            throw new Exception("Please setup the credential in the global settings");
+
+        scanConfig.setProjectName(getProjectName());
 
         if (fixEmptyAndTrim(getTeamName()) != null) {
             scanConfig.setTeamName(getTeamName());
@@ -331,7 +346,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         String defaultBranchName = getDefaultBranchName(envVars);
-        if (!StringUtils.isEmpty(defaultBranchName)) scanConfig.setBranchName(defaultBranchName);
+        scanConfig.setBranchName(defaultBranchName);
 
         if (fixEmptyAndTrim(getAdditionalOptions()) != null) {
             scanConfig.setAdditionalOptions(getAdditionalOptions());

@@ -54,12 +54,12 @@ public class CheckmarxInstallation extends ToolInstallation implements Environme
         return channel == null ? null : channel.call(new MasterToSlaveCallable<String, IOException>() {
             @Override
             public String call() throws IOException {
-                return CheckmarxInstallation.this.resolveExecutable("cx", Platform.current());
+                return CheckmarxInstallation.this.resolveExecutable(Platform.current());
             }
         });
     }
 
-    private String resolveExecutable(final String file, final Platform platform) throws IOException {
+    private String resolveExecutable(final Platform platform) throws IOException {
         final String root = this.getHome();
         if (root == null) {
             return null;
