@@ -1,7 +1,8 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.ast.CxAuth;
-import com.checkmarx.ast.CxScanConfig;
+import com.checkmarx.ast.scans.CxAuth;
+import com.checkmarx.ast.scans.CxScan;
+import com.checkmarx.ast.scans.CxScanConfig;
 import com.checkmarx.jenkins.credentials.CheckmarxApiToken;
 import com.checkmarx.jenkins.model.ScanConfig;
 import com.checkmarx.jenkins.tools.CheckmarxInstallation;
@@ -262,9 +263,9 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         //----------Integration with the wrapper------------
-        final boolean result = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
-        if (result) {
-            PluginUtils.generateHTMLReport(workspace);
+        final CxScan resultObject = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
+        if (resultObject != null) {
+            PluginUtils.generateHTMLReport(workspace, resultObject.getID(), scanConfig, checkmarxCliExecutable, log);
 
             ArtifactArchiver artifactArchiver = new ArtifactArchiver(workspace.getName() + "_" + PluginUtils.CHECKMARX_AST_RESULTS_HTML);
             artifactArchiver.perform(run, workspace, envVars, launcher, listener);
