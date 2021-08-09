@@ -32,8 +32,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
@@ -62,8 +60,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     private String credentialsId;
     private String checkmarxInstallation;
     private String additionalOptions;
-    private String zipFileFilters;
-    private boolean useFileFiltersFromJobConfig;
+    private boolean useOwnAdditionalOptions;
     private boolean useOwnServerCredentials;
 
     @DataBoundConstructor
@@ -75,8 +72,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                                 String projectName,
                                 String teamName,
                                 String credentialsId,
-                                String zipFileFilters,
-                                boolean useFileFiltersFromJobConfig,
+                                boolean useOwnAdditionalOptions,
                                 String additionalOptions
     ) {
         this.useOwnServerCredentials = useOwnServerCredentials;
@@ -87,9 +83,8 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         this.projectName = projectName;
         this.teamName = teamName;
         this.credentialsId = credentialsId;
-        this.useFileFiltersFromJobConfig = useFileFiltersFromJobConfig;
+        this.useOwnAdditionalOptions = useOwnAdditionalOptions;
         this.additionalOptions = additionalOptions;
-        this.zipFileFilters = zipFileFilters;
     }
 
     public CheckmarxScanBuilder() {
@@ -150,22 +145,13 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         this.credentialsId = credentialsId;
     }
 
-    public boolean getUseFileFiltersFromJobConfig() {
-        return useFileFiltersFromJobConfig;
+    public boolean getUseOwnAdditionalOptions() {
+        return useOwnAdditionalOptions;
     }
 
     @DataBoundSetter
-    public void setUseFileFiltersFromJobConfig(boolean useFileFiltersFromJobConfig) {
-        this.useFileFiltersFromJobConfig = useFileFiltersFromJobConfig;
-    }
-
-    public String getZipFileFilters() {
-        return zipFileFilters;
-    }
-
-    @DataBoundSetter
-    public void setZipFileFilters(@Nullable String zipFileFilters) {
-        this.zipFileFilters = zipFileFilters;
+    public void setUseOwnAdditionalOptions(boolean useOwnAdditionalOptions) {
+        this.useOwnAdditionalOptions = useOwnAdditionalOptions;
     }
 
     public String getAdditionalOptions() {
@@ -206,7 +192,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
     @SneakyThrows
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, EnvVars envVars, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException {
+    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, EnvVars envVars, @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
         final CheckmarxScanBuilderDescriptor descriptor = getDescriptor();
         log = new CxLoggerAdapter(listener.getLogger());
 
@@ -274,7 +260,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         } else {
             run.setResult(Result.FAILURE);
         }
-        return;
     }
 
     private String getDefaultBranchName(EnvVars envVars) {
@@ -294,14 +279,10 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("Tenant Name: " + Optional.ofNullable(scanConfig.getTenantName()).orElse(""));
         log.info("Project Name: " + Optional.ofNullable(scanConfig.getProjectName()).orElse(""));
         log.info("Team Name: " + Optional.ofNullable(scanConfig.getTeamName()).orElse(""));
-        log.info("Using Job Specific File filters: " + getUseFileFiltersFromJobConfig());
-
-        if (getUseFileFiltersFromJobConfig()) {
-            log.info("Using File Filters: " + scanConfig.getZipFileFilters());
-        }
 
         log.info("Default branch name: " + Optional.ofNullable(scanConfig.getBranchName()).orElse(""));
 
+        log.info("Using global additional options: " + getUseOwnAdditionalOptions());
         log.info("Additional Options: " + Optional.ofNullable(scanConfig.getAdditionalOptions()).orElse(""));
 
     }
@@ -340,17 +321,17 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             scanConfig.setCheckmarxToken(getCheckmarxTokenCredential(run, descriptor.getCredentialsId()));
         }
 
-        if (getUseFileFiltersFromJobConfig()) {
-            scanConfig.setZipFileFilters(cleanFilters(this.getZipFileFilters()));
-        } else {
-            scanConfig.setZipFileFilters(cleanFilters(descriptor.getZipFileFilters()));
-        }
-
         String defaultBranchName = getDefaultBranchName(envVars);
         scanConfig.setBranchName(defaultBranchName);
 
-        if (fixEmptyAndTrim(getAdditionalOptions()) != null) {
-            scanConfig.setAdditionalOptions(getAdditionalOptions());
+        String additionalOptions;
+        if (getUseOwnAdditionalOptions()) {
+            additionalOptions = getAdditionalOptions();
+        } else {
+            additionalOptions = descriptor.getAdditionalOptions();
+        }
+        if (fixEmptyAndTrim(additionalOptions) != null) {
+            scanConfig.setAdditionalOptions(additionalOptions);
         }
 
         File file = new File(workspace.getRemote());
@@ -362,13 +343,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
     private CheckmarxApiToken getCheckmarxTokenCredential(Run<?, ?> run, String credentialsId) {
         return findCredentialById(credentialsId, CheckmarxApiToken.class, run);
-    }
-
-    private String cleanFilters(String filter) {
-        String cleanFilter = fixEmptyAndTrim(filter);
-        if (cleanFilter == null) return "";
-
-        return cleanFilter.replaceAll("\\s+", "");
     }
 
     @Override
@@ -391,7 +365,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         private String checkmarxInstallation;
         private String credentialsId;
         @Nullable
-        private String zipFileFilters;
+        private String additionalOptions;
 
         @CopyOnWrite
         private volatile CheckmarxInstallation[] installations = new CheckmarxInstallation[0];
@@ -463,12 +437,12 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         @Nullable
-        public String getZipFileFilters() {
-            return this.zipFileFilters;
+        public String getAdditionalOptions() {
+            return this.additionalOptions;
         }
 
-        public void setZipFileFilters(@Nullable final String zipFileFilters) {
-            this.zipFileFilters = zipFileFilters;
+        public void setAdditionalOptions(@Nullable final String additionalOptions) {
+            this.additionalOptions = additionalOptions;
         }
 
         public String getCheckmarxInstallation() {
@@ -480,7 +454,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
 
-        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
+        public boolean configure(StaplerRequest req, JSONObject formData) {
             JSONObject pluginData = formData.getJSONObject("checkmarx");
             req.bindJSON(this, pluginData);
             save();
@@ -534,7 +508,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 CxAuth cxAuth = new CxAuth(config, LOG);
                 Integer valid = cxAuth.cxAuthValidate();
 
-                return valid != null && valid.intValue() == authValid ? FormValidation.ok("Success") : FormValidation.ok("Failed");
+                return valid != null && valid == authValid ? FormValidation.ok("Success") : FormValidation.ok("Failed");
             } catch (final Exception e) {
                 return FormValidation.ok("Error: " + e.getMessage());
             }

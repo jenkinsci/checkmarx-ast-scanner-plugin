@@ -19,7 +19,6 @@ public class ScanConfig implements Serializable {
     private String projectName;
     private String branchName;
     private String teamName;
-    private String zipFileFilters;
     private String additionalOptions;
     private String sourceDirectory;
 }

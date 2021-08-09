@@ -53,8 +53,8 @@
         <!-- *************************** Global Scan Settings ***************************************** -->
         <f:section title="Checkmarx Scan Configuration"/>
 
-        <f:entry title="Default File Filters" field="zipFileFilters">
-            <f:textarea default="${descriptor.DEFAULT_FILTER_PATTERNS}"/>
+        <f:entry title="Additional arguments" field="additionalOptions">
+            <f:textarea />
         </f:entry>
 
     </f:section>

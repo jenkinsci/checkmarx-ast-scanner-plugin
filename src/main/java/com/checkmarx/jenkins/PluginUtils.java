@@ -60,10 +60,6 @@ public class PluginUtils {
             params.put(CxParamType.ADDITIONAL_PARAMETERS, scanConfig.getAdditionalOptions());
         }
 
-        if (StringUtils.isNotEmpty(scanConfig.getZipFileFilters())) {
-            params.put(CxParamType.FILTER, scanConfig.getZipFileFilters());
-        }
-
         if (StringUtils.isNotEmpty(scanConfig.getBranchName())) {
             params.put(CxParamType.BRANCH, scanConfig.getBranchName());
         }
