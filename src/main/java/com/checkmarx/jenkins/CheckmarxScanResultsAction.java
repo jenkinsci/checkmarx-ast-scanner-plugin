@@ -3,6 +3,7 @@ package com.checkmarx.jenkins;
 import hudson.model.Run;
 import jenkins.model.RunAction2;
 import jodd.jerry.Jerry;
+import jodd.jerry.JerryParser;
 import lombok.SneakyThrows;
 
 import javax.annotation.Nonnull;
@@ -12,7 +13,7 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 public class CheckmarxScanResultsAction implements RunAction2 {
-    private static final Jerry.JerryParser parser = Objects.requireNonNull(Jerry.jerry());
+    private static final JerryParser parser = Objects.requireNonNull(Jerry.create());
     private transient Run run;
 
     public CheckmarxScanResultsAction(@Nonnull final Run<?, ?> run) {
@@ -50,17 +51,17 @@ public class CheckmarxScanResultsAction implements RunAction2 {
 
     public String getReportHtml() {
         Jerry document = getHtmlDocument();
-        return document != null ? document.$("body").html() : "";
+        return document != null ? document.s("body").html() : "";
     }
 
     public String getReportCss() {
         Jerry document = getHtmlDocument();
-        return document != null ? document.$("style").text() : "";
+        return document != null ? document.s("style").text() : "";
     }
 
     public String getReportScript() {
         Jerry document = getHtmlDocument();
-        return document != null ? document.$("script").text() : "";
+        return document != null ? document.s("script").text() : "";
     }
 
     @SneakyThrows
