@@ -176,9 +176,9 @@
                 </groupId>  <!-- This override has been added for building with Java 11 -->
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
-                <configuration>
-                    <release>8</release>
-                </configuration>
+<!--                <configuration>-->
+<!--                    <release>8</release>-->
+<!--                </configuration>-->
             </plugin>
             <plugin>
                 <groupId>org.jenkins-ci.tools</groupId>  <!-- This override has been added for building with Java 11 -->

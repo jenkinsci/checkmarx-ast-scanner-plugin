@@ -12,6 +12,9 @@ import java.io.IOException;
 @NameWith(value = CheckmarxApiToken.NameProvider.class, priority = 1)
 public interface CheckmarxApiToken extends StandardCredentials {
     @Nonnull
+    String getClientId() throws IOException, InterruptedException;
+
+    @Nonnull
     Secret getToken() throws IOException, InterruptedException;
 
     class NameProvider extends CredentialsNameProvider<CheckmarxApiToken> {

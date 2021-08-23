@@ -56,7 +56,7 @@ public class CheckmarxScanBuilderDescriptorTest {
 
     @Test
     public void doCheckCheckmarxTokenId_shouldReturnOK_ifTokenFound() throws Exception {
-        DefaultCheckmarxApiToken checkmarxToken = new DefaultCheckmarxApiToken(CredentialsScope.GLOBAL, "id", "", "checkmarx-token");
+        DefaultCheckmarxApiToken checkmarxToken = new DefaultCheckmarxApiToken(CredentialsScope.GLOBAL, "id", "", "checkmarx-clientId", "checkmarx-client-secret");
         CredentialsProvider.lookupStores(jenkins.getInstance()).iterator().next().addCredentials(Domain.global(), checkmarxToken);
 
         FormValidation.Kind checkmarxTokenIdValidation = instance.doCheckCredentialsId(null,"id").kind;

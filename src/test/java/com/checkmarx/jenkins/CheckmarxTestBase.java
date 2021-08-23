@@ -26,14 +26,16 @@ public class CheckmarxTestBase {
     protected String astServerUrl;
     protected String astBaseAuthUrl;
     protected String astTenantName;
-    protected String astToken;
+    protected String astClientSecret;
+    protected String astClientId;
 
     @Before
     public void before() throws IOException {
         this.astServerUrl =System.getenv(Constants.JT_AST_SERVER_URL);
         this.astBaseAuthUrl = System.getenv(Constants.JT_AST_BASE_AUTH_URL);
         this.astTenantName = System.getenv(Constants.JT_AST_TENANT_NAME);
-        this.astToken = System.getenv(Constants.JT_AST_TOKEN);
+        this.astClientSecret = System.getenv(Constants.JT_AST_CLIENT_SECRET);
+        this.astClientId = System.getenv(Constants.JT_AST_CLIENT_ID);
 
         createInstallation();
         createCredentials();
@@ -48,7 +50,7 @@ public class CheckmarxTestBase {
 
     protected void createCredentials() throws IOException {
         DefaultCheckmarxApiToken checkmarxToken =
-                new DefaultCheckmarxApiToken(CredentialsScope.GLOBAL, Constants.JT_TOKEN_ID, Constants.JT_TOKEN_ID, this.astToken);
+                new DefaultCheckmarxApiToken(CredentialsScope.GLOBAL, Constants.JT_TOKEN_ID, Constants.JT_TOKEN_ID, this.astClientId, this.astClientSecret);
         CredentialsProvider.lookupStores(jenkins.getInstance()).iterator().next().addCredentials(Domain.global(), checkmarxToken);
     }
 

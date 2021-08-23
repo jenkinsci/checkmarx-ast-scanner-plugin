@@ -498,7 +498,8 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 CxScanConfig config = new CxScanConfig();
                 config.setBaseUri(serverUrl);
                 config.setTenant(tenantName);
-                config.setApiKey(checkmarxApiToken.getToken().getPlainText());
+                config.setClientId(checkmarxApiToken.getClientId());
+                config.setClientSecret(checkmarxApiToken.getToken().getPlainText());
                 config.setPathToExecutable(cxInstallationPath);
 
                 if (useAuthenticationUrl) {
@@ -508,7 +509,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 CxAuth cxAuth = new CxAuth(config, LOG);
                 Integer valid = cxAuth.cxAuthValidate();
 
-                return valid != null && valid == authValid ? FormValidation.ok("Success") : FormValidation.ok("Failed");
+                return valid != null && valid == authValid ? FormValidation.ok("Success") : FormValidation.ok("Failed ");
             } catch (final Exception e) {
                 return FormValidation.ok("Error: " + e.getMessage());
             }
@@ -530,12 +531,12 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         private CheckmarxApiToken getCheckmarxApiToken(String credentialsId) throws Exception {
-            CheckmarxApiToken checkmarxApiToken =
+            CheckmarxApiToken checkmarxCredentials =
                     CredentialsMatchers.firstOrNull(
                             lookupCredentials(CheckmarxApiToken.class, Jenkins.get(), ACL.SYSTEM, Collections.emptyList()),
                             withId(credentialsId));
 
-            return Optional.ofNullable(checkmarxApiToken).orElseThrow(() -> new Exception("Error getting credentials"));
+            return Optional.ofNullable(checkmarxCredentials).orElseThrow(() -> new Exception("Error getting credentials"));
         }
 
         public FormValidation doCheckProjectName(@QueryParameter String value) {

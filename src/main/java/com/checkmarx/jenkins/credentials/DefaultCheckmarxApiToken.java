@@ -18,18 +18,27 @@ import static hudson.util.Secret.fromString;
 public class DefaultCheckmarxApiToken extends BaseStandardCredentials implements CheckmarxApiToken {
 
     @Nonnull
-    private final Secret token;
+    private final String clientId;
+
+    @Nonnull
+    private final Secret secret;
 
     @DataBoundConstructor
-    public DefaultCheckmarxApiToken(final CredentialsScope scope, final String id, final String description, @Nonnull final String token) {
+    public DefaultCheckmarxApiToken(final CredentialsScope scope, final String id, final String description, @Nonnull final String clientId, @Nonnull final String secret) {
         super(scope, id, description);
-        this.token = fromString(token);
+        this.clientId = clientId;
+        this.secret = fromString(secret);
+    }
+    @Nonnull
+    @Override
+    public String getClientId() {
+        return this.clientId;
     }
 
     @Nonnull
     @Override
     public Secret getToken() {
-        return this.token;
+        return this.secret;
     }
 
     @Extension

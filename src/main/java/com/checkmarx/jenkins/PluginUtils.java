@@ -92,7 +92,8 @@ public class PluginUtils {
         if(fixEmptyAndTrim(scanConfig.getTenantName())!= null) {
             scan.setTenant(scanConfig.getTenantName());
         }
-        scan.setApiKey(scanConfig.getCheckmarxToken().getToken().getPlainText());
+        scan.setClientId(scanConfig.getCheckmarxToken().getClientId());
+        scan.setClientSecret(scanConfig.getCheckmarxToken().getToken().getPlainText());
         scan.setPathToExecutable(checkmarxCliExecutable);
 
         return new CxAuth(scan, log);
