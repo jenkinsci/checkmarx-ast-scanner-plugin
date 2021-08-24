@@ -56,7 +56,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     private String baseAuthUrl;
     private String tenantName;
     private String projectName;
-    private String teamName;
     private String credentialsId;
     private String checkmarxInstallation;
     private String additionalOptions;
@@ -70,7 +69,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                                 String baseAuthUrl,
                                 String tenantName,
                                 String projectName,
-                                String teamName,
                                 String credentialsId,
                                 boolean useOwnAdditionalOptions,
                                 String additionalOptions
@@ -81,7 +79,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         this.baseAuthUrl = baseAuthUrl;
         this.tenantName = tenantName;
         this.projectName = projectName;
-        this.teamName = teamName;
         this.credentialsId = credentialsId;
         this.useOwnAdditionalOptions = useOwnAdditionalOptions;
         this.additionalOptions = additionalOptions;
@@ -125,15 +122,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setProjectName(String projectName) {
         this.projectName = projectName;
-    }
-
-    public String getTeamName() {
-        return teamName;
-    }
-
-    @DataBoundSetter
-    public void setTeamName(String teamName) {
-        this.teamName = teamName;
     }
 
     public String getCredentialsId() {
@@ -278,7 +266,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         }
         log.info("Tenant Name: " + Optional.ofNullable(scanConfig.getTenantName()).orElse(""));
         log.info("Project Name: " + Optional.ofNullable(scanConfig.getProjectName()).orElse(""));
-        log.info("Team Name: " + Optional.ofNullable(scanConfig.getTeamName()).orElse(""));
 
         log.info("Default branch name: " + Optional.ofNullable(scanConfig.getBranchName()).orElse(""));
 
@@ -298,10 +285,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             throw new Exception("Please setup the credential in the global settings");
 
         scanConfig.setProjectName(getProjectName());
-
-        if (fixEmptyAndTrim(getTeamName()) != null) {
-            scanConfig.setTeamName(getTeamName());
-        }
 
         if (descriptor.getUseAuthenticationUrl()) {
             scanConfig.setBaseAuthUrl(descriptor.getBaseAuthUrl());

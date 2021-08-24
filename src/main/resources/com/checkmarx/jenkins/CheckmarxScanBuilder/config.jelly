@@ -96,9 +96,6 @@
     <f:entry title="CxAST Project Name" field="projectName">
         <f:textbox/>
     </f:entry>
-    <f:entry title="Group Name" field="groupName">
-        <f:textbox/>
-    </f:entry>
 
     <!-- *************************** Common Scan Settings ***************************************** -->
 
