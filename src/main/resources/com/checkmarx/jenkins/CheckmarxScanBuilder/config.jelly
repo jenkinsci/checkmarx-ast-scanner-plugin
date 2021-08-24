@@ -70,7 +70,7 @@
         </f:entry>
         <f:optionalBlock title="Use Authentication URL" inline="true"
                                  field="useAuthenticationUrl"
-                                 checked="${instance == null ? false : descriptor.getUseAuthenticationUrl()}">
+                                 checked="${instance == null ? false : instance.getUseAuthenticationUrl()}">
                 <f:entry title="Checkmarx Base Authentication URL" field="baseAuthUrl">
                     <f:textbox/>
                 </f:entry>
