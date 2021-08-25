@@ -27,10 +27,14 @@ jobs:
           distribution: 'adopt'
           server-id: github
           settings-path: ${{ github.workspace }}
-      - name: Update the POM version and build.
-        run: mvn -B versions:set -DnewVersion='${{ github.event.inputs.version }}' package --file pom.xml -s $GITHUB_WORKSPACE/settings.xml -DskipTests
+      - name: Update the POM version.
+        run: mvn -B versions:set -DnewVersion='${{ github.event.inputs.version }}' --file pom.xml -s $GITHUB_WORKSPACE/settings.xml -DskipTests
         env:
-          GITHUB_TOKEN: ${{ github.token}}    
+          GITHUB_TOKEN: ${{ github.token}}
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml -s $GITHUB_WORKSPACE/settings.xml -DskipTests
+        env:
+          GITHUB_TOKEN: ${{ github.token}}
       - name: Push the tag
         run: git push origin ${{ github.event.inputs.version }}
       - name: Create Release
