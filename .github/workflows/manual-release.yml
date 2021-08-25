@@ -1,5 +1,5 @@
 
-name: Version by User Input 
+name: Manual Release Creation
 
 on:
   workflow_dispatch:
@@ -28,15 +28,13 @@ jobs:
           server-id: github
           settings-path: ${{ github.workspace }}
       - name: Build with Maven
-        run: mvn -B package --file pom.xml -s $GITHUB_WORKSPACE/settings.xml -DskipTests -Drevision=${{ github.event.inputs.version }}
+        run: mvn -B package --file pom.xml -s $GITHUB_WORKSPACE/settings.xml -DskipTests -DVERSION_CMD=${{ github.event.inputs.version }}
         env:
           GITHUB_TOKEN: ${{ github.token}}
-      - name: Create Draft Release
-        id: draf_release
-        uses: release-drafter/release-drafter@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-          
+
+      - name: Push the tag
+        run: git push origin ${{ github.event.inputs.version }}
+
       - name: Create Release
         id: create_release
         uses: thomaseizinger/create-release@1.0.0
@@ -60,5 +58,4 @@ jobs:
           asset_name: checkmarx-ast-scanner.hpi
           asset_content_type: application/multipart-core
           overwrite: true
-      - name: Push the tag 
-        run: git push origin ${{ github.event.inputs.version }}
+
