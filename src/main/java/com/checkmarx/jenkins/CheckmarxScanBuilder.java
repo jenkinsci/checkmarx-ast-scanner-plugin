@@ -269,7 +269,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         log.info("Default branch name: " + Optional.ofNullable(scanConfig.getBranchName()).orElse(""));
 
-        log.info("Using global additional options: " + getUseOwnAdditionalOptions());
+        log.info("Using global additional options: " + !getUseOwnAdditionalOptions());
         log.info("Additional Options: " + Optional.ofNullable(scanConfig.getAdditionalOptions()).orElse(""));
 
     }
