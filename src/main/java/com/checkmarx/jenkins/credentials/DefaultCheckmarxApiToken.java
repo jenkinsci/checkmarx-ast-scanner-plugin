@@ -47,7 +47,7 @@ public class DefaultCheckmarxApiToken extends BaseStandardCredentials implements
         @Nonnull
         @Override
         public String getDisplayName() {
-            return "Checkmarx API token";
+            return "Checkmarx Client Id and Client Secret";
         }
     }
 }

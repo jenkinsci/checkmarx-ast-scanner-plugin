@@ -15,7 +15,7 @@ public class CxLoggerAdapter implements Logger {
     private static final String WARN_PREFIX = "[Cx-Warning]: ";
     private static final String TRACE_PREFIX = "[Cx-Trace]: ";
 
-    private final PrintStream log;
+    private transient PrintStream log;
 
     public CxLoggerAdapter(PrintStream log) {
         this.log = log;
