@@ -81,7 +81,7 @@ public class PluginUtils {
 
     public static void generateHTMLReport(FilePath workspace, String scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxException, URISyntaxException {
         CxAuth auth = initiateWrapperObject(scanConfig, checkmarxCliExecutable, log);
-        String htmlData = auth.cxGetResultsSummary(scanId, "", "");
+        String htmlData = auth.cxGetResultsSummary(scanId);
         workspace.child(workspace.getName() + "_" + CHECKMARX_AST_RESULTS_HTML).write(htmlData, UTF_8.name());
     }
 
