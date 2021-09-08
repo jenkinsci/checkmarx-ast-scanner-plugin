@@ -1,9 +1,9 @@
-name: Java CI with Maven
+name: AST Scanner plugin CI
 
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
-  build:
+  integration-tests:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -30,3 +30,19 @@ jobs:
         run: mvn -B package --file pom.xml -s $GITHUB_WORKSPACE/settings.xml -DskipTests
         env:
           GITHUB_TOKEN: ${{ github.token }}
+
+  cx-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Checkmarx AST CLI Action
+        uses: checkmarxDev/ast-github-action@master
+        with:
+          project_name: ast-scanner-plugin
+          branch: master
+          base_uri: https://ast-master.dev.cxast.net/
+          cx_tenant: ${{ secrets.CX_TENANT }}
+          cx_client_id: ${{ secrets.CX_CLIENT_ID }}
+          cx_client_secret: ${{ secrets.CX_CLIENT_SECRET }}
+          additional_params: --tags galactica-team

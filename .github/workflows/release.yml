@@ -1,15 +1,12 @@
-
-name: Manual Release Creation
+name: Release Creation
 
 on:
-  workflow_dispatch:
-      inputs:
-         version:
-            description: 'Next release version'
-            required: true
+  push:
+    tags:
+      - "*"
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -18,8 +15,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2.3.4
-      - name: Create new release Tag
-        run: git tag ${{ github.event.inputs.version }}
+
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
       - name: Set up JDK 11
         uses: actions/setup-java@v2
         with:
@@ -27,24 +26,25 @@ jobs:
           distribution: 'adopt'
           server-id: github
           settings-path: ${{ github.workspace }}
+
       - name: Update the POM version.
-        run: mvn -B versions:set -DnewVersion='${{ github.event.inputs.version }}' --file pom.xml -s $GITHUB_WORKSPACE/settings.xml -DskipTests
+        run: mvn -B versions:set -DnewVersion='${{ env.RELEASE_VERSION }}' --file pom.xml -s $GITHUB_WORKSPACE/settings.xml -DskipTests
         env:
           GITHUB_TOKEN: ${{ github.token}}
+
       - name: Build with Maven
         run: mvn -B package --file pom.xml -s $GITHUB_WORKSPACE/settings.xml -DskipTests
         env:
           GITHUB_TOKEN: ${{ github.token}}
-      - name: Push the tag
-        run: git push origin ${{ github.event.inputs.version }}
+
       - name: Create Release
         id: create_release
         uses: thomaseizinger/create-release@1.0.0
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
+          GITHUB_TOKEN: ${{ github.token}}
         with:
-          tag_name: ${{ github.event.inputs.version }}
-          name: ${{ github.event.inputs.version }}
+          tag_name: ${{ env.RELEASE_VERSION }}
+          name: ${{ env.RELEASE_VERSION }}
           draft: false
           prerelease: false
           
@@ -52,9 +52,9 @@ jobs:
         id: upload-release-asset
         uses: shogo82148/actions-upload-release-asset@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
+          GITHUB_TOKEN: ${{ github.token}}
         with:
-          github_token: ${{ secrets.PAT }}
+          github_token: ${{ github.token}}
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./target/checkmarx-ast-scanner.hpi
           asset_name: checkmarx-ast-scanner.hpi
