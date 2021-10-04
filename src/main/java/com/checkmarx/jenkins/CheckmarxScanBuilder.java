@@ -1,5 +1,6 @@
 package com.checkmarx.jenkins;
 
+import com.checkmarx.ast.results.CxValidateOutput;
 import com.checkmarx.ast.scans.CxAuth;
 import com.checkmarx.ast.scans.CxScan;
 import com.checkmarx.ast.scans.CxScanConfig;
@@ -490,9 +491,10 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 }
 
                 CxAuth cxAuth = new CxAuth(config, LOG);
-                Integer valid = cxAuth.cxAuthValidate();
+                CxValidateOutput cxValidateOutput = cxAuth.cxAuthValidate();
+                Integer exitCode = cxValidateOutput.getExitCode();
 
-                return valid != null && valid == authValid ? FormValidation.ok("Success") : FormValidation.ok("Failed ");
+                return exitCode != null && exitCode == authValid ? FormValidation.ok("Success") : FormValidation.ok("Failed ");
             } catch (final Exception e) {
                 return FormValidation.ok("Error: " + e.getMessage());
             }
