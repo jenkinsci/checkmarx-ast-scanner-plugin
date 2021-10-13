@@ -1,33 +1,96 @@
-# ast-scanner
+<!-- PROJECT LOGO -->
+<br />
+<p align="center">
+  <a href="">
+    <img src="./logo.png" alt="Logo" width="80" height="80">
+  </a>
 
-[![Build Status](https://ci.jenkins.io/job/Plugins/job/ast-scanner-plugin/job/master/badge/icon)](https://ci.jenkins.io/job/Plugins/job/ast-scanner-plugin/job/master/)
-[![Contributors](https://img.shields.io/github/contributors/jenkinsci/ast-scanner-plugin.svg)](https://github.com/jenkinsci/ast-scanner-plugin/graphs/contributors)
-[![Jenkins Plugin](https://img.shields.io/jenkins/plugin/v/ast-scanner.svg)](https://plugins.jenkins.io/ast-scanner)
-[![GitHub release](https://img.shields.io/github/release/jenkinsci/ast-scanner-plugin.svg?label=changelog)](https://github.com/jenkinsci/ast-scanner-plugin/releases/latest)
-[![Jenkins Plugin Installs](https://img.shields.io/jenkins/plugin/i/ast-scanner.svg?color=blue)](https://plugins.jenkins.io/ast-scanner)
+<h3 align="center">AST-JENKINS-PLUGIN </h3>
 
-## Introduction
+<p align="center">
+    Allows the user to scan their source code using Checkmarx AST platform and provide the results as a feedback.
+<br />
+    <a href="https://checkmarx.atlassian.net/wiki/spaces/AST/pages/2966164587/Jenkins+Plugin"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://issues.jenkins-ci.org/">Report Bug</a>
+    ·
+    <a href="https://github.com/CheckmarxDev/checkmarx-ast-scanner-plugin/issues/new">Request Feature</a>
+  </p>
+</p>
 
-Allows the user to scan their source code using Checkmarx AST platform and provide the results as a feedback.
 
-## Getting started
 
-Can be configured as build step within the Job Configuration.
+<!-- TABLE OF CONTENTS -->
+<details open="open">
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#setting-up">Setting Up</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ol>
+</details>
 
-## Issues
 
-Decide where you're going to host your issues, the default is Jenkins JIRA, but you can also enable GitHub issues,
-If you use GitHub issues there's no need for this section; else add the following line:
 
-Report issues and enhancements in the [Jenkins issue tracker](https://issues.jenkins-ci.org/).
+<!-- ABOUT THE PROJECT -->
+## About The Project
 
-## Contributing
+The CxAST Jenkins Plugin allows the user to trigger CxSAST, CxSCA and KICS scans directly from a Jenkins workflow. 
+It provides a wrapper around the CxAST CLI Tool which creates a zip archive from your source code repository and uploads 
+it to CxAST for scanning. The plugin provides easy integration into Jenkins while enabling scan customization using the 
+full functionality and flexibility of the CLI tool.
 
-Review the default [CONTRIBUTING](https://github.com/jenkinsci/.github/blob/master/CONTRIBUTING.md) file and make sure it is appropriate for your plugin, if not then add your own one adapted from the base file
+<!-- GETTING STARTED -->
+## Getting Started
 
-Refer to our [contribution guidelines](https://github.com/jenkinsci/.github/blob/master/CONTRIBUTING.md)
+The plugin can be configured as build step within the Job Configuration.
 
-## LICENSE
+### Prerequisites
 
-Licensed under MIT, see [LICENSE](LICENSE.md)
+- A Jenkins installation v2.263.1 or above
 
+- Access to a CxAST account (user credentials or an API Key)
+
+### Setting Up
+To set the plugin up, follow this [Instructions](https://checkmarx.atlassian.net/wiki/spaces/AST/pages/3221226473/Installing+the+Jenkins+CxAST+Plugin)
+
+## Usage
+
+To see how you can use our tool, please refer to the [Documentation](https://checkmarx.atlassian.net/wiki/spaces/AST/pages/2966164587/Jenkins+Plugin)
+
+
+## Contribution
+
+- Review the default [CONTRIBUTING](https://github.com/jenkinsci/.github/blob/master/CONTRIBUTING.md) file and make sure it is appropriate for your plugin, if not then add your own one adapted from the base file
+
+- Refer to our [contribution guidelines](https://github.com/jenkinsci/.github/blob/master/CONTRIBUTING.md)
+
+** **
+
+<!-- LICENSE -->
+## License
+See `LICENSE` for more information.
+
+
+
+<!-- CONTACT -->
+## Contact
+
+Checkmarx - AST Integrations Team
+
+Project Link: [https://github.com/CheckmarxDev/checkmarx-ast-scanner-plugin](https://github.com/CheckmarxDev/checkmarx-ast-scanner-plugin)
+
+
+© 2021 Checkmarx Ltd. All Rights Reserved.
