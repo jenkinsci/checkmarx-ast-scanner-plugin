@@ -492,11 +492,16 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
                 CxAuth cxAuth = new CxAuth(config, LOG);
                 CxValidateOutput cxValidateOutput = cxAuth.cxAuthValidate();
-                Integer exitCode = cxValidateOutput.getExitCode();
+                Integer valid = cxValidateOutput.getExitCode();
 
-                return exitCode != null && exitCode == authValid ? FormValidation.ok("Success") : FormValidation.ok("Failed ");
+                if (valid == null) {
+                    return FormValidation.error("Something went wrong. Could not perform validation");
+                }
+                return valid == authValid ?
+                        FormValidation.ok("Success") :
+                        FormValidation.ok(cxValidateOutput.getMessage());
             } catch (final Exception e) {
-                return FormValidation.ok("Error: " + e.getMessage());
+                return FormValidation.ok("Error: " + e);
             }
         }
 
