@@ -1,9 +1,8 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.ast.results.CxValidateOutput;
-import com.checkmarx.ast.scans.CxAuth;
-import com.checkmarx.ast.scans.CxScan;
-import com.checkmarx.ast.scans.CxScanConfig;
+import com.checkmarx.ast.scan.Scan;
+import com.checkmarx.ast.wrapper.CxConfig;
+import com.checkmarx.ast.wrapper.CxException;
 import com.checkmarx.jenkins.credentials.CheckmarxApiToken;
 import com.checkmarx.jenkins.model.ScanConfig;
 import com.checkmarx.jenkins.tools.CheckmarxInstallation;
@@ -22,7 +21,6 @@ import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import lombok.NonNull;
-import lombok.SneakyThrows;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
@@ -33,9 +31,12 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.cloudbees.plugins.credentials.CredentialsMatchers.anyOf;
 import static com.cloudbees.plugins.credentials.CredentialsMatchers.withId;
@@ -65,7 +66,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
     @DataBoundConstructor
     public CheckmarxScanBuilder(boolean useOwnServerCredentials,
-                                String serverUrl,
+                                @Nullable String serverUrl,
                                 boolean useAuthenticationUrl,
                                 String baseAuthUrl,
                                 String tenantName,
@@ -98,6 +99,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         this.useOwnServerCredentials = useOwnServerCredentials;
     }
 
+    @Nullable
     public String getServerUrl() {
         return serverUrl;
     }
@@ -179,7 +181,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         this.baseAuthUrl = baseAuthUrl;
     }
 
-    @SneakyThrows
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, EnvVars envVars, @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
         final CheckmarxScanBuilderDescriptor descriptor = getDescriptor();
@@ -214,16 +215,23 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        installation = installation.forNode(node, listener);
-        installation = installation.forEnvironment(envVars);
-        String checkmarxCliExecutable = installation.getCheckmarxExecutable(launcher);
+        String checkmarxCliExecutable = null;
+        try {
+            installation = installation.forNode(node, listener);
+            installation = installation.forEnvironment(envVars);
+            checkmarxCliExecutable = Optional.of(installation.getCheckmarxExecutable(launcher)).orElseThrow(() -> new Exception("Cannot use node"));
 
-        if (checkmarxCliExecutable == null) {
+            if (checkmarxCliExecutable == null) {
+                log.info("Can't retrieve the Checkmarx executable.");
+                run.setResult(Result.FAILURE);
+                return;
+            }
+            log.info("This is the executable: " + checkmarxCliExecutable);
+        } catch (Exception e) {
             log.info("Can't retrieve the Checkmarx executable.");
             run.setResult(Result.FAILURE);
             return;
         }
-        log.info("This is the executable: " + checkmarxCliExecutable);
 
         // Check if the configured token is valid.
         CheckmarxApiToken checkmarxToken = scanConfig.getCheckmarxToken();
@@ -237,16 +245,20 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             run.addAction(new CheckmarxScanResultsAction(run));
         }
 
-        //----------Integration with the wrapper------------
-        final CxScan resultObject = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
-        if (resultObject != null) {
-            PluginUtils.generateHTMLReport(workspace, resultObject.getID(), scanConfig, checkmarxCliExecutable, log);
-
+        try {
+            final Scan scan = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
+            PluginUtils.generateHTMLReport(workspace, UUID.fromString(scan.getID()), scanConfig, checkmarxCliExecutable, log);
             ArtifactArchiver artifactArchiver = new ArtifactArchiver(workspace.getName() + "_" + PluginUtils.CHECKMARX_AST_RESULTS_HTML);
             artifactArchiver.perform(run, workspace, envVars, launcher, listener);
-
             run.setResult(Result.SUCCESS);
-        } else {
+        } catch (IOException | InterruptedException | URISyntaxException e) {
+            run.setResult(Result.FAILURE);
+        } catch (CxConfig.InvalidCLIConfigException e) {
+            log.error(e.getMessage());
+            run.setResult(Result.FAILURE);
+        } catch (CxException e) {
+            log.error(String.format("Exit code from AST-CLI: %s", e.getExitCode()));
+            log.error(e.getMessage());
             run.setResult(Result.FAILURE);
         }
     }
@@ -479,29 +491,18 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 String cxInstallationPath = getCheckmarxInstallationPath(checkmarxInstallation);
                 CheckmarxApiToken checkmarxApiToken = getCheckmarxApiToken(credentialsId);
 
-                CxScanConfig config = new CxScanConfig();
-                config.setBaseUri(serverUrl);
-                config.setTenant(tenantName);
-                config.setClientId(checkmarxApiToken.getClientId());
-                config.setClientSecret(checkmarxApiToken.getToken().getPlainText());
-                config.setPathToExecutable(cxInstallationPath);
+                ScanConfig scanConfig = new ScanConfig();
+                scanConfig.setServerUrl(serverUrl);
+                scanConfig.setBaseAuthUrl(useAuthenticationUrl ? baseAuthUrl : null);
+                scanConfig.setTenantName(tenantName);
+                scanConfig.setCheckmarxToken(checkmarxApiToken);
 
-                if (useAuthenticationUrl) {
-                    config.setBaseAuthUri(baseAuthUrl);
-                }
-
-                CxAuth cxAuth = new CxAuth(config, LOG);
-                CxValidateOutput cxValidateOutput = cxAuth.cxAuthValidate();
-                Integer valid = cxValidateOutput.getExitCode();
-
-                if (valid == null) {
-                    return FormValidation.error("Something went wrong. Could not perform validation");
-                }
-                return valid == authValid ?
-                        FormValidation.ok("Success") :
-                        FormValidation.ok(cxValidateOutput.getMessage());
+                String message = PluginUtils.authValidate(scanConfig, cxInstallationPath);
+                return FormValidation.ok(message);
+            } catch (CxException e) {
+                return FormValidation.error(e.getMessage());
             } catch (final Exception e) {
-                return FormValidation.ok("Error: " + e);
+                return FormValidation.ok("Error: " + e.getMessage());
             }
         }
 

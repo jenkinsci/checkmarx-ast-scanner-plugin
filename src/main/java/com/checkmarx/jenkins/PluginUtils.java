@@ -1,33 +1,33 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.ast.scans.*;
-import com.checkmarx.ast.exceptions.CxException;
-import com.checkmarx.ast.results.*;
+import com.checkmarx.ast.results.ReportFormat;
+import com.checkmarx.ast.scan.Scan;
+import com.checkmarx.ast.wrapper.CxConfig;
+import com.checkmarx.ast.wrapper.CxConstants;
+import com.checkmarx.ast.wrapper.CxException;
+import com.checkmarx.ast.wrapper.CxWrapper;
 import com.checkmarx.jenkins.credentials.CheckmarxApiToken;
 import com.checkmarx.jenkins.model.ScanConfig;
 import com.checkmarx.jenkins.tools.CheckmarxInstallation;
 import hudson.FilePath;
 import hudson.model.Run;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static com.cloudbees.plugins.credentials.CredentialsProvider.findCredentialById;
-import static hudson.Util.fixEmptyAndTrim;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class PluginUtils {
 
-    private static final String JENKINS = "Jenkins";
-    private static final String RESULTS_OVERVIEW_URL = "{serverUrl}/#/projects/{projectId}/overview";
     public static final String CHECKMARX_AST_RESULTS_HTML = "checkmarx-ast-results.html";
+    private static final String JENKINS = "Jenkins";
 
     public static CheckmarxInstallation findCheckmarxInstallation(final String checkmarxInstallation) {
         final CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor descriptor = Jenkins.get().getDescriptorByType(CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor.class);
@@ -36,67 +36,46 @@ public class PluginUtils {
                 .findFirst().orElse(null);
     }
 
-    public static CheckmarxApiToken getCheckmarxTokenCredential(final Run<?, ?> run, final String credentialsId) {
-        return findCredentialById(credentialsId, CheckmarxApiToken.class, run);
-    }
-
-    public static String getSourceDirectory(final FilePath workspace) {
-        final File file = new File(workspace.getRemote());
-
-        return file.getAbsolutePath();
-    }
-
-    public static CxScan submitScanDetailsToWrapper(final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, URISyntaxException {
+    public static Scan submitScanDetailsToWrapper(final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, URISyntaxException, CxConfig.InvalidCLIConfigException, CxException {
         log.info("Submitting the scan details to the CLI wrapper.");
 
-        final CxAuth wrapper = initiateWrapperObject(scanConfig, checkmarxCliExecutable, log);
+        final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
+        cxConfig.setAdditionalParameters(scanConfig.getAdditionalOptions());
 
-        final Map<CxParamType, String> params = new HashMap<>();
-        params.put(CxParamType.AGENT, PluginUtils.JENKINS);
-        params.put(CxParamType.S, scanConfig.getSourceDirectory());
-        params.put(CxParamType.PROJECT_NAME, scanConfig.getProjectName());
+        final Map<String, String> params = new HashMap<>();
+        params.put(CxConstants.AGENT, PluginUtils.JENKINS);
+        params.put(CxConstants.SOURCE, scanConfig.getSourceDirectory());
+        params.put(CxConstants.PROJECT_NAME, scanConfig.getProjectName());
+        params.put(CxConstants.BRANCH, scanConfig.getBranchName());
 
-        if (StringUtils.isNotEmpty(scanConfig.getAdditionalOptions())) {
-            params.put(CxParamType.ADDITIONAL_PARAMETERS, scanConfig.getAdditionalOptions());
-        }
-
-        if (StringUtils.isNotEmpty(scanConfig.getBranchName())) {
-            params.put(CxParamType.BRANCH, scanConfig.getBranchName());
-        }
-
-        final CxCommandOutput cxScan = wrapper.cxScanCreate(params);
-
-        /**
-         * Return the object and pass the scan ID to generate report
-         */
-        log.info("--------------- Checkmarx execution completed ---------------");
-
-
-        return  ((cxScan.getExitCode() == 0) && (cxScan.getScanObjectList() != null)) ? cxScan.getScanObjectList().get(0) : null;
+        final CxWrapper cxWrapper = new CxWrapper(cxConfig, log);
+        return cxWrapper.scanCreate(params, scanConfig.getAdditionalOptions());
     }
 
-    public static String getCheckmarxResultsOverviewUrl() {
-        return String.format(RESULTS_OVERVIEW_URL);
+    public static void generateHTMLReport(FilePath workspace, UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxException, URISyntaxException, CxConfig.InvalidCLIConfigException {
+        final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
+
+        final CxWrapper cxWrapper = new CxWrapper(cxConfig, log);
+        final String summaryHtml = cxWrapper.results(scanId, ReportFormat.summaryHTML);
+        workspace.child(workspace.getName() + "_" + CHECKMARX_AST_RESULTS_HTML).write(summaryHtml, UTF_8.name());
     }
 
-    public static void generateHTMLReport(FilePath workspace, String scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxException, URISyntaxException {
-        CxAuth auth = initiateWrapperObject(scanConfig, checkmarxCliExecutable, log);
-        String htmlData = auth.cxGetResultsSummary(scanId);
-        workspace.child(workspace.getName() + "_" + CHECKMARX_AST_RESULTS_HTML).write(htmlData, UTF_8.name());
+    public static String authValidate(final ScanConfig scanConfig, final String checkmarxCliExecutable) throws IOException, InterruptedException, CxConfig.InvalidCLIConfigException, URISyntaxException, CxException {
+        final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
+
+        final CxWrapper cxWrapper = new CxWrapper(cxConfig);
+        return cxWrapper.authValidate();
     }
 
-    private static CxAuth initiateWrapperObject(final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxException, URISyntaxException {
-        final CxScanConfig scan = new CxScanConfig();
-        scan.setBaseUri(scanConfig.getServerUrl());
-        scan.setBaseAuthUri(scanConfig.getBaseAuthUrl());
-        if(fixEmptyAndTrim(scanConfig.getTenantName())!= null) {
-            scan.setTenant(scanConfig.getTenantName());
-        }
-        scan.setClientId(scanConfig.getCheckmarxToken().getClientId());
-        scan.setClientSecret(scanConfig.getCheckmarxToken().getToken().getPlainText());
-        scan.setPathToExecutable(checkmarxCliExecutable);
-
-        return new CxAuth(scan, log);
+    private static CxConfig initiateWrapperObject(final ScanConfig scanConfig, final String checkmarxCliExecutable) throws IOException, InterruptedException {
+        return CxConfig.builder()
+                .baseUri(scanConfig.getServerUrl())
+                .baseAuthUri(scanConfig.getBaseAuthUrl())
+                .clientId(scanConfig.getCheckmarxToken().getClientId())
+                .clientSecret(scanConfig.getCheckmarxToken().getToken().getPlainText())
+                .tenant(scanConfig.getTenantName())
+                .additionalParameters(null)
+                .pathToExecutable(checkmarxCliExecutable)
+                .build();
     }
-
 }
