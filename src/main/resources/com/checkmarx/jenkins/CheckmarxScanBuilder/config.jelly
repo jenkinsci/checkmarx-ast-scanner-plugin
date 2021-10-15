@@ -66,7 +66,7 @@
                      field="useOwnServerCredentials" negative="true"
                      checked="${instance == null ? true : !instance.getUseOwnServerCredentials()}">
         <f:entry title="Checkmarx Server URL" field="serverUrl">
-            <f:textbox/>
+            <f:textbox checkMethod="post"/>
         </f:entry>
         <f:optionalBlock title="Use Authentication URL" inline="true"
                                  field="useAuthenticationUrl"

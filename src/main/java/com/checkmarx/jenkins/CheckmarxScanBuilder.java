@@ -21,10 +21,14 @@ import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import lombok.NonNull;
-import net.sf.json.JSONObject;
+import lombok.SneakyThrows;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
-import org.kohsuke.stapler.*;
+import org.kohsuke.stapler.AncestorInPath;
+import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.verb.POST;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -181,6 +185,8 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         this.baseAuthUrl = baseAuthUrl;
     }
 
+
+    @SneakyThrows
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath workspace, EnvVars envVars, @Nonnull Launcher launcher, @Nonnull TaskListener listener) {
         final CheckmarxScanBuilderDescriptor descriptor = getDescriptor();
@@ -188,7 +194,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         ScanConfig scanConfig;
         try {
-            scanConfig = resolveConfiguration(run, workspace, descriptor, envVars, log);
+            scanConfig = resolveConfiguration(run, workspace, descriptor, envVars);
         } catch (Exception e) {
             log.info(e.getMessage());
             run.setResult(Result.FAILURE);
@@ -215,23 +221,19 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        String checkmarxCliExecutable = null;
-        try {
-            installation = installation.forNode(node, listener);
-            installation = installation.forEnvironment(envVars);
-            checkmarxCliExecutable = Optional.of(installation.getCheckmarxExecutable(launcher)).orElseThrow(() -> new Exception("Cannot use node"));
+        String checkmarxCliExecutable;
 
-            if (checkmarxCliExecutable == null) {
-                log.info("Can't retrieve the Checkmarx executable.");
-                run.setResult(Result.FAILURE);
-                return;
-            }
-            log.info("This is the executable: " + checkmarxCliExecutable);
-        } catch (Exception e) {
+        installation = installation.forNode(node, listener);
+        installation = installation.forEnvironment(envVars);
+        checkmarxCliExecutable = Optional.of(installation.getCheckmarxExecutable(launcher)).orElseThrow(() -> new Exception("Cannot use node"));
+
+        if (checkmarxCliExecutable == null) {
             log.info("Can't retrieve the Checkmarx executable.");
             run.setResult(Result.FAILURE);
             return;
         }
+        log.info("This is the executable: " + checkmarxCliExecutable);
+
 
         // Check if the configured token is valid.
         CheckmarxApiToken checkmarxToken = scanConfig.getCheckmarxToken();
@@ -287,7 +289,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
     }
 
-    private ScanConfig resolveConfiguration(Run<?, ?> run, FilePath workspace, CheckmarxScanBuilderDescriptor descriptor, EnvVars envVars, CxLoggerAdapter log) throws Exception {
+    private ScanConfig resolveConfiguration(Run<?, ?> run, FilePath workspace, CheckmarxScanBuilderDescriptor descriptor, EnvVars envVars) throws Exception {
         ScanConfig scanConfig = new ScanConfig();
 
         if (fixEmptyAndTrim(getProjectName()) == null)
@@ -351,8 +353,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     public static class CheckmarxScanBuilderDescriptor extends BuildStepDescriptor<Builder> {
 
         private static final Logger LOG = LoggerFactory.getLogger(CheckmarxScanBuilderDescriptor.class.getName());
-        private static final int authValid = 0;
-
         @Nullable
         private String serverUrl;
         private String tenantName;
@@ -449,14 +449,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             this.checkmarxInstallation = checkmarxInstallation;
         }
 
-
-        public boolean configure(StaplerRequest req, JSONObject formData) {
-            JSONObject pluginData = formData.getJSONObject("checkmarx");
-            req.bindJSON(this, pluginData);
-            save();
-            return false;
-        }
-
         public boolean hasInstallationsAvailable() {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Available Checkmarx installations: {}",
@@ -466,6 +458,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return this.installations.length > 0;
         }
 
+        @POST
         public FormValidation doCheckServerUrl(@QueryParameter String value) {
             if (Util.fixEmptyAndTrim(value) == null) {
                 return FormValidation.error("Server Url cannot be empty");
@@ -473,6 +466,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return FormValidation.ok();
         }
 
+        @POST
         public FormValidation doTestConnection(@QueryParameter final String serverUrl,
                                                @QueryParameter final boolean useAuthenticationUrl,
                                                @QueryParameter final String baseAuthUrl,

@@ -7,7 +7,7 @@
         <!-- ********************** Server Settings ********************************************** -->
         <f:section title="Checkmarx Server Settings"/>
         <f:entry title="Checkmarx server URL" field="serverUrl">
-            <f:textbox/>
+            <f:textbox checkMethod="post"/>
         </f:entry>
 
         <f:optionalBlock title="Use Authentication URL" inline="true"
