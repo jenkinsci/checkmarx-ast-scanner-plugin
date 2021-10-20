@@ -14,7 +14,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2.3.4
         with:
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          token: ${{ secrets.PAT }}
       - name: Tag
         run: |
           echo ${{ github.event.inputs.tag }}
@@ -22,6 +22,6 @@ jobs:
       - name: Create tag
         uses: actions-ecosystem/action-push-tag@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         with:
           tag: ${{ env.NEXT_VERSION }}
