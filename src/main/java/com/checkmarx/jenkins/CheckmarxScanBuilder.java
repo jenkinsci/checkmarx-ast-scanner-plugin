@@ -22,12 +22,10 @@ import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
-import org.kohsuke.stapler.AncestorInPath;
-import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
-import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.*;
 import org.kohsuke.stapler.verb.POST;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -456,6 +454,13 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             }
 
             return this.installations.length > 0;
+        }
+
+        public boolean configure(StaplerRequest req, JSONObject formData) {
+            JSONObject pluginData = formData.getJSONObject("checkmarx");
+            req.bindJSON(this, pluginData);
+            save();
+            return false;
         }
 
         @POST
