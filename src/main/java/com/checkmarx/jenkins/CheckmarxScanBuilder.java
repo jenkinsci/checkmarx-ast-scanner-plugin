@@ -49,6 +49,8 @@ import static java.util.stream.Collectors.joining;
 
 public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
+    public static final String DEFAULT_BRANCH_WARN = "If blank, branch name points to %s, %s or %s environment variables";
+
     public static final String GIT_BRANCH = "GIT_BRANCH";
     public static final String CVS_BRANCH = "CVS_BRANCH";
     public static final String SVN_REVISION = "SVN_REVISION";
@@ -60,6 +62,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     private String baseAuthUrl;
     private String tenantName;
     private String projectName;
+    private String branchName;
     private String credentialsId;
     private String checkmarxInstallation;
     private String additionalOptions;
@@ -75,7 +78,8 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                                 String projectName,
                                 String credentialsId,
                                 boolean useOwnAdditionalOptions,
-                                String additionalOptions
+                                String additionalOptions,
+                                String branchName
     ) {
         this.useOwnServerCredentials = useOwnServerCredentials;
         this.serverUrl = serverUrl;
@@ -86,6 +90,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         this.credentialsId = credentialsId;
         this.useOwnAdditionalOptions = useOwnAdditionalOptions;
         this.additionalOptions = additionalOptions;
+        this.branchName = branchName;
     }
 
     public CheckmarxScanBuilder() {
@@ -127,6 +132,15 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     @DataBoundSetter
     public void setProjectName(String projectName) {
         this.projectName = projectName;
+    }
+
+    public String getBranchName() {
+        return branchName;
+    }
+
+    @DataBoundSetter
+    public void setBranchName(String branchName) {
+        this.branchName = branchName;
     }
 
     public String getCredentialsId() {
@@ -263,7 +277,15 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-    private String getDefaultBranchName(EnvVars envVars) {
+    /**
+     * Return branch name when filled by the user. Otherwise try to pick from environment variables
+     *
+     * @param envVars
+     * @return
+     */
+    private String getBranchNameOrDefault(EnvVars envVars) {
+
+        if (!StringUtils.isEmpty(getBranchName())) return getBranchName();
         if (!StringUtils.isEmpty(envVars.get(GIT_BRANCH))) return envVars.get(GIT_BRANCH).replaceAll("^([^/]+)/", "");
         if (!StringUtils.isEmpty(envVars.get(CVS_BRANCH))) return envVars.get(CVS_BRANCH);
         if (!StringUtils.isEmpty(envVars.get(SVN_REVISION))) return envVars.get(SVN_REVISION);
@@ -280,7 +302,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("Tenant Name: " + Optional.ofNullable(scanConfig.getTenantName()).orElse(""));
         log.info("Project Name: " + Optional.ofNullable(scanConfig.getProjectName()).orElse(""));
 
-        log.info("Default branch name: " + Optional.ofNullable(scanConfig.getBranchName()).orElse(""));
+        log.info("Branch name: " + scanConfig.getBranchName());
 
         log.info("Using global additional options: " + !getUseOwnAdditionalOptions());
         log.info("Additional Options: " + Optional.ofNullable(scanConfig.getAdditionalOptions()).orElse(""));
@@ -317,8 +339,8 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             scanConfig.setCheckmarxToken(getCheckmarxTokenCredential(run, descriptor.getCredentialsId()));
         }
 
-        String defaultBranchName = getDefaultBranchName(envVars);
-        scanConfig.setBranchName(defaultBranchName);
+        String branchName = getBranchNameOrDefault(envVars);
+        scanConfig.setBranchName(branchName);
 
         String additionalOptions;
         if (getUseOwnAdditionalOptions()) {
@@ -534,6 +556,10 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 return FormValidation.error("Project Name cannot be empty");
             }
             return FormValidation.ok();
+        }
+
+        public FormValidation doCheckBranchName(@QueryParameter String value) {
+            return FormValidation.warning(String.format(DEFAULT_BRANCH_WARN, GIT_BRANCH, CVS_BRANCH, SVN_REVISION));
         }
 
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String credentialsId) {
