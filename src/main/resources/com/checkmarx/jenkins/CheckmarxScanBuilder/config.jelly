@@ -96,6 +96,9 @@
     <f:entry title="CxAST Project Name" field="projectName">
         <f:textbox/>
     </f:entry>
+    <f:entry title="CxAST Branch Name" field="branchName">
+            <f:textbox/>
+        </f:entry>
 
     <!-- *************************** Common Scan Settings ***************************************** -->
 
