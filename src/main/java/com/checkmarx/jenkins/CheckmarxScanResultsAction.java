@@ -2,23 +2,17 @@ package com.checkmarx.jenkins;
 
 import hudson.model.Run;
 import jenkins.model.RunAction2;
-import jodd.jerry.Jerry;
-import jodd.jerry.JerryParser;
-import lombok.SneakyThrows;
+import jenkins.util.VirtualFile;
 
-import javax.annotation.Nonnull;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Objects;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 
 public class CheckmarxScanResultsAction implements RunAction2 {
-    private static final JerryParser parser = Objects.requireNonNull(Jerry.create());
-    private transient Run run;
-
-    public CheckmarxScanResultsAction(@Nonnull final Run<?, ?> run) {
-        this.run = run;
-    }
+    private transient Run<?, ?> run;
 
     public Run getRun() {
         return run;
@@ -49,32 +43,30 @@ public class CheckmarxScanResultsAction implements RunAction2 {
         return "scanResults";
     }
 
-    public String getReportHtml() {
-        Jerry document = getHtmlDocument();
-        return document != null ? document.s("body").html() : "";
+    @SuppressWarnings("unused")
+    public String getArtifactContent() {
+        VirtualFile artifact = getArtifact();
+        return readFile(artifact);
     }
 
-    public String getReportCss() {
-        Jerry document = getHtmlDocument();
-        return document != null ? document.s("style").text() : "";
+    private VirtualFile getArtifact() {
+        return run.getArtifacts().stream()
+                .filter(a -> a.getFileName().contains(PluginUtils.CHECKMARX_AST_RESULTS_HTML))
+                .map(a -> run.getArtifactManager().root().child(a.relativePath))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Could not find artifact."));
     }
 
-    public String getReportScript() {
-        Jerry document = getHtmlDocument();
-        return document != null ? document.s("script").text() : "";
-    }
-
-    @SneakyThrows
-    private Jerry getHtmlDocument() {
-        for (Object artifact : run.getArtifacts()) {
-            if (artifact instanceof Run.Artifact && ((Run.Artifact) artifact).getFileName().contains(PluginUtils.CHECKMARX_AST_RESULTS_HTML)) {
-
-                byte[] encoded = Files.readAllBytes(Paths.get(((Run.Artifact) artifact).getFile().getCanonicalPath()));
-                String htmlData = new String(encoded, Charset.defaultCharset());
-                return CheckmarxScanResultsAction.parser.parse(htmlData);
-            }
+    private String readFile(VirtualFile file) {
+        try (
+                InputStream is = file.open();
+                InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+                BufferedReader br = new BufferedReader(isr)
+        ) {
+            return br.lines().collect(Collectors.joining("\n"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return null;
     }
 }
 

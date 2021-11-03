@@ -255,15 +255,16 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        if (run.getActions(CheckmarxScanResultsAction.class).isEmpty()) {
-            run.addAction(new CheckmarxScanResultsAction(run));
-        }
+
 
         try {
             final Scan scan = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
             PluginUtils.generateHTMLReport(workspace, UUID.fromString(scan.getID()), scanConfig, checkmarxCliExecutable, log);
             ArtifactArchiver artifactArchiver = new ArtifactArchiver(workspace.getName() + "_" + PluginUtils.CHECKMARX_AST_RESULTS_HTML);
             artifactArchiver.perform(run, workspace, envVars, launcher, listener);
+            if (run.getActions(CheckmarxScanResultsAction.class).isEmpty()) {
+                run.addAction(new CheckmarxScanResultsAction());
+            }
             run.setResult(Result.SUCCESS);
         } catch (IOException | InterruptedException | URISyntaxException e) {
             run.setResult(Result.FAILURE);
