@@ -7,11 +7,9 @@
 
         <l:main-panel>
             <iframe id="cx_results_iframe"
-                    width="100%" sandbox="allow-popups allow-scripts"
+                    width="100%" sandbox="allow-scripts allow-popups"
                     height="100%" frameborder="0" style="min-height: 700px;"
                     srcdoc="${it.getArtifactContent()}" />
         </l:main-panel>
     </l:layout>
-
-
 </j:jelly>

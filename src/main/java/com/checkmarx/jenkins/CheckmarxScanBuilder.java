@@ -18,6 +18,7 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import lombok.NonNull;
@@ -255,15 +256,13 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-
-
         try {
             final Scan scan = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
-            PluginUtils.generateHTMLReport(workspace, UUID.fromString(scan.getID()), scanConfig, checkmarxCliExecutable, log);
+            String htmlContent = PluginUtils.generateHTMLReport(workspace, UUID.fromString(scan.getID()), scanConfig, checkmarxCliExecutable, log);
             ArtifactArchiver artifactArchiver = new ArtifactArchiver(workspace.getName() + "_" + PluginUtils.CHECKMARX_AST_RESULTS_HTML);
             artifactArchiver.perform(run, workspace, envVars, launcher, listener);
             if (run.getActions(CheckmarxScanResultsAction.class).isEmpty()) {
-                run.addAction(new CheckmarxScanResultsAction());
+                run.addAction(new CheckmarxScanResultsAction(Secret.fromString(htmlContent)));
             }
             run.setResult(Result.SUCCESS);
         } catch (IOException | InterruptedException | URISyntaxException e) {
@@ -611,8 +610,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             }
 
             return "Server URL: " + this.getServerUrl();
-
         }
     }
-
 }
