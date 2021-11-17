@@ -7,8 +7,11 @@ import com.checkmarx.jenkins.utils.Constants;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.domains.Domain;
+import hudson.EnvVars;
 import hudson.model.FreeStyleProject;
+import hudson.slaves.EnvironmentVariablesNodeProperty;
 import hudson.tools.InstallSourceProperty;
+import jenkins.model.Jenkins;
 import org.junit.Before;
 import org.junit.Rule;
 import org.jvnet.hudson.test.JenkinsRule;
@@ -19,6 +22,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CheckmarxTestBase {
+
+    public static final String TEST_CX_BASE_URI = "TEST_CX_BASE_URI";
+    public static final String TEST_CX_TENANT = "TEST_CX_TENANT";
+    public static final String TEST_CX_PROJECT_NAME = "TEST_CX_PROJECT_NAME";
+    public static final String TEST_CX_BRANCH_NAME = "TEST_CX_BRANCH_NAME";
 
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
@@ -39,6 +47,8 @@ public class CheckmarxTestBase {
 
         createInstallation();
         createCredentials();
+
+        setJenkinsEnvironmentVariables();
     }
 
     protected FreeStyleProject createSimpleProject(String projectName) throws IOException {
@@ -72,5 +82,20 @@ public class CheckmarxTestBase {
         jenkins.getInstance()
                 .getDescriptorByType(CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor.class)
                 .setInstallations(expected);
+    }
+
+    /**
+     * Defines some jenkins environment variables
+     */
+    private void setJenkinsEnvironmentVariables(){
+
+        EnvironmentVariablesNodeProperty.Entry cx_base_uri = new EnvironmentVariablesNodeProperty.Entry(TEST_CX_BASE_URI, this.astServerUrl);
+        EnvironmentVariablesNodeProperty cx_base_uri_var = new EnvironmentVariablesNodeProperty(cx_base_uri);
+        jenkins.getInstance().getGlobalNodeProperties().add(cx_base_uri_var);
+
+        EnvVars envVars = ((EnvironmentVariablesNodeProperty) Jenkins.get().getGlobalNodeProperties().get(0)).getEnvVars();
+        envVars.put(TEST_CX_TENANT, this.astTenantName);
+        envVars.put(TEST_CX_PROJECT_NAME, "jenkins_project_with_env_vars");
+        envVars.put(TEST_CX_BRANCH_NAME, "master");
     }
 }

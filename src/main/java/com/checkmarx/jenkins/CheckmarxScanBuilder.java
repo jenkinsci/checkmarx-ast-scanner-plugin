@@ -13,6 +13,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.*;
 import hudson.model.*;
 import hudson.security.ACL;
+import hudson.slaves.EnvironmentVariablesNodeProperty;
 import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -53,8 +54,12 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     public static final String DEFAULT_BRANCH_WARN = "If blank, branch name points to %s, %s or %s environment variables";
 
     public static final String GIT_BRANCH = "GIT_BRANCH";
+    public static final String GIT_BRANCH_VAR = "${GIT_BRANCH}";
     public static final String CVS_BRANCH = "CVS_BRANCH";
+    public static final String CVS_BRANCH_VAR = "${CVS_BRANCH}";
     public static final String SVN_REVISION = "SVN_REVISION";
+    public static final String SVN_REVISION_VAR = "${SVN_REVISION}";
+
 
     CxLoggerAdapter log;
     @Nullable
@@ -214,7 +219,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        printConfiguration(scanConfig, log);
+        printConfiguration(envVars, descriptor, log);
 
         if (!getUseOwnServerCredentials()) checkmarxInstallation = descriptor.getCheckmarxInstallation();
         //// Check for required version of CLI
@@ -285,71 +290,94 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
      */
     private String getBranchNameOrDefault(EnvVars envVars) {
 
-        if (!StringUtils.isEmpty(getBranchName())) return getBranchName();
-        if (!StringUtils.isEmpty(envVars.get(GIT_BRANCH))) return envVars.get(GIT_BRANCH).replaceAll("^([^/]+)/", "");
-        if (!StringUtils.isEmpty(envVars.get(CVS_BRANCH))) return envVars.get(CVS_BRANCH);
-        if (!StringUtils.isEmpty(envVars.get(SVN_REVISION))) return envVars.get(SVN_REVISION);
+        if (StringUtils.isNotEmpty(getBranchName())) return envVars.expand(getBranchName());
+        if (StringUtils.isNotEmpty(envVars.get(GIT_BRANCH))) return envVars.get(GIT_BRANCH).replaceAll("^([^/]+)/", "");
+        if (StringUtils.isNotEmpty(envVars.get(CVS_BRANCH))) return envVars.get(CVS_BRANCH);
+        if (StringUtils.isNotEmpty(envVars.get(SVN_REVISION))) return envVars.get(SVN_REVISION);
 
         return "";
     }
 
-    private void printConfiguration(ScanConfig scanConfig, CxLoggerAdapter log) {
-        log.info("----**** Checkmarx Scan Configuration ****----");
-        log.info("Checkmarx Server Url: " + scanConfig.getServerUrl());
-        if (StringUtils.isNotEmpty(scanConfig.getBaseAuthUrl())) {
-            log.info("Checkmarx Auth Server Url: " + scanConfig.getBaseAuthUrl());
-        }
-        log.info("Tenant Name: " + Optional.ofNullable(scanConfig.getTenantName()).orElse(""));
-        log.info("Project Name: " + Optional.ofNullable(scanConfig.getProjectName()).orElse(""));
+    /**
+     * Return branch name to print
+     *
+     * @param envVars
+     * @return
+     */
+    private String getBranchToPrint(EnvVars envVars){
 
-        log.info("Branch name: " + scanConfig.getBranchName());
+        if(StringUtils.isNotEmpty(getBranchName())) return getBranchName();
+        if(StringUtils.isNotEmpty(envVars.get(GIT_BRANCH))) return GIT_BRANCH_VAR;
+        if(StringUtils.isNotEmpty(envVars.get(CVS_BRANCH))) return CVS_BRANCH_VAR;
+        if(StringUtils.isNotEmpty(envVars.get(SVN_REVISION))) return SVN_REVISION_VAR;
+
+        return "";
+    }
+
+    /**
+     * Prints scan configuration which is gonna be used by the CLI
+     *
+     * @param envVars
+     * @param descriptor
+     * @param log
+     */
+    private void printConfiguration(EnvVars envVars, CheckmarxScanBuilderDescriptor descriptor, CxLoggerAdapter log) {
+        log.info("----**** Checkmarx Scan Configuration ****----");
+
+        String serverUrl = getUseOwnServerCredentials() ? getServerUrl() : descriptor.getServerUrl();
+        log.info("Checkmarx Server Url: " + serverUrl);
+
+        boolean useOwnBaseAuthUrl = getUseOwnServerCredentials() && isUseAuthenticationUrl();
+        boolean useGlobalAuthUrl = !useOwnBaseAuthUrl && descriptor.getUseAuthenticationUrl();
+        String authUrl = useOwnBaseAuthUrl ? getBaseAuthUrl() : useGlobalAuthUrl ? descriptor.getBaseAuthUrl() : "";
+
+        if (StringUtils.isNotEmpty(authUrl)) {
+            log.info("Checkmarx Auth Server Url: " + authUrl);
+        }
+
+        String tenantName = getUseOwnServerCredentials() ? getTenantName() : descriptor.getTenantName();
+        log.info("Tenant Name: " + Optional.ofNullable(tenantName).orElse(""));
+        log.info("Project Name: " + getProjectName());
+        log.info("Branch name: " + getBranchToPrint(envVars));
 
         log.info("Using global additional options: " + !getUseOwnAdditionalOptions());
-        log.info("Additional Options: " + Optional.ofNullable(scanConfig.getAdditionalOptions()).orElse(""));
+
+        String additionalOptions = getUseOwnAdditionalOptions() ? getAdditionalOptions() : descriptor.getAdditionalOptions();
+        log.info("Additional Options: " + Optional.ofNullable(additionalOptions).orElse(""));
 
     }
 
     private ScanConfig resolveConfiguration(Run<?, ?> run, FilePath workspace, CheckmarxScanBuilderDescriptor descriptor, EnvVars envVars) throws Exception {
+
+        checkMandatoryFields(descriptor);
+
         ScanConfig scanConfig = new ScanConfig();
-
-        if (fixEmptyAndTrim(getProjectName()) == null)
-            throw new Exception("Please provide a valid project name.");
-        if (!getUseOwnServerCredentials() && fixEmptyAndTrim(descriptor.getServerUrl()) == null)
-            throw new Exception("Please setup the server url in the global settings.");
-        if (!getUseOwnServerCredentials() && fixEmptyAndTrim(descriptor.getCredentialsId()) == null)
-            throw new Exception("Please setup the credential in the global settings");
-
-        scanConfig.setProjectName(getProjectName());
+        scanConfig.setProjectName(envVars.expand(getProjectName()));
 
         if (descriptor.getUseAuthenticationUrl()) {
-            scanConfig.setBaseAuthUrl(descriptor.getBaseAuthUrl());
+            scanConfig.setBaseAuthUrl(envVars.expand(descriptor.getBaseAuthUrl()));
         }
 
         if (this.getUseOwnServerCredentials()) {
-            scanConfig.setServerUrl(getServerUrl());
-            scanConfig.setTenantName(fixEmptyAndTrim(getTenantName()));
+            scanConfig.setServerUrl(envVars.expand(getServerUrl()));
+            scanConfig.setTenantName(envVars.expand(fixEmptyAndTrim(getTenantName())));
             if (this.isUseAuthenticationUrl()) {
-                scanConfig.setBaseAuthUrl(this.getBaseAuthUrl());
+                scanConfig.setBaseAuthUrl(envVars.expand(this.getBaseAuthUrl()));
             }
             scanConfig.setCheckmarxToken(getCheckmarxTokenCredential(run, getCredentialsId()));
 
         } else {
-            scanConfig.setServerUrl(descriptor.getServerUrl());
-            scanConfig.setTenantName(fixEmptyAndTrim(descriptor.getTenantName()));
+            scanConfig.setServerUrl(envVars.expand(descriptor.getServerUrl()));
+            scanConfig.setTenantName(envVars.expand(fixEmptyAndTrim(descriptor.getTenantName())));
             scanConfig.setCheckmarxToken(getCheckmarxTokenCredential(run, descriptor.getCredentialsId()));
         }
 
         String branchName = getBranchNameOrDefault(envVars);
         scanConfig.setBranchName(branchName);
 
-        String additionalOptions;
-        if (getUseOwnAdditionalOptions()) {
-            additionalOptions = getAdditionalOptions();
-        } else {
-            additionalOptions = descriptor.getAdditionalOptions();
-        }
+        String additionalOptions = getUseOwnAdditionalOptions() ? getAdditionalOptions() : descriptor.getAdditionalOptions();
         if (fixEmptyAndTrim(additionalOptions) != null) {
-            scanConfig.setAdditionalOptions(additionalOptions);
+            scanConfig.setAdditionalOptions(envVars.expand(additionalOptions));
         }
 
         File file = new File(workspace.getRemote());
@@ -357,6 +385,20 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         scanConfig.setSourceDirectory(sourceDir);
 
         return scanConfig;
+    }
+
+    /**
+     * Check if all mandatory fields are filled in
+     *
+     * @throws Exception
+     */
+    private void checkMandatoryFields(CheckmarxScanBuilderDescriptor descriptor) throws Exception {
+        if (fixEmptyAndTrim(getProjectName()) == null)
+            throw new Exception("Please provide a valid project name.");
+        if (!getUseOwnServerCredentials() && fixEmptyAndTrim(descriptor.getServerUrl()) == null)
+            throw new Exception("Please setup the server url in the global settings.");
+        if (!getUseOwnServerCredentials() && fixEmptyAndTrim(descriptor.getCredentialsId()) == null)
+            throw new Exception("Please setup the credential in the global settings");
     }
 
     private CheckmarxApiToken getCheckmarxTokenCredential(Run<?, ?> run, String credentialsId) {
@@ -512,10 +554,12 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 String cxInstallationPath = getCheckmarxInstallationPath(checkmarxInstallation);
                 CheckmarxApiToken checkmarxApiToken = getCheckmarxApiToken(credentialsId);
 
+                EnvVars envVars = ((EnvironmentVariablesNodeProperty) Jenkins.get().getGlobalNodeProperties().get(0)).getEnvVars();
+
                 ScanConfig scanConfig = new ScanConfig();
-                scanConfig.setServerUrl(serverUrl);
-                scanConfig.setBaseAuthUrl(useAuthenticationUrl ? baseAuthUrl : null);
-                scanConfig.setTenantName(tenantName);
+                scanConfig.setServerUrl(envVars.expand(serverUrl));
+                scanConfig.setBaseAuthUrl(useAuthenticationUrl ? envVars.expand(baseAuthUrl) : null);
+                scanConfig.setTenantName(envVars.expand(tenantName));
                 scanConfig.setCheckmarxToken(checkmarxApiToken);
 
                 String message = PluginUtils.authValidate(scanConfig, cxInstallationPath);
@@ -559,7 +603,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         public FormValidation doCheckBranchName(@QueryParameter String value) {
-            return FormValidation.warning(String.format(DEFAULT_BRANCH_WARN, GIT_BRANCH, CVS_BRANCH, SVN_REVISION));
+            return FormValidation.warning(String.format(DEFAULT_BRANCH_WARN, GIT_BRANCH_VAR, CVS_BRANCH_VAR, SVN_REVISION_VAR));
         }
 
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item item, @QueryParameter String credentialsId) {
