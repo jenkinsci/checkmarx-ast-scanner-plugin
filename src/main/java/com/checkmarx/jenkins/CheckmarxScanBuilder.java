@@ -256,7 +256,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         // Check if the configured token is valid.
         CheckmarxApiToken checkmarxToken = scanConfig.getCheckmarxToken();
         if (checkmarxToken == null) {
-            log.error("Checkmarx API token with ID '" + credentialsId + "' was not found. Please configure the build properly and retry.");
+            log.error("Checkmarx credentials with ID '" + credentialsId + "' was not found. Please configure the build properly and retry.");
             run.setResult(Result.FAILURE);
             return;
         }
@@ -638,12 +638,12 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             }
 
             if (fixEmptyAndTrim(value) == null) {
-                return FormValidation.error("Checkmarx API token is required.");
+                return FormValidation.error("Checkmarx credentials are required.");
             }
 
             if (null == CredentialsMatchers.firstOrNull(lookupCredentials(CheckmarxApiToken.class, Jenkins.get(), ACL.SYSTEM, Collections.emptyList()),
                     anyOf(withId(value), CredentialsMatchers.instanceOf(CheckmarxApiToken.class)))) {
-                return FormValidation.error("Cannot find currently selected Checkmarx API token.");
+                return FormValidation.error("Cannot find currently selected Checkmarx credentials.");
             }
             return FormValidation.ok();
         }
