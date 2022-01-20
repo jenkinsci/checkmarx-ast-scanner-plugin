@@ -5,6 +5,7 @@ build/
 /bin/
 !gradle/wrapper/gradle-wrapper.jar
 application-secrets.yml
+.DS_Store
 
 ### STS ###
 .apt_generated
