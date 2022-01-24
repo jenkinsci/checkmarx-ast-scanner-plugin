@@ -23,6 +23,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class PluginUtils {
 
     public static final String CHECKMARX_AST_RESULTS_HTML = "checkmarx-ast-results.html";
+    public static final String CHECKMARX_AST_RESULTS_JSON = "checkmarx-ast-results.json";
     private static final String JENKINS = "Jenkins";
 
     public static CheckmarxInstallation findCheckmarxInstallation(final String checkmarxInstallation) {
@@ -48,14 +49,20 @@ public class PluginUtils {
         return cxWrapper.scanCreate(params, scanConfig.getAdditionalOptions());
     }
 
-    public static String generateHTMLReport(FilePath workspace, UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxException, URISyntaxException, CxConfig.InvalidCLIConfigException {
+    public static void generateHTMLReport(FilePath workspace, UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxException, URISyntaxException, CxConfig.InvalidCLIConfigException {
         final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
 
         final CxWrapper cxWrapper = new CxWrapper(cxConfig, log);
         final String summaryHtml = cxWrapper.results(scanId, ReportFormat.summaryHTML);
         workspace.child(workspace.getName() + "_" + CHECKMARX_AST_RESULTS_HTML).write(summaryHtml, UTF_8.name());
+    }
 
-        return summaryHtml;
+    public static void generateJsonReport(FilePath workspace, UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxException, URISyntaxException, CxConfig.InvalidCLIConfigException {
+        final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
+
+        final CxWrapper cxWrapper = new CxWrapper(cxConfig, log);
+        final String summaryJson = cxWrapper.results(scanId, ReportFormat.summaryJSON);
+        workspace.child(workspace.getName() + "_" + CHECKMARX_AST_RESULTS_JSON).write(summaryJson, UTF_8.name());
     }
 
     public static String authValidate(final ScanConfig scanConfig, final String checkmarxCliExecutable) throws IOException, InterruptedException, CxConfig.InvalidCLIConfigException, URISyntaxException, CxException {

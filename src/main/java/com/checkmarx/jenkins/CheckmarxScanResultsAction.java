@@ -1,16 +1,16 @@
 package com.checkmarx.jenkins;
 
+import com.checkmarx.ast.results.ResultsSummary;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.model.Run;
-import hudson.util.Secret;
 import jenkins.model.RunAction2;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 public class CheckmarxScanResultsAction implements RunAction2 {
-
-    private final String content;
-
-    public CheckmarxScanResultsAction(Secret content) {
-        this.content = content.getEncryptedValue();
-    }
 
     private transient Run<?, ?> run;
 
@@ -43,10 +43,21 @@ public class CheckmarxScanResultsAction implements RunAction2 {
         return "scanResults";
     }
 
-    @SuppressWarnings("unused")
-    public String getArtifactContent() {
-        Secret decryptedValue = Secret.decrypt(content);
-        return decryptedValue != null ? decryptedValue.getPlainText() : "";
+    public ResultsSummary getResultsSummary() {
+        for (Object artifact : run.getArtifacts()) {
+            if (artifact instanceof Run.Artifact && ((Run.Artifact) artifact).getFileName().contains(PluginUtils.CHECKMARX_AST_RESULTS_JSON)) {
+                try {
+                    byte[] encoded = Files.readAllBytes(Paths.get(((Run.Artifact) artifact).getFile().getCanonicalPath()));
+                    String json = new String(encoded, Charset.defaultCharset());
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    return objectMapper.readValue(json, ResultsSummary.class);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return null;
     }
 }
+
 

@@ -19,7 +19,6 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import hudson.util.Secret;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
 import lombok.NonNull;
@@ -263,11 +262,17 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         try {
             final Scan scan = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
-            String htmlContent = PluginUtils.generateHTMLReport(workspace, UUID.fromString(scan.getID()), scanConfig, checkmarxCliExecutable, log);
-            ArtifactArchiver artifactArchiver = new ArtifactArchiver(workspace.getName() + "_" + PluginUtils.CHECKMARX_AST_RESULTS_HTML);
-            artifactArchiver.perform(run, workspace, envVars, launcher, listener);
+            PluginUtils.generateHTMLReport(workspace, UUID.fromString(scan.getID()), scanConfig, checkmarxCliExecutable, log);
+            PluginUtils.generateJsonReport(workspace, UUID.fromString(scan.getID()), scanConfig, checkmarxCliExecutable, log);
+
+            ArtifactArchiver artifactArchiverHtml = new ArtifactArchiver(workspace.getName() + "_" + PluginUtils.CHECKMARX_AST_RESULTS_HTML);
+            artifactArchiverHtml.perform(run, workspace, envVars, launcher, listener);
+
+            ArtifactArchiver artifactArchiverJson = new ArtifactArchiver(workspace.getName() + "_" + PluginUtils.CHECKMARX_AST_RESULTS_JSON);
+            artifactArchiverJson.perform(run, workspace, envVars, launcher, listener);
+
             if (run.getActions(CheckmarxScanResultsAction.class).isEmpty()) {
-                run.addAction(new CheckmarxScanResultsAction(Secret.fromString(htmlContent)));
+                run.addAction(new CheckmarxScanResultsAction());
             }
             run.setResult(Result.SUCCESS);
         } catch (IOException | InterruptedException | URISyntaxException e) {
