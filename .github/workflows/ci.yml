@@ -37,10 +37,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2.3.5
       - name: Checkmarx AST CLI Action
-        uses: checkmarxDev/ast-github-action@master
+        uses: checkmarx/ast-github-action@main
         with:
           project_name: ast-scanner-plugin
-          branch: master
+          branch: main
           base_uri: https://ast-master.dev.cxast.net/
           cx_tenant: ${{ secrets.CX_TENANT }}
           cx_client_id: ${{ secrets.CX_CLIENT_ID }}
