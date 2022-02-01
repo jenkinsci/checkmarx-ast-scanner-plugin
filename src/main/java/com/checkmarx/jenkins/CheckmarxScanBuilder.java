@@ -14,9 +14,12 @@ import hudson.*;
 import hudson.model.*;
 import hudson.security.ACL;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
+import hudson.slaves.NodeProperty;
+import hudson.slaves.NodePropertyDescriptor;
 import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import hudson.util.DescribableList;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
@@ -262,8 +265,8 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         try {
             final Scan scan = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
-            PluginUtils.generateHTMLReport(workspace, UUID.fromString(scan.getID()), scanConfig, checkmarxCliExecutable, log);
-            PluginUtils.generateJsonReport(workspace, UUID.fromString(scan.getID()), scanConfig, checkmarxCliExecutable, log);
+            PluginUtils.generateHTMLReport(workspace, UUID.fromString(scan.getId()), scanConfig, checkmarxCliExecutable, log);
+            PluginUtils.generateJsonReport(workspace, UUID.fromString(scan.getId()), scanConfig, checkmarxCliExecutable, log);
 
             ArtifactArchiver artifactArchiverHtml = new ArtifactArchiver(workspace.getName() + "_" + PluginUtils.CHECKMARX_AST_RESULTS_HTML);
             artifactArchiverHtml.perform(run, workspace, envVars, launcher, listener);
@@ -559,7 +562,13 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 String cxInstallationPath = getCheckmarxInstallationPath(checkmarxInstallation);
                 CheckmarxApiToken checkmarxApiToken = getCheckmarxApiToken(credentialsId);
 
-                EnvVars envVars = ((EnvironmentVariablesNodeProperty) Jenkins.get().getGlobalNodeProperties().get(0)).getEnvVars();
+                DescribableList<NodeProperty<?>, NodePropertyDescriptor> globalNodeProperties = Jenkins.get().getGlobalNodeProperties();
+                EnvironmentVariablesNodeProperty environmentVariablesNodeProperty = globalNodeProperties.get(hudson.slaves.EnvironmentVariablesNodeProperty.class);
+                EnvVars envVars = null;
+                if(environmentVariablesNodeProperty != null) {
+                    envVars = environmentVariablesNodeProperty.getEnvVars();
+                }
+                else envVars = new EnvVars();
 
                 ScanConfig scanConfig = new ScanConfig();
                 scanConfig.setServerUrl(envVars.expand(serverUrl));
