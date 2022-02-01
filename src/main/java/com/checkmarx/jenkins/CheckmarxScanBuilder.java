@@ -553,13 +553,13 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
                 String cxInstallationPath = getCheckmarxInstallationPath(checkmarxInstallation);
                 CheckmarxApiToken checkmarxApiToken = getCheckmarxApiToken(credentialsId);
-
-                EnvVars envVars = ((EnvironmentVariablesNodeProperty) Jenkins.get().getGlobalNodeProperties().get(0)).getEnvVars();
+                Optional.ofNullable(checkmarxApiToken.getClientId()).orElseThrow(() -> new Exception("Invalid clientId"));
+                Optional.ofNullable(checkmarxApiToken.getToken().getPlainText()).orElseThrow(() -> new Exception("Invalid client secret"));
 
                 ScanConfig scanConfig = new ScanConfig();
-                scanConfig.setServerUrl(envVars.expand(serverUrl));
-                scanConfig.setBaseAuthUrl(useAuthenticationUrl ? envVars.expand(baseAuthUrl) : null);
-                scanConfig.setTenantName(envVars.expand(tenantName));
+                scanConfig.setServerUrl(serverUrl != null ? serverUrl.trim() : "");
+                scanConfig.setBaseAuthUrl(useAuthenticationUrl && baseAuthUrl != null ? baseAuthUrl.trim() : null);
+                scanConfig.setTenantName(tenantName != null ? tenantName.trim() : "");
                 scanConfig.setCheckmarxToken(checkmarxApiToken);
 
                 String message = PluginUtils.authValidate(scanConfig, cxInstallationPath);
