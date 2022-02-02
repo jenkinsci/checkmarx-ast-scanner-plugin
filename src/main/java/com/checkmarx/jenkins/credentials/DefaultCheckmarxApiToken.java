@@ -4,9 +4,8 @@ import com.cloudbees.plugins.credentials.CredentialsScope;
 import com.cloudbees.plugins.credentials.impl.BaseStandardCredentials;
 import hudson.Extension;
 import hudson.util.Secret;
+import lombok.NonNull;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import javax.annotation.Nonnull;
 
 import static hudson.util.Secret.fromString;
 
@@ -17,25 +16,25 @@ import static hudson.util.Secret.fromString;
 
 public class DefaultCheckmarxApiToken extends BaseStandardCredentials implements CheckmarxApiToken {
 
-    @Nonnull
+    @NonNull
     private final String clientId;
 
-    @Nonnull
+    @NonNull
     private final Secret secret;
 
     @DataBoundConstructor
-    public DefaultCheckmarxApiToken(final CredentialsScope scope, final String id, final String description, @Nonnull final String clientId, @Nonnull final String secret) {
+    public DefaultCheckmarxApiToken(final CredentialsScope scope, final String id, final String description, @NonNull final String clientId, @NonNull final String secret) {
         super(scope, id, description);
         this.clientId = clientId;
         this.secret = fromString(secret);
     }
-    @Nonnull
+    @NonNull
     @Override
     public String getClientId() {
         return this.clientId;
     }
 
-    @Nonnull
+    @NonNull
     @Override
     public Secret getToken() {
         return this.secret;
@@ -44,7 +43,7 @@ public class DefaultCheckmarxApiToken extends BaseStandardCredentials implements
     @Extension
     public static class DefaultCheckmarxApiTokenDescriptor extends BaseStandardCredentials.BaseStandardCredentialsDescriptor {
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Checkmarx Client Id and Client Secret";

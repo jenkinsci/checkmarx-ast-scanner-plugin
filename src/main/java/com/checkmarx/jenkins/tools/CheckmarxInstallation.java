@@ -19,7 +19,6 @@ import jenkins.security.MasterToSlaveCallable;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -32,7 +31,7 @@ import static java.lang.String.format;
 public class CheckmarxInstallation extends ToolInstallation implements EnvironmentSpecific<CheckmarxInstallation>, NodeSpecific<CheckmarxInstallation> {
 
     @DataBoundConstructor
-    public CheckmarxInstallation(@Nonnull final String name, @Nonnull final String home, final List<? extends ToolProperty<?>> properties) {
+    public CheckmarxInstallation(@NonNull final String name, @NonNull final String home, final List<? extends ToolProperty<?>> properties) {
         super(name, home, properties);
     }
 
@@ -47,7 +46,7 @@ public class CheckmarxInstallation extends ToolInstallation implements Environme
     }
 
 
-    public String getCheckmarxExecutable(@Nonnull final Launcher launcher) throws IOException, InterruptedException {
+    public String getCheckmarxExecutable(@NonNull final Launcher launcher) throws IOException, InterruptedException {
         if (this.getProperties().size() == 0) return this.getHome();
 
         final VirtualChannel channel = launcher.getChannel();
@@ -77,7 +76,7 @@ public class CheckmarxInstallation extends ToolInstallation implements Environme
     @Symbol("checkmarx")
     public static class CheckmarxInstallationDescriptor extends ToolDescriptor<CheckmarxInstallation> {
 
-        @Nonnull
+        @NonNull
         @Override
         public String getDisplayName() {
             return "Checkmarx";

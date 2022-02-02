@@ -5,23 +5,23 @@ import com.cloudbees.plugins.credentials.NameWith;
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import hudson.Util;
 import hudson.util.Secret;
+import lombok.NonNull;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 
 @NameWith(value = CheckmarxApiToken.NameProvider.class, priority = 1)
 public interface CheckmarxApiToken extends StandardCredentials {
-    @Nonnull
+    @NonNull
     String getClientId() throws IOException, InterruptedException;
 
-    @Nonnull
+    @NonNull
     Secret getToken() throws IOException, InterruptedException;
 
     class NameProvider extends CredentialsNameProvider<CheckmarxApiToken> {
 
-        @Nonnull
+        @NonNull
         @Override
-        public String getName(@Nonnull final CheckmarxApiToken credentials) {
+        public String getName(@NonNull final CheckmarxApiToken credentials) {
             final String description = Util.fixEmptyAndTrim(credentials.getDescription());
 
             return credentials.getId() + (description != null ? " (" + description + ")" : "");

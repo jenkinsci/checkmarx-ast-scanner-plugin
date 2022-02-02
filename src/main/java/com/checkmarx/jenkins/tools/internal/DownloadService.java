@@ -1,10 +1,10 @@
 package com.checkmarx.jenkins.tools.internal;
 
 import com.checkmarx.jenkins.tools.Platform;
+import lombok.NonNull;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -23,7 +23,7 @@ public class DownloadService {
         // squid:S1118
     }
 
-    public static URL getDownloadUrlForCli(@Nonnull final String version, @Nonnull final Platform platform) throws IOException {
+    public static URL getDownloadUrlForCli(@NonNull final String version, @NonNull final Platform platform) throws IOException {
         final String jsonString = DownloadService.loadJSON("latest".equals(version) ?
                 DownloadService.CHECKMARX_CLI_RELEASES_LATEST :
                 format(DownloadService.CHECKMARX_RELEASES_TAGS, version));

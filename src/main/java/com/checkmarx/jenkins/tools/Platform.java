@@ -1,6 +1,6 @@
 package com.checkmarx.jenkins.tools;
 
-import javax.annotation.Nonnull;
+import lombok.NonNull;
 import java.util.Locale;
 import java.util.Map;
 
@@ -17,13 +17,13 @@ public enum Platform {
         this.checkmarxWrapperFileName = checkmarxWrapperFileName;
     }
 
-    @Nonnull
+    @NonNull
     public static Platform current() throws ToolDetectionException {
         return Platform.detect(System.getProperties());
     }
 
-    @Nonnull
-    private static Platform detect(@Nonnull final Map<Object, Object> systemProperties) throws ToolDetectionException {
+    @NonNull
+    private static Platform detect(@NonNull final Map<Object, Object> systemProperties) throws ToolDetectionException {
         final String arch = ((String) systemProperties.get("os.name")).toLowerCase(Locale.ENGLISH);
         if (arch.contains("linux")) {
             return Platform.LINUX;
