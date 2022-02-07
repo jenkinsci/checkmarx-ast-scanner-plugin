@@ -1,3 +1,9 @@
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![APACHE License][license-shield]][license-url]
+
 <!-- PROJECT LOGO -->
 <br />
 <p align="center">
@@ -15,7 +21,7 @@
     <br />
     <a href="https://issues.jenkins-ci.org/">Report Bug</a>
     ·
-    <a href="https://github.com/CheckmarxDev/checkmarx-ast-scanner-plugin/issues/new">Request Feature</a>
+    <a href="https://github.com/jenkinsci/checkmarx-ast-scanner-plugin/issues/new">Request Feature</a>
   </p>
 </p>
 
@@ -90,7 +96,18 @@ See `LICENSE` for more information.
 
 Checkmarx - AST Integrations Team
 
-Project Link: [https://github.com/CheckmarxDev/checkmarx-ast-scanner-plugin](https://github.com/CheckmarxDev/checkmarx-ast-scanner-plugin)
+Project Link: [https://github.com/CheckmarxDev/checkmarx-ast-scanner-plugin](hhttps://github.com/jenkinsci/checkmarx-ast-scanner-plugin)
 
 
-© 2021 Checkmarx Ltd. All Rights Reserved.
+© 2022 Checkmarx Ltd. All Rights Reserved.
+
+[contributors-shield]: https://img.shields.io/github/contributors/jenkinsci/checkmarx-ast-scanner-plugin.svg?style=flat-square
+[contributors-url]: https://github.com/jenkinsci/checkmarx-ast-scanner-plugin/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/jenkinsci/checkmarx-ast-scanner-plugin.svg?style=flat-square
+[forks-url]: https://github.com/jenkinsci/checkmarx-ast-scanner-plugin/network/members
+[stars-shield]: https://img.shields.io/github/stars/jenkinsci/checkmarx-ast-scanner-plugin.svg?style=flat-square
+[stars-url]: https://github.com/jenkinsci/checkmarx-ast-scanner-plugin/stargazers
+[issues-shield]: https://img.shields.io/github/issues/jenkinsci/checkmarx-ast-scanner-plugin.svg?style=flat-square
+[issues-url]: https://github.com/jenkinsci/checkmarx-ast-scanner-plugin/issues
+[license-shield]: https://img.shields.io/github/license/jenkinsci/checkmarx-ast-scanner-plugin.svg?style=flat-square
+[license-url]: https://github.com/jenkinsci/checkmarx-ast-scanner-plugin/blob/master/LICENSE
