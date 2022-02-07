@@ -90,7 +90,6 @@ To see how you can use our tool, please refer to the [Documentation](https://che
 See `LICENSE` for more information.
 
 
-
 <!-- CONTACT -->
 ## Contact
 
