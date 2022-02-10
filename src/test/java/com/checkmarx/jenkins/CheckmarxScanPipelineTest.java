@@ -21,7 +21,7 @@ public class CheckmarxScanPipelineTest extends CheckmarxTestBase {
         project.setDefinition(new CpsFlowDefinition("" +
                 "node {" +
                 "  writeFile file: 'test.yml', text: 'overwrite me' \n" +
-                "  checkmarxASTScanner additionalOptions: '--scan-types sast', useOwnAdditionalOptions: true, useOwnServerCredentials: true, baseAuthUrl: '" + this.astBaseAuthUrl + "', checkmarxInstallation: '" + Constants.JT_LATEST + "', credentialsId: '" + Constants.JT_TOKEN_ID + "', projectName: 'successIntegrationJenkinsScan', serverUrl: '" + this.astServerUrl + "', tenantName: '" + this.astTenantName +
+                "  checkmarxASTScanner additionalOptions: '--scan-types sast',  branchName: 'main', useOwnAdditionalOptions: true, useOwnServerCredentials: true, baseAuthUrl: '" + this.astBaseAuthUrl + "', checkmarxInstallation: '" + Constants.JT_LATEST + "', credentialsId: '" + Constants.JT_TOKEN_ID + "', projectName: 'successIntegrationJenkinsScan', serverUrl: '" + this.astServerUrl + "', tenantName: '" + this.astTenantName +
                 "'}", true));
 
         WorkflowRun workflowRun = project.scheduleBuild2(0).waitForStart();
@@ -37,7 +37,7 @@ public class CheckmarxScanPipelineTest extends CheckmarxTestBase {
         project.setDefinition(new CpsFlowDefinition("" +
                 "node {" +
                 "  writeFile file: 'test.yml', text: 'overwrite me' \n" +
-                "  checkmarxASTScanner additionalOptions: '--scan-types sast', useOwnAdditionalOptions: true, useOwnServerCredentials: false, checkmarxInstallation: '" + Constants.JT_LATEST + "',  credentialsId: '" + Constants.JT_TOKEN_ID + "', projectName: 'doFailWhenUseOwnServerCredentialButNotConfigured', serverUrl: '" + this.astServerUrl + "', tenantName: '" + this.astTenantName +
+                "  checkmarxASTScanner additionalOptions: '--scan-types sast', branchName: 'main', useOwnAdditionalOptions: true, useOwnServerCredentials: false, checkmarxInstallation: '" + Constants.JT_LATEST + "',  credentialsId: '" + Constants.JT_TOKEN_ID + "', projectName: 'doFailWhenUseOwnServerCredentialButNotConfigured', serverUrl: '" + this.astServerUrl + "', tenantName: '" + this.astTenantName +
                 "'}", true));
 
         WorkflowRun workflowRun = project.scheduleBuild2(0).waitForStart();
