@@ -95,8 +95,6 @@ See `LICENSE` for more information.
 
 Checkmarx - AST Integrations Team
 
-Project Link: [https://github.com/CheckmarxDev/checkmarx-ast-scanner-plugin](hhttps://github.com/jenkinsci/checkmarx-ast-scanner-plugin)
-
 
 © 2022 Checkmarx Ltd. All Rights Reserved.
 
