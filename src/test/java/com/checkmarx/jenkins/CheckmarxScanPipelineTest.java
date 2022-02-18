@@ -20,7 +20,7 @@ public class CheckmarxScanPipelineTest extends CheckmarxTestBase {
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
         project.setDefinition(new CpsFlowDefinition("" +
                 "node {" +
-                "  writeFile file: 'test.yml', text: 'overwrite me' \n" +
+                "  writeFile file: 'source.py', text: 'overwrite me' \n" +
                 "  checkmarxASTScanner additionalOptions: '--scan-types sast',  branchName: 'main', useOwnAdditionalOptions: true, useOwnServerCredentials: true, baseAuthUrl: '" + this.astBaseAuthUrl + "', checkmarxInstallation: '" + Constants.JT_LATEST + "', credentialsId: '" + Constants.JT_TOKEN_ID + "', projectName: 'successIntegrationJenkinsScan', serverUrl: '" + this.astServerUrl + "', tenantName: '" + this.astTenantName +
                 "'}", true));
 
@@ -36,7 +36,7 @@ public class CheckmarxScanPipelineTest extends CheckmarxTestBase {
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
         project.setDefinition(new CpsFlowDefinition("" +
                 "node {" +
-                "  writeFile file: 'test.yml', text: 'overwrite me' \n" +
+                "  writeFile file: 'source.py', text: 'overwrite me' \n" +
                 "  checkmarxASTScanner additionalOptions: '--scan-types sast', branchName: 'main', useOwnAdditionalOptions: true, useOwnServerCredentials: false, checkmarxInstallation: '" + Constants.JT_LATEST + "',  credentialsId: '" + Constants.JT_TOKEN_ID + "', projectName: 'doFailWhenUseOwnServerCredentialButNotConfigured', serverUrl: '" + this.astServerUrl + "', tenantName: '" + this.astTenantName +
                 "'}", true));
 
