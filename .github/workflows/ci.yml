@@ -40,8 +40,7 @@ jobs:
         uses: checkmarx/ast-github-action@main
         with:
           project_name: ast-scanner-plugin
-          branch: main
-          base_uri: https://ast-master.dev.cxast.net/
+          base_uri: ${{ secrets.CX_BASE_URI }}
           cx_tenant: ${{ secrets.CX_TENANT }}
           cx_client_id: ${{ secrets.CX_CLIENT_ID }}
           cx_client_secret: ${{ secrets.CX_CLIENT_SECRET }}
