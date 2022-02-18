@@ -149,13 +149,6 @@
 
     <repositories>
         <repository>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <id>github</id>
-            <url>https://maven.pkg.github.com/CheckmarxDev/ast-cli-java-wrapper</url>
-        </repository>
-        <repository>
             <id>repo.jenkins-ci.org</id>
             <url>https://repo.jenkins-ci.org/public/</url>
         </repository>
