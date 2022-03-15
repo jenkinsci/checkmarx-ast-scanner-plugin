@@ -1,14 +1,19 @@
+<img src="https://raw.githubusercontent.com/Checkmarx/ci-cd-integrations/main/.images/banner.png">
+<br />
+<div align="center">
+
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
+[![Install][install-shield]][install-url]
 [![APACHE License][license-shield]][license-url]
 
-<!-- PROJECT LOGO -->
+</div>
 <br />
 <p align="center">
-  <a href="">
-    <img src="./logo.png" alt="Logo" width="80" height="80">
+  <a href="https://github.com/jenkinsci/checkmarx-ast-scanner-plugin">
+    <img src="https://raw.githubusercontent.com/Checkmarx/ci-cd-integrations/main/.images/logo.png" alt="Logo" width="80" height="80" />
   </a>
 
 <h3 align="center">AST-JENKINS-PLUGIN </h3>
@@ -83,11 +88,10 @@ To see how you can use our tool, please refer to the [Documentation](https://che
 
 - Refer to our [contribution guidelines](https://github.com/jenkinsci/.github/blob/master/CONTRIBUTING.md)
 
-** **
 
 <!-- LICENSE -->
 ## License
-See `LICENSE` for more information.
+Distributed under the [MIT](LICENSE). See `LICENSE` for more information.
 
 
 <!-- CONTACT -->
@@ -95,16 +99,20 @@ See `LICENSE` for more information.
 
 Checkmarx - AST Integrations Team
 
+Find more integrations from our team [here](https://github.com/Checkmarx/ci-cd-integrations#checkmarx-ast-integrations)
+
 
 © 2022 Checkmarx Ltd. All Rights Reserved.
 
-[contributors-shield]: https://img.shields.io/github/contributors/jenkinsci/checkmarx-ast-scanner-plugin.svg?style=flat-square
+[contributors-shield]: https://img.shields.io/github/contributors/jenkinsci/checkmarx-ast-scanner-plugin.svg
 [contributors-url]: https://github.com/jenkinsci/checkmarx-ast-scanner-plugin/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/jenkinsci/checkmarx-ast-scanner-plugin.svg?style=flat-square
+[forks-shield]: https://img.shields.io/github/forks/jenkinsci/checkmarx-ast-scanner-plugin.svg
 [forks-url]: https://github.com/jenkinsci/checkmarx-ast-scanner-plugin/network/members
-[stars-shield]: https://img.shields.io/github/stars/jenkinsci/checkmarx-ast-scanner-plugin.svg?style=flat-square
+[stars-shield]: https://img.shields.io/github/stars/jenkinsci/checkmarx-ast-scanner-plugin.svg
 [stars-url]: https://github.com/jenkinsci/checkmarx-ast-scanner-plugin/stargazers
-[issues-shield]: https://img.shields.io/github/issues/jenkinsci/checkmarx-ast-scanner-plugin.svg?style=flat-square
+[issues-shield]: https://img.shields.io/github/issues/jenkinsci/checkmarx-ast-scanner-plugin.svg
 [issues-url]: https://github.com/jenkinsci/checkmarx-ast-scanner-plugin/issues
-[license-shield]: https://img.shields.io/github/license/jenkinsci/checkmarx-ast-scanner-plugin.svg?style=flat-square
-[license-url]: https://github.com/jenkinsci/checkmarx-ast-scanner-plugin/blob/master/LICENSE
+[license-shield]: https://img.shields.io/github/license/jenkinsci/checkmarx-ast-scanner-plugin.svg
+[license-url]: https://github.com/jenkinsci/checkmarx-ast-scanner-plugin/blob/main/LICENSE
+[install-shield]: https://img.shields.io/jenkins/plugin/i/checkmarx-ast-scanner
+[install-url]: https://plugins.jenkins.io/checkmarx-ast-scanner/
