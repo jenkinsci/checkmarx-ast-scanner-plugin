@@ -11,8 +11,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 public class CheckmarxScanBuilderDescriptorTest {
 
@@ -22,45 +22,47 @@ public class CheckmarxScanBuilderDescriptorTest {
     private CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor instance;
 
     @Before
-    public void setUp() { instance = new  CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor(); }
+    public void setUp() {
+        this.instance = new CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor();
+    }
 
     @Test
     public void doFillCheckmarxTokenItems_shouldAddCurrentValue_ifPresent() {
-        ListBoxModel model = instance.doFillCredentialsIdItems(null, "current-value");
-        assertEquals(2,model.size());
-        assertSame(2,model.size());
+        final ListBoxModel model = this.instance.doFillCredentialsIdItems(null, "current-value");
+        assertEquals(2, model.size());
+        assertSame(2, model.size());
 
-        ListBoxModel.Option firstItem = model.get(0);
-        assertEquals("",firstItem.value);
-        assertSame("",firstItem.value);
+        final ListBoxModel.Option firstItem = model.get(0);
+        assertEquals("", firstItem.value);
+        assertSame("", firstItem.value);
 
 
-        ListBoxModel.Option secondItem = model.get(1);
-        assertEquals("current-value",secondItem.value);
-        assertSame("current-value",secondItem.value);
+        final ListBoxModel.Option secondItem = model.get(1);
+        assertEquals("current-value", secondItem.value);
+        assertSame("current-value", secondItem.value);
     }
 
     @Test
     public void doCheckCheckmarxTokenId_shouldReturnError_ifTokenIsEmpty() {
-        FormValidation.Kind checkmarxTokenIdValidation = instance.doCheckCredentialsId(null,null).kind;
+        final FormValidation.Kind checkmarxTokenIdValidation = this.instance.doCheckCredentialsId(null, null).kind;
 
-        assertEquals(FormValidation.Kind.ERROR,checkmarxTokenIdValidation);
+        assertEquals(FormValidation.Kind.ERROR, checkmarxTokenIdValidation);
     }
 
     @Test
     public void doCheckCheckmarxTokenId_shouldReturnError_ifTokenNotFound() {
-        FormValidation.Kind checkmarxTokenIdValidation = instance.doCheckCredentialsId(null,"any-token").kind;
+        final FormValidation.Kind checkmarxTokenIdValidation = this.instance.doCheckCredentialsId(null, "any-token").kind;
 
-        assertEquals(FormValidation.Kind.ERROR,checkmarxTokenIdValidation);
+        assertEquals(FormValidation.Kind.ERROR, checkmarxTokenIdValidation);
     }
 
     @Test
     public void doCheckCheckmarxTokenId_shouldReturnOK_ifTokenFound() throws Exception {
-        DefaultCheckmarxApiToken checkmarxToken = new DefaultCheckmarxApiToken(CredentialsScope.GLOBAL, "id", "", "checkmarx-clientId", "checkmarx-client-secret");
-        CredentialsProvider.lookupStores(jenkins.getInstance()).iterator().next().addCredentials(Domain.global(), checkmarxToken);
+        final DefaultCheckmarxApiToken checkmarxToken = new DefaultCheckmarxApiToken(CredentialsScope.GLOBAL, "id", "", "checkmarx-clientId", "checkmarx-client-secret");
+        CredentialsProvider.lookupStores(this.jenkins.getInstance()).iterator().next().addCredentials(Domain.global(), checkmarxToken);
 
-        FormValidation.Kind checkmarxTokenIdValidation = instance.doCheckCredentialsId(null,"id").kind;
+        final FormValidation.Kind checkmarxTokenIdValidation = this.instance.doCheckCredentialsId(null, "id").kind;
 
-        assertEquals(FormValidation.Kind.OK,checkmarxTokenIdValidation);
+        assertEquals(FormValidation.Kind.OK, checkmarxTokenIdValidation);
     }
 }
