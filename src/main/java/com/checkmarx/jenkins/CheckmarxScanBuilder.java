@@ -20,6 +20,7 @@ import hudson.slaves.NodePropertyDescriptor;
 import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import hudson.util.ArgumentListBuilder;
 import hudson.util.DescribableList;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -38,10 +39,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static com.cloudbees.plugins.credentials.CredentialsMatchers.anyOf;
 import static com.cloudbees.plugins.credentials.CredentialsMatchers.withId;
@@ -263,9 +261,14 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         try {
-            final Scan scan = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
-            PluginUtils.generateHTMLReport(workspace, UUID.fromString(scan.getId()), scanConfig, checkmarxCliExecutable, log);
-            PluginUtils.generateJsonReport(workspace, UUID.fromString(scan.getId()), scanConfig, checkmarxCliExecutable, log);
+            final List<String> argumentsForCommand = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
+            ArgumentListBuilder args = new ArgumentListBuilder();
+            args.add(argumentsForCommand);
+            launcher.launch().cmds(args).envs(envVars).stdout(listener.getLogger()).join();
+
+
+//            PluginUtils.generateHTMLReport(workspace, UUID.fromString(scan.getId()), scanConfig, checkmarxCliExecutable, log);
+//            PluginUtils.generateJsonReport(workspace, UUID.fromString(scan.getId()), scanConfig, checkmarxCliExecutable, log);
 
             ArtifactArchiver artifactArchiverHtml = new ArtifactArchiver(workspace.getName() + "_" + PluginUtils.CHECKMARX_AST_RESULTS_HTML);
             artifactArchiverHtml.perform(run, workspace, envVars, launcher, listener);
@@ -277,15 +280,19 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 run.addAction(new CheckmarxScanResultsAction());
             }
             run.setResult(Result.SUCCESS);
-        } catch (IOException | InterruptedException | URISyntaxException e) {
-            run.setResult(Result.FAILURE);
-        } catch (CxConfig.InvalidCLIConfigException e) {
-            log.error(e.getMessage());
-            run.setResult(Result.FAILURE);
-        } catch (CxException e) {
-            log.error(String.format("Exit code from AST-CLI: %s", e.getExitCode()));
-            log.error(e.getMessage());
-            run.setResult(Result.FAILURE);
+//        } catch (IOException | InterruptedException | URISyntaxException e) {
+//            run.setResult(Result.FAILURE);
+//        } catch (CxConfig.InvalidCLIConfigException e) {
+//            log.error(e.getMessage());
+//            run.setResult(Result.FAILURE);
+//        } catch (CxException e) {
+//            log.error(String.format("Exit code from AST-CLI: %s", e.getExitCode()));
+//            log.error(e.getMessage());
+//            run.setResult(Result.FAILURE);
+//        }
+        }
+        catch(Exception e) {
+
         }
     }
 
@@ -560,7 +567,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
                 String cxInstallationPath = getCheckmarxInstallationPath(checkmarxInstallation);
                 CheckmarxApiToken checkmarxApiToken = getCheckmarxApiToken(credentialsId);
-                
+
                 DescribableList<NodeProperty<?>, NodePropertyDescriptor> globalNodeProperties = Jenkins.get().getGlobalNodeProperties();
                 EnvironmentVariablesNodeProperty environmentVariablesNodeProperty = globalNodeProperties.get(hudson.slaves.EnvironmentVariablesNodeProperty.class);
 

@@ -14,6 +14,7 @@ import jenkins.model.Jenkins;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -33,7 +34,7 @@ public class PluginUtils {
                 .findFirst().orElse(null);
     }
 
-    public static Scan submitScanDetailsToWrapper(final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, URISyntaxException, CxConfig.InvalidCLIConfigException, CxException {
+    public static List<String> submitScanDetailsToWrapper(final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, URISyntaxException, CxConfig.InvalidCLIConfigException, CxException {
         log.info("Submitting the scan details to the CLI wrapper.");
 
         final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
@@ -46,7 +47,7 @@ public class PluginUtils {
         params.put(CxConstants.BRANCH, scanConfig.getBranchName());
 
         final CxWrapper cxWrapper = new CxWrapper(cxConfig, log);
-        return cxWrapper.scanCreate(params, scanConfig.getAdditionalOptions());
+        return cxWrapper.scanBuild(params, scanConfig.getAdditionalOptions());
     }
 
     public static void generateHTMLReport(FilePath workspace, UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxException, URISyntaxException, CxConfig.InvalidCLIConfigException {
