@@ -1,6 +1,6 @@
 # Note: additional setup is required, see https://www.jenkins.io/redirect/continuous-delivery-of-plugins
 
-name: cd
+name: Plugin Deployment
 on:
   workflow_dispatch:
   check_run:
@@ -43,7 +43,7 @@ jobs:
     if: needs.validate.outputs.should_release == 'true'
     steps:
       - name: Check out
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Set up JDK 8
