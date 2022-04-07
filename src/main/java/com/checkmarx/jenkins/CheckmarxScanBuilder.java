@@ -1,7 +1,5 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.ast.scan.Scan;
-import com.checkmarx.ast.wrapper.CxConfig;
 import com.checkmarx.ast.wrapper.CxException;
 import com.checkmarx.jenkins.credentials.CheckmarxApiToken;
 import com.checkmarx.jenkins.model.ScanConfig;
@@ -37,8 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.io.OutputStream;
 import java.util.*;
 
 import static com.cloudbees.plugins.credentials.CredentialsMatchers.anyOf;
@@ -260,40 +259,89 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        try {
             final List<String> argumentsForCommand = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
-            ArgumentListBuilder args = new ArgumentListBuilder();
-            args.add(argumentsForCommand);
-            launcher.launch().cmds(args).envs(envVars).stdout(listener.getLogger()).join();
+            ArgumentListBuilder arguments = new ArgumentListBuilder();
 
+            FileOutputStream fos = new FileOutputStream("./output.log");
 
-//            PluginUtils.generateHTMLReport(workspace, UUID.fromString(scan.getId()), scanConfig, checkmarxCliExecutable, log);
-//            PluginUtils.generateJsonReport(workspace, UUID.fromString(scan.getId()), scanConfig, checkmarxCliExecutable, log);
+            arguments.add(argumentsForCommand);
+            launcher.launch().cmds(arguments).envs(envVars).stdout(
+                    // Writing stdout to file
+                    new OutputStream() {
+                        @Override
+                        public void write(int b) throws IOException {
+                            fos.write(b);
+                            listener.getLogger().write(b);
+                        }
 
-            ArtifactArchiver artifactArchiverHtml = new ArtifactArchiver(workspace.getName() + "_" + PluginUtils.CHECKMARX_AST_RESULTS_HTML);
-            artifactArchiverHtml.perform(run, workspace, envVars, launcher, listener);
+                        @Override
+                        public void flush() throws IOException {
+                            super.flush();
+                            fos.flush();
+                            listener.getLogger().flush();
+                        }
 
-            ArtifactArchiver artifactArchiverJson = new ArtifactArchiver(workspace.getName() + "_" + PluginUtils.CHECKMARX_AST_RESULTS_JSON);
-            artifactArchiverJson.perform(run, workspace, envVars, launcher, listener);
+                        @Override
+                        public void close() throws IOException {
+                            super.close();
+                            fos.close();
+                            listener.getLogger().close();
+                        }
+                    }).join();
+
+            String scanId = PluginUtils.getScanIdFromLogFile("./output.log", log);
+
+            FilePath tempDir = workspace.createTempDir("cx", "");
+
+            ArgumentListBuilder htmlArguments = new ArgumentListBuilder();
+            ArgumentListBuilder jsonArguments = new ArgumentListBuilder();
+
+            try {
+                final List<String>  htmlReportCommand = PluginUtils.generateHTMLReport(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, log);
+
+                String fileName = Long.toString(System.nanoTime());
+
+                htmlArguments.add(htmlReportCommand);
+                //Adding temp directory path name to command arguments
+                htmlArguments.add("--output-path");
+                htmlArguments.add(tempDir.getRemote());
+                //Adding output file name to command arguments
+                htmlArguments.add("--output-name");
+                htmlArguments.add(fileName);
+
+                launcher.launch().cmds(htmlArguments).envs(envVars).stdout(listener.getLogger()).join();
+
+                final List<String>  jsonReportCommand = PluginUtils.generateJsonReport(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, log);
+
+                jsonArguments.add(jsonReportCommand);
+                //Adding temp directory path name to command arguments
+                jsonArguments.add("--output-path");
+                jsonArguments.add(tempDir.getRemote());
+                //Adding output file name to command arguments
+                jsonArguments.add("--output-name");
+                jsonArguments.add(fileName);
+
+                launcher.launch().cmds(jsonArguments).envs(envVars).stdout(listener.getLogger()).join();
+
+                //Getting created report files path
+                FilePath htmlReportFilePath = tempDir.child(fileName + ".html" );
+                FilePath jsonReportFilePath = tempDir.child(fileName + ".json" );
+
+                ArtifactArchiver artifactArchiverHtml = new ArtifactArchiver(workspace.toURI().relativize(htmlReportFilePath.toURI()).toString());
+                artifactArchiverHtml.perform(run, workspace, envVars, launcher, listener);
+
+                ArtifactArchiver artifactArchiverJson = new ArtifactArchiver(workspace.toURI().relativize(jsonReportFilePath.toURI()).toString());
+                artifactArchiverJson.perform(run, workspace, envVars, launcher, listener);
+
+            } finally {
+                //Deleting temporary directory to clean up the workspace env
+                tempDir.delete();
+            }
 
             if (run.getActions(CheckmarxScanResultsAction.class).isEmpty()) {
                 run.addAction(new CheckmarxScanResultsAction());
             }
             run.setResult(Result.SUCCESS);
-//        } catch (IOException | InterruptedException | URISyntaxException e) {
-//            run.setResult(Result.FAILURE);
-//        } catch (CxConfig.InvalidCLIConfigException e) {
-//            log.error(e.getMessage());
-//            run.setResult(Result.FAILURE);
-//        } catch (CxException e) {
-//            log.error(String.format("Exit code from AST-CLI: %s", e.getExitCode()));
-//            log.error(e.getMessage());
-//            run.setResult(Result.FAILURE);
-//        }
-        }
-        catch(Exception e) {
-
-        }
     }
 
     /**

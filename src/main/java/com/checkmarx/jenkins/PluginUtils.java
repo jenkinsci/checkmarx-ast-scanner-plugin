@@ -1,30 +1,29 @@
 package com.checkmarx.jenkins;
 
 import com.checkmarx.ast.results.ReportFormat;
-import com.checkmarx.ast.scan.Scan;
 import com.checkmarx.ast.wrapper.CxConfig;
 import com.checkmarx.ast.wrapper.CxConstants;
 import com.checkmarx.ast.wrapper.CxException;
 import com.checkmarx.ast.wrapper.CxWrapper;
 import com.checkmarx.jenkins.model.ScanConfig;
 import com.checkmarx.jenkins.tools.CheckmarxInstallation;
-import hudson.FilePath;
 import jenkins.model.Jenkins;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+
 
 public class PluginUtils {
 
     public static final String CHECKMARX_AST_RESULTS_HTML = "checkmarx-ast-results.html";
     public static final String CHECKMARX_AST_RESULTS_JSON = "checkmarx-ast-results.json";
+    public static final String REGEX_SCAN_ID_FROM_LOGS = "(ID)\":\"((\\\\\"|[^\"])*)";
     private static final String JENKINS = "Jenkins";
 
     public static CheckmarxInstallation findCheckmarxInstallation(final String checkmarxInstallation) {
@@ -50,20 +49,18 @@ public class PluginUtils {
         return cxWrapper.scanBuild(params, scanConfig.getAdditionalOptions());
     }
 
-    public static void generateHTMLReport(FilePath workspace, UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxException, URISyntaxException, CxConfig.InvalidCLIConfigException {
+    public static List<String> generateHTMLReport(UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxConfig.InvalidCLIConfigException {
         final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
 
         final CxWrapper cxWrapper = new CxWrapper(cxConfig, log);
-        final String summaryHtml = cxWrapper.results(scanId, ReportFormat.summaryHTML);
-        workspace.child(workspace.getName() + "_" + CHECKMARX_AST_RESULTS_HTML).write(summaryHtml, UTF_8.name());
+        return cxWrapper.resultsBuild(scanId, ReportFormat.summaryHTML);
     }
 
-    public static void generateJsonReport(FilePath workspace, UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxException, URISyntaxException, CxConfig.InvalidCLIConfigException {
+    public static List<String> generateJsonReport(UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxException, URISyntaxException, CxConfig.InvalidCLIConfigException {
         final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
 
         final CxWrapper cxWrapper = new CxWrapper(cxConfig, log);
-        final String summaryJson = cxWrapper.results(scanId, ReportFormat.summaryJSON);
-        workspace.child(workspace.getName() + "_" + CHECKMARX_AST_RESULTS_JSON).write(summaryJson, UTF_8.name());
+        return cxWrapper.resultsBuild(scanId, ReportFormat.summaryJSON);
     }
 
     public static String authValidate(final ScanConfig scanConfig, final String checkmarxCliExecutable) throws IOException, InterruptedException, CxConfig.InvalidCLIConfigException, URISyntaxException, CxException {
@@ -84,4 +81,29 @@ public class PluginUtils {
                 .pathToExecutable(checkmarxCliExecutable)
                 .build();
     }
+
+    public static String getScanIdFromLogFile(String filename, final CxLoggerAdapter log) {
+        try {
+            // regex to find scanId from logs
+            final String regex = REGEX_SCAN_ID_FROM_LOGS;
+            final Pattern pattern = Pattern.compile(regex);
+            Matcher matcher;
+
+            File logFile = new File(filename);
+            Scanner logFileReader = new Scanner(logFile, UTF_8.name());
+            while (logFileReader.hasNextLine()) {
+                String logs = logFileReader.nextLine();
+                matcher = pattern.matcher(logs);
+
+                if (matcher.find()) {
+                    return matcher.group(2);
+                }
+            }
+            logFileReader.close();
+        } catch (FileNotFoundException err) {
+            log.error("An error occurred while finding scanId in logs", err);
+        }
+        return "";
+    }
+
 }
