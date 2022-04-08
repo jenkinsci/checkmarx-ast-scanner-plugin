@@ -46,21 +46,28 @@ public class PluginUtils {
         params.put(CxConstants.BRANCH, scanConfig.getBranchName());
 
         final CxWrapper cxWrapper = new CxWrapper(cxConfig, log);
-        return cxWrapper.scanBuild(params, scanConfig.getAdditionalOptions());
+        return cxWrapper.buildScanCreateArguments(params, scanConfig.getAdditionalOptions());
+    }
+
+    public static List<String> scanCancel(UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxConfig.InvalidCLIConfigException {
+        final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
+
+        final CxWrapper cxWrapper = new CxWrapper(cxConfig, log);
+        return cxWrapper.buildScanCancelArguments(scanId);
     }
 
     public static List<String> generateHTMLReport(UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxConfig.InvalidCLIConfigException {
         final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
 
         final CxWrapper cxWrapper = new CxWrapper(cxConfig, log);
-        return cxWrapper.resultsBuild(scanId, ReportFormat.summaryHTML);
+        return cxWrapper.buildResultsArguments(scanId, ReportFormat.summaryHTML);
     }
 
     public static List<String> generateJsonReport(UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxException, URISyntaxException, CxConfig.InvalidCLIConfigException {
         final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
 
         final CxWrapper cxWrapper = new CxWrapper(cxConfig, log);
-        return cxWrapper.resultsBuild(scanId, ReportFormat.summaryJSON);
+        return cxWrapper.buildResultsArguments(scanId, ReportFormat.summaryJSON);
     }
 
     public static String authValidate(final ScanConfig scanConfig, final String checkmarxCliExecutable) throws IOException, InterruptedException, CxConfig.InvalidCLIConfigException, URISyntaxException, CxException {

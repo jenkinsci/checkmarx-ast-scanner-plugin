@@ -259,12 +259,15 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-            final List<String> argumentsForCommand = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
-            ArgumentListBuilder arguments = new ArgumentListBuilder();
+        final List<String> argumentsForCommand = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
 
-            FileOutputStream fos = new FileOutputStream("./output.log");
+        ArgumentListBuilder arguments = new ArgumentListBuilder();
 
-            arguments.add(argumentsForCommand);
+        FileOutputStream fos = new FileOutputStream("./output.log");
+
+        arguments.add(argumentsForCommand);
+
+        try {
             launcher.launch().cmds(arguments).envs(envVars).stdout(
                     // Writing stdout to file
                     new OutputStream() {
@@ -288,60 +291,78 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                             listener.getLogger().close();
                         }
                     }).join();
-
+        } catch (InterruptedException interruptedException) {
             String scanId = PluginUtils.getScanIdFromLogFile("./output.log", log);
-
-            FilePath tempDir = workspace.createTempDir("cx", "");
-
-            ArgumentListBuilder htmlArguments = new ArgumentListBuilder();
-            ArgumentListBuilder jsonArguments = new ArgumentListBuilder();
-
-            try {
-                final List<String>  htmlReportCommand = PluginUtils.generateHTMLReport(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, log);
-
-                String fileName = Long.toString(System.nanoTime());
-
-                htmlArguments.add(htmlReportCommand);
-                //Adding temp directory path name to command arguments
-                htmlArguments.add("--output-path");
-                htmlArguments.add(tempDir.getRemote());
-                //Adding output file name to command arguments
-                htmlArguments.add("--output-name");
-                htmlArguments.add(fileName);
-
-                launcher.launch().cmds(htmlArguments).envs(envVars).stdout(listener.getLogger()).join();
-
-                final List<String>  jsonReportCommand = PluginUtils.generateJsonReport(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, log);
-
-                jsonArguments.add(jsonReportCommand);
-                //Adding temp directory path name to command arguments
-                jsonArguments.add("--output-path");
-                jsonArguments.add(tempDir.getRemote());
-                //Adding output file name to command arguments
-                jsonArguments.add("--output-name");
-                jsonArguments.add(fileName);
-
-                launcher.launch().cmds(jsonArguments).envs(envVars).stdout(listener.getLogger()).join();
-
-                //Getting created report files path
-                FilePath htmlReportFilePath = tempDir.child(fileName + ".html" );
-                FilePath jsonReportFilePath = tempDir.child(fileName + ".json" );
-
-                ArtifactArchiver artifactArchiverHtml = new ArtifactArchiver(workspace.toURI().relativize(htmlReportFilePath.toURI()).toString());
-                artifactArchiverHtml.perform(run, workspace, envVars, launcher, listener);
-
-                ArtifactArchiver artifactArchiverJson = new ArtifactArchiver(workspace.toURI().relativize(jsonReportFilePath.toURI()).toString());
-                artifactArchiverJson.perform(run, workspace, envVars, launcher, listener);
-
-            } finally {
-                //Deleting temporary directory to clean up the workspace env
-                tempDir.delete();
+            if(!scanId.isEmpty()) {
+                log.info("Cancelling scan with id: {}", scanId);
+                launcher.launch().cmds(PluginUtils.scanCancel(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, this.log)).envs(envVars).stdout(listener.getLogger()).join();
+                log.info("Successfully canceled scan with id: {}", scanId);
+                run.setResult(Result.ABORTED);
+                return;
+            } else {
+                run.setResult(Result.ABORTED);
+                return;
             }
+        }  catch (Exception e) {
+            log.info(e.getMessage());
+            run.setResult(Result.FAILURE);
+            return;
+        }
 
-            if (run.getActions(CheckmarxScanResultsAction.class).isEmpty()) {
-                run.addAction(new CheckmarxScanResultsAction());
-            }
-            run.setResult(Result.SUCCESS);
+        String scanId = PluginUtils.getScanIdFromLogFile("./output.log", log);
+
+        FilePath tempDir = workspace.createTempDir("cx", "");
+
+        ArgumentListBuilder htmlArguments = new ArgumentListBuilder();
+        ArgumentListBuilder jsonArguments = new ArgumentListBuilder();
+
+        try {
+            final List<String>  htmlReportCommand = PluginUtils.generateHTMLReport(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, log);
+
+            String fileName = Long.toString(System.nanoTime());
+
+            htmlArguments.add(htmlReportCommand);
+            //Adding temp directory path name to command arguments
+            htmlArguments.add("--output-path");
+            htmlArguments.add(tempDir.getRemote());
+            //Adding output file name to command arguments
+            htmlArguments.add("--output-name");
+            htmlArguments.add(fileName);
+
+            launcher.launch().cmds(htmlArguments).envs(envVars).stdout(listener.getLogger()).join();
+
+            final List<String>  jsonReportCommand = PluginUtils.generateJsonReport(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, log);
+
+            jsonArguments.add(jsonReportCommand);
+            //Adding temp directory path name to command arguments
+            jsonArguments.add("--output-path");
+            jsonArguments.add(tempDir.getRemote());
+            //Adding output file name to command arguments
+            jsonArguments.add("--output-name");
+            jsonArguments.add(fileName);
+
+            launcher.launch().cmds(jsonArguments).envs(envVars).stdout(listener.getLogger()).join();
+
+            //Getting created report files path
+            FilePath htmlReportFilePath = tempDir.child(fileName + ".html" );
+            FilePath jsonReportFilePath = tempDir.child(fileName + ".json" );
+
+            ArtifactArchiver artifactArchiverHtml = new ArtifactArchiver(workspace.toURI().relativize(htmlReportFilePath.toURI()).toString());
+            artifactArchiverHtml.perform(run, workspace, envVars, launcher, listener);
+
+            ArtifactArchiver artifactArchiverJson = new ArtifactArchiver(workspace.toURI().relativize(jsonReportFilePath.toURI()).toString());
+            artifactArchiverJson.perform(run, workspace, envVars, launcher, listener);
+
+        } finally {
+            //Deleting temporary directory to clean up the workspace env
+            tempDir.deleteContents();
+            tempDir.delete();
+        }
+
+        if (run.getActions(CheckmarxScanResultsAction.class).isEmpty()) {
+            run.addAction(new CheckmarxScanResultsAction());
+        }
+        run.setResult(Result.SUCCESS);
     }
 
     /**
