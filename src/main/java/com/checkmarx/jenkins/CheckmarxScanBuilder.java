@@ -1,7 +1,5 @@
 package com.checkmarx.jenkins;
 
-import com.checkmarx.ast.scan.Scan;
-import com.checkmarx.ast.wrapper.CxConfig;
 import com.checkmarx.ast.wrapper.CxException;
 import com.checkmarx.jenkins.credentials.CheckmarxApiToken;
 import com.checkmarx.jenkins.model.ScanConfig;
@@ -20,6 +18,7 @@ import hudson.slaves.NodePropertyDescriptor;
 import hudson.tasks.ArtifactArchiver;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
+import hudson.util.ArgumentListBuilder;
 import hudson.util.DescribableList;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -36,12 +35,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.UUID;
+import java.io.OutputStream;
+import java.util.*;
 
 import static com.cloudbees.plugins.credentials.CredentialsMatchers.anyOf;
 import static com.cloudbees.plugins.credentials.CredentialsMatchers.withId;
@@ -262,31 +259,110 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        try {
-            final Scan scan = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
-            PluginUtils.generateHTMLReport(workspace, UUID.fromString(scan.getId()), scanConfig, checkmarxCliExecutable, log);
-            PluginUtils.generateJsonReport(workspace, UUID.fromString(scan.getId()), scanConfig, checkmarxCliExecutable, log);
+        final List<String> argumentsForCommand = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
+        ArgumentListBuilder arguments = new ArgumentListBuilder();
+        FileOutputStream fos = new FileOutputStream("./output.log");
+        arguments.add(argumentsForCommand);
 
-            ArtifactArchiver artifactArchiverHtml = new ArtifactArchiver(workspace.getName() + "_" + PluginUtils.CHECKMARX_AST_RESULTS_HTML);
+        try {
+            int exitCode = launcher.launch().cmds(arguments).envs(envVars).stdout(
+                    // Writing stdout to file
+                    new OutputStream() {
+                        @Override
+                        public void write(int b) throws IOException {
+                            fos.write(b);
+                            listener.getLogger().write(b);
+                        }
+
+                        @Override
+                        public void flush() throws IOException {
+                            super.flush();
+                            fos.flush();
+                            listener.getLogger().flush();
+                        }
+
+                        @Override
+                        public void close() throws IOException {
+                            super.close();
+                            fos.close();
+                            listener.getLogger().close();
+                        }
+                    }).join();
+
+            if(exitCode != 0) {
+                log.error(String.format("Exit code from AST-CLI: %s", exitCode));
+                run.setResult(Result.FAILURE);
+                return;
+            }
+        } catch (InterruptedException interruptedException) {
+            String scanId = PluginUtils.getScanIdFromLogFile("./output.log", log);
+            if(!scanId.isEmpty()) {
+                log.info("Cancelling scan with id: {}", scanId);
+                launcher.launch().cmds(PluginUtils.scanCancel(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, this.log)).envs(envVars).stdout(listener.getLogger()).join();
+                log.info("Successfully canceled scan with id: {}", scanId);
+            }
+            run.setResult(Result.ABORTED);
+            return;
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            run.setResult(Result.FAILURE);
+            return;
+        }
+
+        String scanId = PluginUtils.getScanIdFromLogFile("./output.log", log);
+
+        FilePath tempDir = workspace.createTempDir("cx", "");
+
+        ArgumentListBuilder htmlArguments = new ArgumentListBuilder();
+        ArgumentListBuilder jsonArguments = new ArgumentListBuilder();
+
+        try {
+            final List<String>  htmlReportCommand = PluginUtils.generateHTMLReport(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, log);
+
+            String fileName = Long.toString(System.nanoTime());
+
+            htmlArguments.add(htmlReportCommand);
+            //Adding temp directory path name to command arguments
+            htmlArguments.add("--output-path");
+            htmlArguments.add(tempDir.getRemote());
+            //Adding output file name to command arguments
+            htmlArguments.add("--output-name");
+            htmlArguments.add(fileName);
+
+            launcher.launch().cmds(htmlArguments).envs(envVars).stdout(listener.getLogger()).join();
+
+            final List<String>  jsonReportCommand = PluginUtils.generateJsonReport(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, log);
+
+            jsonArguments.add(jsonReportCommand);
+            //Adding temp directory path name to command arguments
+            jsonArguments.add("--output-path");
+            jsonArguments.add(tempDir.getRemote());
+            //Adding output file name to command arguments
+            jsonArguments.add("--output-name");
+            jsonArguments.add(fileName);
+
+            launcher.launch().cmds(jsonArguments).envs(envVars).stdout(listener.getLogger()).join();
+
+            //Getting created report files path
+            FilePath htmlReportFilePath = tempDir.child(fileName + ".html" );
+            FilePath jsonReportFilePath = tempDir.child(fileName + ".json" );
+
+            ArtifactArchiver artifactArchiverHtml = new ArtifactArchiver(workspace.toURI().relativize(htmlReportFilePath.toURI()).toString());
             artifactArchiverHtml.perform(run, workspace, envVars, launcher, listener);
 
-            ArtifactArchiver artifactArchiverJson = new ArtifactArchiver(workspace.getName() + "_" + PluginUtils.CHECKMARX_AST_RESULTS_JSON);
+            ArtifactArchiver artifactArchiverJson = new ArtifactArchiver(workspace.toURI().relativize(jsonReportFilePath.toURI()).toString());
             artifactArchiverJson.perform(run, workspace, envVars, launcher, listener);
 
-            if (run.getActions(CheckmarxScanResultsAction.class).isEmpty()) {
-                run.addAction(new CheckmarxScanResultsAction());
-            }
-            run.setResult(Result.SUCCESS);
-        } catch (IOException | InterruptedException | URISyntaxException e) {
-            run.setResult(Result.FAILURE);
-        } catch (CxConfig.InvalidCLIConfigException e) {
-            log.error(e.getMessage());
-            run.setResult(Result.FAILURE);
-        } catch (CxException e) {
-            log.error(String.format("Exit code from AST-CLI: %s", e.getExitCode()));
-            log.error(e.getMessage());
-            run.setResult(Result.FAILURE);
+        } finally {
+            //Deleting temporary directory to clean up the workspace env
+            tempDir.deleteContents();
+            tempDir.delete();
         }
+
+        if (run.getActions(CheckmarxScanResultsAction.class).isEmpty()) {
+            run.addAction(new CheckmarxScanResultsAction());
+        }
+        run.setResult(Result.SUCCESS);
     }
 
     /**
@@ -560,7 +636,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
                 String cxInstallationPath = getCheckmarxInstallationPath(checkmarxInstallation);
                 CheckmarxApiToken checkmarxApiToken = getCheckmarxApiToken(credentialsId);
-                
+
                 DescribableList<NodeProperty<?>, NodePropertyDescriptor> globalNodeProperties = Jenkins.get().getGlobalNodeProperties();
                 EnvironmentVariablesNodeProperty environmentVariablesNodeProperty = globalNodeProperties.get(hudson.slaves.EnvironmentVariablesNodeProperty.class);
 
