@@ -260,15 +260,12 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         final List<String> argumentsForCommand = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
-
         ArgumentListBuilder arguments = new ArgumentListBuilder();
-
         FileOutputStream fos = new FileOutputStream("./output.log");
-
         arguments.add(argumentsForCommand);
 
         try {
-            launcher.launch().cmds(arguments).envs(envVars).stdout(
+            int exitCode = launcher.launch().cmds(arguments).envs(envVars).stdout(
                     // Writing stdout to file
                     new OutputStream() {
                         @Override
@@ -291,6 +288,11 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                             listener.getLogger().close();
                         }
                     }).join();
+
+            if(exitCode != 0) {
+                run.setResult(Result.FAILURE);
+                return;
+            }
         } catch (InterruptedException interruptedException) {
             String scanId = PluginUtils.getScanIdFromLogFile("./output.log", log);
             if(!scanId.isEmpty()) {
@@ -303,7 +305,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 run.setResult(Result.ABORTED);
                 return;
             }
-        }  catch (Exception e) {
+        } catch (Exception e) {
             log.info(e.getMessage());
             run.setResult(Result.FAILURE);
             return;
