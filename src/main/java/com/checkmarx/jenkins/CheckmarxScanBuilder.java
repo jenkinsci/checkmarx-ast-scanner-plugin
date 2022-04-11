@@ -290,7 +290,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                     }).join();
 
             if(exitCode != 0) {
-                log.info("Exit code from AST-CLI: 1");
+                log.info("Exit code from AST-CLI: " + exitCode);
                 run.setResult(Result.FAILURE);
                 return;
             }
