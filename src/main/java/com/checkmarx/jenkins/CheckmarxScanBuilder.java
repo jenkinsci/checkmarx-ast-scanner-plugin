@@ -290,6 +290,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                     }).join();
 
             if(exitCode != 0) {
+                log.info("Exit code from AST-CLI: 1");
                 run.setResult(Result.FAILURE);
                 return;
             }
@@ -299,12 +300,9 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 log.info("Cancelling scan with id: {}", scanId);
                 launcher.launch().cmds(PluginUtils.scanCancel(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, this.log)).envs(envVars).stdout(listener.getLogger()).join();
                 log.info("Successfully canceled scan with id: {}", scanId);
-                run.setResult(Result.ABORTED);
-                return;
-            } else {
-                run.setResult(Result.ABORTED);
-                return;
             }
+            run.setResult(Result.ABORTED);
+            return;
         } catch (Exception e) {
             log.info(e.getMessage());
             run.setResult(Result.FAILURE);
