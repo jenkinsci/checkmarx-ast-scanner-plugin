@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>4.38</version>
+        <version>4.40</version>
         <relativePath/>
     </parent>
     <groupId>com.checkmarx.jenkins</groupId>
@@ -94,7 +94,7 @@
         <dependency>
             <groupId>com.checkmarx.ast</groupId>
             <artifactId>ast-cli-java-wrapper</artifactId>
-            <version>1.0.31</version>
+            <version>1.0.34</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -176,7 +176,7 @@
             <plugin>
                 <groupId>org.jenkins-ci.tools</groupId>  <!-- This override has been added for building with Java 11 -->
                 <artifactId>maven-hpi-plugin</artifactId>
-                <version>3.26</version>
+                <version>3.27</version>
                 <extensions>true</extensions>
                 <configuration>
                     <minimumJavaVersion>8</minimumJavaVersion>
