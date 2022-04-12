@@ -57,6 +57,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     public static final String CVS_BRANCH_VAR = "${CVS_BRANCH}";
     public static final String SVN_REVISION = "SVN_REVISION";
     public static final String SVN_REVISION_VAR = "${SVN_REVISION}";
+    public static final String LOGFILE = "./output.log";
 
 
     CxLoggerAdapter log;
@@ -261,7 +262,9 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         final List<String> argumentsForCommand = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
         ArgumentListBuilder arguments = new ArgumentListBuilder();
-        FileOutputStream fos = new FileOutputStream("./output.log");
+        FilePath tempDir = workspace.createTempDir("cx", "");
+        FilePath logfile = tempDir.child(LOGFILE);
+        FileOutputStream fos = new FileOutputStream(logfile.getRemote());
         arguments.add(argumentsForCommand);
 
         try {
@@ -295,7 +298,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 return;
             }
         } catch (InterruptedException interruptedException) {
-            String scanId = PluginUtils.getScanIdFromLogFile("./output.log", log);
+            String scanId = PluginUtils.getScanIdFromLogFile(logfile.getRemote(), log);
             if(!scanId.isEmpty()) {
                 log.info("Cancelling scan with id: {}", scanId);
                 launcher.launch().cmds(PluginUtils.scanCancel(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, this.log)).envs(envVars).stdout(listener.getLogger()).join();
@@ -309,9 +312,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        String scanId = PluginUtils.getScanIdFromLogFile("./output.log", log);
-
-        FilePath tempDir = workspace.createTempDir("cx", "");
+        String scanId = PluginUtils.getScanIdFromLogFile(logfile.getRemote(), log);
 
         ArgumentListBuilder htmlArguments = new ArgumentListBuilder();
         ArgumentListBuilder jsonArguments = new ArgumentListBuilder();
