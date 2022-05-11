@@ -34,10 +34,12 @@ import org.kohsuke.stapler.verb.POST;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.*;
 
 import static com.cloudbees.plugins.credentials.CredentialsMatchers.anyOf;
@@ -263,8 +265,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         final List<String> argumentsForCommand = PluginUtils.submitScanDetailsToWrapper(scanConfig, checkmarxCliExecutable, this.log);
         ArgumentListBuilder arguments = new ArgumentListBuilder();
         FilePath tempDir = workspace.createTempDir("cx", "");
-        FilePath logfile = tempDir.child(LOGFILE);
-        FileOutputStream fos = new FileOutputStream(logfile.getRemote());
+        ByteArrayOutputStream fos = new ByteArrayOutputStream();
         arguments.add(argumentsForCommand);
 
         try {
@@ -298,7 +299,8 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 return;
             }
         } catch (InterruptedException interruptedException) {
-            String scanId = PluginUtils.getScanIdFromLogFile(logfile.getRemote(), log);
+            String logFile = fos.toString(String.valueOf(StandardCharsets.UTF_8));
+            String scanId = PluginUtils.getScanIdFromLogFile(logFile);
             if(!scanId.isEmpty()) {
                 log.info("Cancelling scan with id: {}", scanId);
                 launcher.launch().cmds(PluginUtils.scanCancel(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, this.log)).envs(envVars).stdout(listener.getLogger()).join();
@@ -311,42 +313,38 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             run.setResult(Result.FAILURE);
             return;
         }
-
-        String scanId = PluginUtils.getScanIdFromLogFile(logfile.getRemote(), log);
+        String logFile = fos.toString(String.valueOf(StandardCharsets.UTF_8));
+        String scanId = PluginUtils.getScanIdFromLogFile(logFile);
 
         ArgumentListBuilder htmlArguments = new ArgumentListBuilder();
         ArgumentListBuilder jsonArguments = new ArgumentListBuilder();
 
         try {
             final List<String>  htmlReportCommand = PluginUtils.generateHTMLReport(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, log);
-
-            String fileName = Long.toString(System.nanoTime());
-
             htmlArguments.add(htmlReportCommand);
             //Adding temp directory path name to command arguments
             htmlArguments.add("--output-path");
             htmlArguments.add(tempDir.getRemote());
             //Adding output file name to command arguments
             htmlArguments.add("--output-name");
-            htmlArguments.add(fileName);
+            htmlArguments.add(PluginUtils.CHECKMARX_AST_RESULTS);
 
             launcher.launch().cmds(htmlArguments).envs(envVars).stdout(listener.getLogger()).join();
 
             final List<String>  jsonReportCommand = PluginUtils.generateJsonReport(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, log);
-
             jsonArguments.add(jsonReportCommand);
             //Adding temp directory path name to command arguments
             jsonArguments.add("--output-path");
             jsonArguments.add(tempDir.getRemote());
             //Adding output file name to command arguments
             jsonArguments.add("--output-name");
-            jsonArguments.add(fileName);
+            jsonArguments.add(PluginUtils.CHECKMARX_AST_RESULTS);
 
             launcher.launch().cmds(jsonArguments).envs(envVars).stdout(listener.getLogger()).join();
 
             //Getting created report files path
-            FilePath htmlReportFilePath = tempDir.child(fileName + ".html" );
-            FilePath jsonReportFilePath = tempDir.child(fileName + ".json" );
+            FilePath htmlReportFilePath = tempDir.child(PluginUtils.CHECKMARX_AST_RESULTS_HTML);
+            FilePath jsonReportFilePath = tempDir.child(PluginUtils.CHECKMARX_AST_RESULTS_JSON);
 
             ArtifactArchiver artifactArchiverHtml = new ArtifactArchiver(workspace.toURI().relativize(htmlReportFilePath.toURI()).toString());
             artifactArchiverHtml.perform(run, workspace, envVars, launcher, listener);
