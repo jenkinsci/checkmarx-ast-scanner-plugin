@@ -286,8 +286,8 @@
         padding: 16px 20px;
         width: 24.5%;
         }
-        .cx-demo {
-        color: red;
+        .cx-details {
+        color: black;
         align-items: center;
         text-align: center;
         margin-bottom: 10px;
@@ -361,72 +361,84 @@
                             </div>
 
                         </div>
-                        <div class="top-row">
-                            <div class="element risk-level-tile ${resultSummary.getRiskStyle()}">
-                                <span class="value">${resultSummary.getRiskMessage()}</span>
-                            </div>
-                            <div class="element">
-                                <div class="total">Total Vulnerabilities</div>
-                                <div>
-                                    <div class="legend">
-                                        <span class="severity-legend-dot">high</span>
-                                        <div class="severity-legend-text bg-red"></div>
-                                    </div>
-                                    <div class="legend">
-                                        <span class="severity-legend-dot">medium</span>
-                                        <div class="severity-legend-text bg-green"></div>
-                                    </div>
-                                    <div class="legend">
-                                        <span class="severity-legend-dot">low</span>
-                                        <div class="severity-legend-text bg-grey"></div>
+                        <j:choose>
+                            <j:when test="${resultSummary.getScanInfoMessage() != null}">
+                                <div class="cx-info">
+                                    <div class="data">
+                                        <div class="cx-details">${resultSummary.getScanInfoMessage()}</div>
                                     </div>
                                 </div>
-                                <div class="chart">
-                                    <div id="total" class="total">${resultSummary.getTotalIssues()}</div>
-                                    <div class="single-stacked-bar-chart bar-chart">
-                                        <div class="progress">
-                                            <div class="progress-bar bg-danger value">${resultSummary.getHighIssues()}
+                            </j:when>
+                            <j:otherwise>
+                                <div class="top-row">
+                                    <div class="element risk-level-tile ${resultSummary.getRiskStyle()}">
+                                        <span class="value">${resultSummary.getRiskMessage()}</span>
+                                    </div>
+                                    <div class="element">
+                                        <div class="total">Total Vulnerabilities</div>
+                                        <div>
+                                            <div class="legend">
+                                                <span class="severity-legend-dot">high</span>
+                                                <div class="severity-legend-text bg-red"></div>
                                             </div>
-                                            <div class="progress-bar bg-warning value">
-                                                ${resultSummary.getMediumIssues()}
+                                            <div class="legend">
+                                                <span class="severity-legend-dot">medium</span>
+                                                <div class="severity-legend-text bg-green"></div>
                                             </div>
-                                            <div class="progress-bar bg-success value">${resultSummary.getLowIssues()}
+                                            <div class="legend">
+                                                <span class="severity-legend-dot">low</span>
+                                                <div class="severity-legend-text bg-grey"></div>
+                                            </div>
+                                        </div>
+                                        <div class="chart">
+                                            <div id="total" class="total">${resultSummary.getTotalIssues()}</div>
+                                            <div class="single-stacked-bar-chart bar-chart">
+                                                <div class="progress">
+                                                    <div class="progress-bar bg-danger value">${resultSummary.getHighIssues()}
+                                                    </div>
+                                                    <div class="progress-bar bg-warning value">
+                                                        ${resultSummary.getMediumIssues()}
+                                                    </div>
+                                                    <div class="progress-bar bg-success value">${resultSummary.getLowIssues()}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="element">
+                                        <div class="total">Vulnerabilities per Scan Type</div>
+                                        <div class="legend">
+                                            <div class="legend">
+                                                <span class="engines-legend-dot">SAST</span>
+                                                <div class="severity-engines-text bg-sast"></div>
+                                            </div>
+                                            <div class="legend">
+                                                <span class="engines-legend-dot">KICS</span>
+                                                <div class="severity-engines-text bg-kicks"></div>
+                                            </div>
+                                            <div class="legend">
+                                                <span class="engines-legend-dot">SCA</span>
+                                                <div class="severity-engines-text bg-sca"></div>
+                                            </div>
+                                        </div>
+                                        <div class="chart">
+                                            <div class="single-stacked-bar-chart bar-chart">
+                                                <div class="progress">
+                                                    <div class="progress-bar bg-sast value">${resultSummary.getSastIssues()}
+                                                    </div>
+                                                    <div class="progress-bar bg-kicks value">${resultSummary.getScaIssues()}
+                                                    </div>
+                                                    <div class="progress-bar bg-sca value">${resultSummary.getKicsIssues()}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="element">
-                                <div class="total">Vulnerabilities per Scan Type</div>
-                                <div class="legend">
-                                    <div class="legend">
-                                        <span class="engines-legend-dot">SAST</span>
-                                        <div class="severity-engines-text bg-sast"></div>
-                                    </div>
-                                    <div class="legend">
-                                        <span class="engines-legend-dot">KICS</span>
-                                        <div class="severity-engines-text bg-kicks"></div>
-                                    </div>
-                                    <div class="legend">
-                                        <span class="engines-legend-dot">SCA</span>
-                                        <div class="severity-engines-text bg-sca"></div>
-                                    </div>
-                                </div>
-                                <div class="chart">
-                                    <div class="single-stacked-bar-chart bar-chart">
-                                        <div class="progress">
-                                            <div class="progress-bar bg-sast value">${resultSummary.getSastIssues()}
-                                            </div>
-                                            <div class="progress-bar bg-kicks value">${resultSummary.getScaIssues()}
-                                            </div>
-                                            <div class="progress-bar bg-sca value">${resultSummary.getKicsIssues()}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                            </j:otherwise>
+                        </j:choose>
                     </div>
+
                 </j:when>
                 <j:otherwise>Error parsing summary results json.</j:otherwise>
             </j:choose>
