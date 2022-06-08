@@ -211,12 +211,12 @@
                 <configuration>
                     <check>
                         <haltOnFailure>true</haltOnFailure>
-                        <branchRate>75</branchRate>
-                        <lineRate>85</lineRate>
-                        <totalBranchRate>75</totalBranchRate>
-                        <totalLineRate>85</totalLineRate>
-                        <packageLineRate>75</packageLineRate>
-                        <packageBranchRate>85</packageBranchRate>
+                        <branchRate>100</branchRate>
+                        <lineRate>100</lineRate>
+                        <totalBranchRate>100</totalBranchRate>
+                        <totalLineRate>100</totalLineRate>
+                        <packageLineRate>100</packageLineRate>
+                        <packageBranchRate>100</packageBranchRate>
                     </check>
                 </configuration>
             </plugin>
