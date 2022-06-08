@@ -31,5 +31,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-      - name: Run tests with Maven
-        run: mvn -B test --file pom.xml
+      - name: Generate Cobertura report
+        run: mvn cobertura:cobertura
