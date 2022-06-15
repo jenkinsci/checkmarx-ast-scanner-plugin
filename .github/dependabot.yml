@@ -4,7 +4,11 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    reviewers:
+      - "Checkmarx/ast-galactica-team"
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    reviewers:
+      - "Checkmarx/ast-galactica-team"
