@@ -204,24 +204,6 @@
                     <generateBackupPoms>false</generateBackupPoms>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>4.7.0.0</version>
-                <configuration>
-                    <effort>Max</effort>
-                    <threshold>High</threshold>
-                    <xmlOutput>true</xmlOutput>
-                    <failOnError>false</failOnError>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 </project>
