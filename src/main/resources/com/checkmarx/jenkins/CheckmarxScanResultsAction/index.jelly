@@ -362,7 +362,7 @@
 
                         </div>
                         <j:choose>
-                            <j:when test="${resultSummary.getScanInfoMessage() != null}">
+                            <j:when test="${!(resultSummary.getStatus().equalsIgnoreCase('Completed') || resultSummary.getStatus().equalsIgnoreCase('Failed') || resultSummary.getStatus().equalsIgnoreCase('Partial'))}">
                                 <div class="cx-info">
                                     <div class="data">
                                         <div class="cx-details">${resultSummary.getScanInfoMessage()}</div>
