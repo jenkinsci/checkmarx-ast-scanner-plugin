@@ -31,6 +31,10 @@
         background-color: #0fcdc2 !important;
         }
 
+        .bg-api-sec {
+        background-color: #bdbdbd !important;
+        }
+
         .header-row .cx-info .data .calendar-svg {
         margin-right: 8px;
         }
@@ -108,7 +112,7 @@
 
 
         .top-row .element {
-        margin: 0 3rem 6rem;
+        margin: 0 3rem 2rem;
         }
 
         .top-row .risk-level-tile .value {
@@ -206,6 +210,39 @@
         width: 100%;
         }
 
+        .second-row {
+        -ms-flex-pack: justify;
+        -webkit-box-pack: justify;
+        align-items: normal;
+        display: flex;
+        justify-content: space-evenly;
+        padding: 20px;
+        width: 100%;
+        height: 100px;
+        }
+
+        .second-row .element {
+        -ms-flex-direction: column;
+        -ms-flex-pack: justify;
+        -webkit-box-direction: normal;
+        -webkit-box-orient: vertical;
+        -webkit-box-pack: justify;
+        -webkit-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        background: #fff;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        color: #565360;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        min-height: 100px;
+        padding: 16px 20px;
+        width: 18%;
+        margin: 0 3rem 2rem;
+        position: fixed;
+        right: 40px;
+        }
+
         .bar-chart .progress .progress-bar.bg-danger {
         background-color: #f1605d !important;
         }
@@ -291,6 +328,15 @@
         align-items: center;
         text-align: center;
         margin-bottom: 10px;
+        }
+
+        hr {
+        display: block;
+        height: 1px;
+        border: 0;
+        border-top: 1px solid #ccc;
+        margin: 1em 0;
+        padding: 0;
         }
     </style>
 
@@ -420,6 +466,10 @@
                                                 <span class="engines-legend-dot">SCA</span>
                                                 <div class="severity-engines-text bg-sca"></div>
                                             </div>
+                                            <div class="legend">
+                                                <span class="engines-legend-dot">API SECURITY</span>
+                                                <div class="severity-engines-text bg-api-sec"></div>
+                                            </div>
                                         </div>
                                         <div class="chart">
                                             <div class="single-stacked-bar-chart bar-chart">
@@ -430,11 +480,19 @@
                                                     </div>
                                                     <div class="progress-bar bg-sca value">${resultSummary.getKicsIssues()}
                                                     </div>
+                                                    <div class="progress-bar bg-api-sec value">${resultSummary.getApiSecResult().getTotalRisksCount()}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </div><hr/>
+                                <div class="second-row">
+                                    <div class="element">
+                                        <div class="total">Detected APIs</div>
+                                        <div class="total">${resultSummary.getApiSecResult().getApiCount()}</div>
+                                    </div>
+                                </div>`
                             </j:otherwise>
                         </j:choose>
                     </div>
