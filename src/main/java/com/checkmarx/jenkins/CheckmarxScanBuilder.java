@@ -221,6 +221,8 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
+        PluginUtils.insertSecretsAsEnvVars(scanConfig, envVars );
+
         printConfiguration(envVars, descriptor, log);
 
         if (!getUseOwnServerCredentials()) checkmarxInstallation = descriptor.getCheckmarxInstallation();

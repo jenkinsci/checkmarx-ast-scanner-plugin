@@ -7,14 +7,12 @@ import com.checkmarx.ast.wrapper.CxException;
 import com.checkmarx.ast.wrapper.CxWrapper;
 import com.checkmarx.jenkins.model.ScanConfig;
 import com.checkmarx.jenkins.tools.CheckmarxInstallation;
+import hudson.EnvVars;
 import jenkins.model.Jenkins;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -26,6 +24,9 @@ public class PluginUtils {
     public static final String CHECKMARX_AST_RESULTS_JSON = "checkmarx-ast-results.json";
     public static final String REGEX_SCAN_ID_FROM_LOGS = "(ID)\":\"((\\\\\"|[^\"])*)";
     private static final String JENKINS = "Jenkins";
+    static final String CX_CLIENT_ID_ENV_KEY = "CX_CLIENT_ID";
+    static final String CX_CLIENT_SECRET_ENV_KEY = "CX_CLIENT_SECRET";
+    static final String PRINT_ASTERISKS = "*****";
 
     public static CheckmarxInstallation findCheckmarxInstallation(final String checkmarxInstallation) {
         final CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor descriptor = Jenkins.get().getDescriptorByType(CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor.class);
@@ -41,7 +42,7 @@ public class PluginUtils {
         cxConfig.setAdditionalParameters(scanConfig.getAdditionalOptions());
 
         final Map<String, String> params = new HashMap<>();
-        params.put(CxConstants.AGENT, PluginUtils.JENKINS);
+        params.put(CxConstants.AGENT, JENKINS);
         params.put(CxConstants.SOURCE, scanConfig.getSourceDirectory());
         params.put(CxConstants.PROJECT_NAME, scanConfig.getProjectName());
         params.put(CxConstants.BRANCH, scanConfig.getBranchName());
@@ -82,8 +83,8 @@ public class PluginUtils {
         return CxConfig.builder()
                 .baseUri(scanConfig.getServerUrl())
                 .baseAuthUri(scanConfig.getBaseAuthUrl())
-                .clientId(scanConfig.getCheckmarxToken().getClientId())
-                .clientSecret(scanConfig.getCheckmarxToken().getToken().getPlainText())
+                .clientId(PRINT_ASTERISKS)
+                .clientSecret(PRINT_ASTERISKS)
                 .tenant(scanConfig.getTenantName())
                 .additionalParameters(null)
                 .pathToExecutable(checkmarxCliExecutable)
@@ -98,6 +99,11 @@ public class PluginUtils {
             return matcher.group(2);
         }
         return "";
+    }
+
+    public static void insertSecretsAsEnvVars(ScanConfig scanConfig, EnvVars envVars) throws IOException, InterruptedException {
+        envVars.put(CX_CLIENT_ID_ENV_KEY,scanConfig.getCheckmarxToken().getClientId());
+        envVars.put(CX_CLIENT_SECRET_ENV_KEY, scanConfig.getCheckmarxToken().getToken().getPlainText());
     }
 
 }
