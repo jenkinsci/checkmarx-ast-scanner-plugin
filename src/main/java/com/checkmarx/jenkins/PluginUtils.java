@@ -26,7 +26,6 @@ public class PluginUtils {
     private static final String JENKINS = "Jenkins";
     static final String CX_CLIENT_ID_ENV_KEY = "CX_CLIENT_ID";
     static final String CX_CLIENT_SECRET_ENV_KEY = "CX_CLIENT_SECRET";
-    static final String PRINT_ASTERISKS = "*****";
 
     public static CheckmarxInstallation findCheckmarxInstallation(final String checkmarxInstallation) {
         final CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor descriptor = Jenkins.get().getDescriptorByType(CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor.class);
@@ -83,8 +82,6 @@ public class PluginUtils {
         return CxConfig.builder()
                 .baseUri(scanConfig.getServerUrl())
                 .baseAuthUri(scanConfig.getBaseAuthUrl())
-                .clientId(PRINT_ASTERISKS)
-                .clientSecret(PRINT_ASTERISKS)
                 .tenant(scanConfig.getTenantName())
                 .additionalParameters(null)
                 .pathToExecutable(checkmarxCliExecutable)
