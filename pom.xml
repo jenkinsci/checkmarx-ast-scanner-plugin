@@ -8,7 +8,6 @@
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
         <version>4.41</version>
-        <relativePath/>
     </parent>
     <groupId>com.checkmarx.jenkins</groupId>
     <artifactId>checkmarx-ast-scanner</artifactId>
@@ -52,7 +51,6 @@
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
         <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
         <jenkins.version>2.263.1</jenkins.version>
-        <java.level>8</java.level>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
     </properties>
 
@@ -118,7 +116,7 @@
         <dependency>
             <groupId>org.jodd</groupId>
             <artifactId>jodd-lagarto</artifactId>
-            <version>6.0.6</version>
+            <version>6.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
@@ -178,9 +176,6 @@
                 <artifactId>maven-hpi-plugin</artifactId>
                 <version>3.28</version>
                 <extensions>true</extensions>
-                <configuration>
-                    <minimumJavaVersion>8</minimumJavaVersion>
-                </configuration>
             </plugin>
             <!--            <plugin>-->
             <!--                 This override has been skipped for building with Java 11-->
