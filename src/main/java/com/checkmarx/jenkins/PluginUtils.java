@@ -73,7 +73,8 @@ public class PluginUtils {
 
     public static String authValidate(final ScanConfig scanConfig, final String checkmarxCliExecutable) throws IOException, InterruptedException, CxConfig.InvalidCLIConfigException, URISyntaxException, CxException {
         final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
-
+        cxConfig.setClientId(scanConfig.getCheckmarxToken().getClientId());
+        cxConfig.setClientSecret(scanConfig.getCheckmarxToken().getToken().getPlainText());
         final CxWrapper cxWrapper = new CxWrapper(cxConfig);
         return cxWrapper.authValidate();
     }
