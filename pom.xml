@@ -169,7 +169,7 @@
             <plugin>
                 <groupId>org.jenkins-ci.tools</groupId>  <!-- This override has been added for building with Java 11 -->
                 <artifactId>maven-hpi-plugin</artifactId>
-                <version>3.28</version>
+                <version>3.29</version>
                 <extensions>true</extensions>
             </plugin>
             <!--            <plugin>-->
