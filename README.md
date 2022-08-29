@@ -21,7 +21,7 @@
 <p align="center">
     Allows the user to scan their source code using Checkmarx AST platform and provide the results as a feedback.
 <br />
-    <a href="https://checkmarx.atlassian.net/wiki/spaces/AST/pages/2966164587/Jenkins+Plugin"><strong>Explore the docs »</strong></a>
+    <a href="https://checkmarx.com/resource/documents/en/34965-68685-checkmarx-one-jenkins-plugin.html"><strong>Explore the docs »</strong></a>
     <br />
     <br />
     <a href="https://issues.jenkins-ci.org/">Report Bug</a>
@@ -75,11 +75,11 @@ The plugin can be configured as build step within the Job Configuration.
 - Access to a CxAST account (user credentials or an API Key)
 
 ### Setting Up
-To set the plugin up, follow this [Instructions](https://checkmarx.atlassian.net/wiki/spaces/AST/pages/3221226473/Installing+the+Jenkins+CxAST+Plugin)
+To set the plugin up, follow this [Instructions](https://checkmarx.com/resource/documents/en/34965-68687-checkmarx-one-jenkins-plugin---installation-and-initial-setup.html)
 
 ## Usage
 
-To see how you can use our tool, please refer to the [Documentation](https://checkmarx.atlassian.net/wiki/spaces/AST/pages/2966164587/Jenkins+Plugin)
+To see how you can use our tool, please refer to the [Documentation](https://checkmarx.com/resource/documents/en/34965-68685-checkmarx-one-jenkins-plugin.html)
 
 
 ## Contribution
