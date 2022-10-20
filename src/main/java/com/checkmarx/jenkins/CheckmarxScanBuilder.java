@@ -463,9 +463,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             scanConfig.setAdditionalOptions(envVars.expand(additionalOptions));
         }
 
-        File file = new File(workspace.getRemote());
-        String sourceDir = file.getAbsolutePath();
-        scanConfig.setSourceDirectory(sourceDir);
+        scanConfig.setSourceDirectory(workspace.getRemote());
 
         return scanConfig;
     }
