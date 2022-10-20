@@ -296,8 +296,8 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
             if(exitCode != 0) {
                 log.error(String.format("Exit code from AST-CLI: %s", exitCode));
+                log.info("Generating failed report");
                 run.setResult(Result.FAILURE);
-                return;
             }
         } catch (InterruptedException interruptedException) {
             String logFile = fos.toString(String.valueOf(StandardCharsets.UTF_8));
@@ -308,14 +308,17 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 log.info("Successfully canceled scan with id: {}", scanId);
             }
             run.setResult(Result.ABORTED);
-            return;
         } catch (Exception e) {
             log.info(e.getMessage());
             run.setResult(Result.FAILURE);
-            return;
         }
         String logFile = fos.toString(String.valueOf(StandardCharsets.UTF_8));
         String scanId = PluginUtils.getScanIdFromLogFile(logFile);
+
+        if(scanId.isEmpty()) {
+            log.error("Scan ID is emtpty");
+            return;
+        }
 
         ArgumentListBuilder htmlArguments = new ArgumentListBuilder();
         ArgumentListBuilder jsonArguments = new ArgumentListBuilder();
