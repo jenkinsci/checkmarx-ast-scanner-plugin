@@ -316,7 +316,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         String scanId = PluginUtils.getScanIdFromLogFile(logFile);
 
         if(scanId.isEmpty()) {
-            log.error("Scan ID is emtpty");
+            log.error("Scan ID is empty");
             return;
         }
 
