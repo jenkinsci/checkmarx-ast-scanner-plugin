@@ -92,7 +92,7 @@
         <dependency>
             <groupId>com.checkmarx.ast</groupId>
             <artifactId>ast-cli-java-wrapper</artifactId>
-            <version>1.0.50</version>
+            <version>1.0.51</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -137,6 +137,16 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.24</version>
+        </dependency>
+        <!--
+        Required for jenkins versions < 2.378
+        ast-cli-java-wrapper needs version 2.0.3 but jenkins uses 1.X
+         -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.3</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
