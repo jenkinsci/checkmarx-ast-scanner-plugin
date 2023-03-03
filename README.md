@@ -58,9 +58,9 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-The CxAST Jenkins Plugin allows the user to trigger CxSAST, CxSCA and KICS scans directly from a Jenkins workflow. 
-It provides a wrapper around the CxAST CLI Tool which creates a zip archive from your source code repository and uploads 
-it to CxAST for scanning. The plugin provides easy integration into Jenkins while enabling scan customization using the 
+The CxOne/CxAST Jenkins Plugin allows the user to trigger SAST, SCA and IaC and API Security scans directly from a Jenkins workflow. 
+It provides a wrapper around the CxOne CLI Tool which creates a zip archive from your source code repository and uploads 
+it to CxOne for scanning. The plugin provides easy integration into Jenkins while enabling scan customization using the 
 full functionality and flexibility of the CLI tool.
 
 <!-- GETTING STARTED -->
@@ -72,7 +72,7 @@ The plugin can be configured as build step within the Job Configuration.
 
 - A Jenkins installation v2.263.1 or above
 
-- Access to a CxAST account (user credentials or an API Key)
+- Access to a CxOne account (user credentials or an API Key)
 
 ### Setting Up
 To set the plugin up, follow this [Instructions](https://checkmarx.com/resource/documents/en/34965-68687-checkmarx-one-jenkins-plugin---installation-and-initial-setup.html)
@@ -97,7 +97,7 @@ Distributed under the [MIT](LICENSE). See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Checkmarx - AST Integrations Team
+Checkmarx - CxOne Integrations Team
 
 Find more integrations from our team [here](https://github.com/Checkmarx/ci-cd-integrations#checkmarx-ast-integrations)
 
