@@ -14,10 +14,10 @@ import static java.lang.String.format;
 public class DownloadService {
 
     private static final String CHECKMARX_FILE_NAME = "ast-cli";
-    private static final String CHECKMARX_CLI_REPO = "https://api.github.com/repos/CheckmarxDev/ast-cli";
+    private static final String CHECKMARX_CLI_REPO = "https://api.github.com/repos/Checkmarx/ast-cli";
     private static final String CHECKMARX_CLI_RELEASES_LATEST = CHECKMARX_CLI_REPO + "/releases/latest";
     private static final String CHECKMARX_RELEASES_TAGS = CHECKMARX_CLI_REPO +  "/releases/tags/%s";
-    private static final String CHECKMARX_DOWNLOAD = "https://github.com/CheckmarxDev/ast-cli/releases/download/%s/%s";
+    private static final String CHECKMARX_DOWNLOAD = "https://github.com/Checkmarx/ast-cli/releases/download/%s/%s";
 
     private DownloadService() {
         // squid:S1118
