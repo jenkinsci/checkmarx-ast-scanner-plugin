@@ -168,35 +168,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins
-                </groupId>  <!-- This override has been added for building with Java 11 -->
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
-<!--                <configuration>-->
-<!--                    <release>8</release>-->
-<!--                </configuration>-->
-            </plugin>
-            <plugin>
-                <groupId>org.jenkins-ci.tools</groupId>  <!-- This override has been added for building with Java 11 -->
-                <artifactId>maven-hpi-plugin</artifactId>
-                <version>3.35</version>
-                <extensions>true</extensions>
-            </plugin>
-            <!--            <plugin>-->
-            <!--                 This override has been skipped for building with Java 11-->
-            <!--                <groupId>org.codehaus.mojo</groupId>-->
-            <!--                <artifactId>animal-sniffer-maven-plugin</artifactId>-->
-            <!--                <version>${animal.sniffer.version}</version>-->
-            <!--                <configuration>-->
-            <!--                    <skip>false</skip> &lt;!&ndash; Skipped because the signature for java11 isn't available &ndash;&gt;-->
-            <!--                    <signature>-->
-            <!--                        <groupId>org.codehaus.mojo.signature</groupId>-->
-            <!--                        <artifactId>${java.level}</artifactId>-->
-            <!--                        <version>1.0</version>-->
-            <!--                    </signature>-->
-            <!--                </configuration>-->
-            <!--            </plugin>-->
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
                 <version>2.15.0</version>
