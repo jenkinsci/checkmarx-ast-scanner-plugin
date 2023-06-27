@@ -104,7 +104,7 @@ jobs:
       - name: mvn compile and package
         if: inputs.dev == true || inputs.tag == 'nightly'
         run: |
-          mvn package -DskipTests
+          mvn package -DskipTests -Dset.changelist
       - name: Create Release
         uses: softprops/action-gh-release@v1
         if: inputs.dev == true || inputs.tag == 'nightly'
