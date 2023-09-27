@@ -22,7 +22,7 @@ public class PluginUtils {
     public static final String CHECKMARX_AST_RESULTS = "checkmarx-ast-results";
     public static final String CHECKMARX_AST_RESULTS_HTML = "checkmarx-ast-results.html";
     public static final String CHECKMARX_AST_RESULTS_JSON = "checkmarx-ast-results.json";
-    public static final String REGEX_SCAN_ID_FROM_LOGS = "\"ID\":\"([a-f0-9\\-]+)\"";
+    public static final String REGEX_SCAN_ID_FROM_LOGS = "Scan ID: ([0-9a-fA-F-]+)";
     private static final String JENKINS = "Jenkins";
     static final String CX_CLIENT_ID_ENV_KEY = "CX_CLIENT_ID";
     static final String CX_CLIENT_SECRET_ENV_KEY = "CX_CLIENT_SECRET";
