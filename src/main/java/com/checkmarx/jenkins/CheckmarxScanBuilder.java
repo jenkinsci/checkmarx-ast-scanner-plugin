@@ -221,7 +221,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return;
         }
 
-        PluginUtils.insertSecretsAsEnvVars(scanConfig, envVars );
+        PluginUtils.insertSecretsAsEnvVars(scanConfig, envVars);
 
         printConfiguration(envVars, descriptor, log);
 
@@ -294,7 +294,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                         }
                     }).join();
 
-            if(exitCode != 0) {
+            if (exitCode != 0) {
                 log.error(String.format("Exit code from AST-CLI: %s", exitCode));
                 log.info("Generating failed report");
                 run.setResult(Result.FAILURE);
@@ -302,7 +302,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         } catch (InterruptedException interruptedException) {
             String logFile = fos.toString(String.valueOf(StandardCharsets.UTF_8));
             String scanId = PluginUtils.getScanIdFromLogFile(logFile);
-            if(!scanId.isEmpty()) {
+            if (!scanId.isEmpty()) {
                 log.info("Cancelling scan with id: {}", scanId);
                 launcher.launch().cmds(PluginUtils.scanCancel(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, this.log)).envs(envVars).stdout(listener.getLogger()).join();
                 log.info("Successfully canceled scan with id: {}", scanId);
@@ -315,7 +315,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         String logFile = fos.toString(String.valueOf(StandardCharsets.UTF_8));
         String scanId = PluginUtils.getScanIdFromLogFile(logFile);
 
-        if(scanId.isEmpty()) {
+        if (scanId.isEmpty()) {
             log.error("Scan ID is empty");
             return;
         }
@@ -324,7 +324,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         ArgumentListBuilder jsonArguments = new ArgumentListBuilder();
 
         try {
-            final List<String>  htmlReportCommand = PluginUtils.generateHTMLReport(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, log);
+            final List<String> htmlReportCommand = PluginUtils.generateHTMLReport(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, log);
             htmlArguments.add(htmlReportCommand);
             //Adding temp directory path name to command arguments
             htmlArguments.add("--output-path");
@@ -335,7 +335,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
             launcher.launch().cmds(htmlArguments).envs(envVars).stdout(listener.getLogger()).join();
 
-            final List<String>  jsonReportCommand = PluginUtils.generateJsonReport(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, log);
+            final List<String> jsonReportCommand = PluginUtils.generateJsonReport(UUID.fromString(scanId), scanConfig, checkmarxCliExecutable, log);
             jsonArguments.add(jsonReportCommand);
             //Adding temp directory path name to command arguments
             jsonArguments.add("--output-path");
@@ -390,12 +390,12 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
      * @param envVars
      * @return
      */
-    private String getBranchToPrint(EnvVars envVars){
+    private String getBranchToPrint(EnvVars envVars) {
 
-        if(StringUtils.isNotEmpty(getBranchName())) return getBranchName();
-        if(StringUtils.isNotEmpty(envVars.get(GIT_BRANCH))) return GIT_BRANCH_VAR;
-        if(StringUtils.isNotEmpty(envVars.get(CVS_BRANCH))) return CVS_BRANCH_VAR;
-        if(StringUtils.isNotEmpty(envVars.get(SVN_REVISION))) return SVN_REVISION_VAR;
+        if (StringUtils.isNotEmpty(getBranchName())) return getBranchName();
+        if (StringUtils.isNotEmpty(envVars.get(GIT_BRANCH))) return GIT_BRANCH_VAR;
+        if (StringUtils.isNotEmpty(envVars.get(CVS_BRANCH))) return CVS_BRANCH_VAR;
+        if (StringUtils.isNotEmpty(envVars.get(SVN_REVISION))) return SVN_REVISION_VAR;
 
         return "";
     }
@@ -473,7 +473,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
     /**
      * Check if all mandatory fields are filled in
-     *
      */
     private void checkMandatoryFields(CheckmarxScanBuilderDescriptor descriptor) throws CheckmarxException {
         if (fixEmptyAndTrim(getProjectName()) == null)
@@ -660,7 +659,8 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         private String getCheckmarxInstallationPath(String checkmarxInstallation) throws CheckmarxException, IOException, InterruptedException {
-            if (StringUtils.isEmpty(checkmarxInstallation)) throw new CheckmarxException("Checkmarx installation not provided");
+            if (StringUtils.isEmpty(checkmarxInstallation))
+                throw new CheckmarxException("Checkmarx installation not provided");
 
             TaskListener taskListener = () -> System.out;
             Launcher launcher = Jenkins.get().createLauncher(taskListener);
