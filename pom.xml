@@ -12,6 +12,7 @@
     <groupId>com.checkmarx.jenkins</groupId>
     <artifactId>checkmarx-ast-scanner</artifactId>
     <version>${revision}-${changelist}</version>
+    <packaging>hpi</packaging>
 
     <!-- More Project Information -->
     <name>Checkmarx AST Scanner Plugin</name>
