@@ -11,7 +11,7 @@
     </parent>
     <groupId>com.checkmarx.jenkins</groupId>
     <artifactId>checkmarx-ast-scanner</artifactId>
-    <version>${revision}${changelist}</version>
+    <version>${revision}</version>
     <packaging>hpi</packaging>
 
     <!-- More Project Information -->
@@ -46,7 +46,7 @@
 
     <properties>
         <!-- Override the needed properties from the parent pom -->
-        <revision>2.0</revision>
+        <revision>2.0.12</revision>
         <changelist>-SNAPSHOT</changelist>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
         <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
