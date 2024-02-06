@@ -11,7 +11,7 @@
     </parent>
     <groupId>com.checkmarx.jenkins</groupId>
     <artifactId>checkmarx-ast-scanner</artifactId>
-    <version>${revision}-${changelist}</version>
+    <version>${revision}.${changelist}</version>
     <packaging>hpi</packaging>
 
     <!-- More Project Information -->
@@ -46,8 +46,8 @@
 
     <properties>
         <!-- Override the needed properties from the parent pom -->
-        <revision>2.0.12</revision>
-        <changelist>-SNAPSHOT</changelist>
+        <revision>2.0</revision>
+        <changelist>999999-SNAPSHOT</changelist>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
         <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
         <jenkins.version>2.361.1</jenkins.version>
@@ -60,7 +60,7 @@
                 <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-2.263.x</artifactId>
-                <version>961.vf0c9f6f59827</version>
+                <version>984.vb5eaac999a7e</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -172,9 +172,9 @@
                 </groupId>  <!-- This override has been added for building with Java 11 -->
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
-<!--                <configuration>-->
-<!--                    <release>8</release>-->
-<!--                </configuration>-->
+                <configuration>
+                    <release>8</release>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jenkins-ci.tools</groupId>  <!-- This override has been added for building with Java 11 -->
