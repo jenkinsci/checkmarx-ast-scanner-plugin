@@ -50,7 +50,7 @@
         <changelist>999999-SNAPSHOT</changelist>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
         <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
-        <jenkins.version>2.263.1</jenkins.version>
+        <jenkins.version>2.361.1</jenkins.version>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
     </properties>
 
@@ -87,7 +87,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.15.2</version>
+            <version>2.16.1</version>
         </dependency>
         <dependency>
             <groupId>com.checkmarx.ast</groupId>
@@ -111,7 +111,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20230618</version>
+            <version>20231013</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
@@ -179,7 +179,7 @@
             <plugin>
                 <groupId>org.jenkins-ci.tools</groupId>  <!-- This override has been added for building with Java 11 -->
                 <artifactId>maven-hpi-plugin</artifactId>
-                <version>3.35</version>
+                <version>3.51</version>
                 <extensions>true</extensions>
             </plugin>
             <!--            <plugin>-->
