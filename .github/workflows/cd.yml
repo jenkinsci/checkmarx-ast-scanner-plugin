@@ -80,7 +80,7 @@ jobs:
         uses: actions/setup-java@v4.0.0
         with:
           distribution: temurin
-          java-version: 8
+          java-version: 11
       - name: Release
         uses: jenkins-infra/jenkins-maven-cd-action@v1.3.3
         if: inputs.dev == false && inputs.tag != 'nightly'
