@@ -11,7 +11,7 @@
     </parent>
     <groupId>com.checkmarx.jenkins</groupId>
     <artifactId>checkmarx-ast-scanner</artifactId>
-    <version>${revision}</version>
+    <version>${revision}-${changelist}</version>
     <packaging>hpi</packaging>
 
     <!-- More Project Information -->
