@@ -106,7 +106,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
-            <version>2.24</version>
+            <version>657.v03b_e8115821b_</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
