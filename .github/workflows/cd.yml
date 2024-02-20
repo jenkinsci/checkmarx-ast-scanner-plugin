@@ -43,13 +43,12 @@ jobs:
       should_release: ${{ (steps.verify-ci-status.outputs.result == 'success' && steps.interesting-categories.outputs.interesting == 'true') || inputs.dev == true || inputs.tag == 'nightly' }}
     steps:
       - name: Verify CI status
-        uses: jenkins-infra/verify-ci-status-action@v1.2.2
+        uses: jenkins-infra/verify-ci-status-action@7d194d0c5785a12623f350581db5243063542f90 #v1.2.2
         id: verify-ci-status
         if: inputs.dev == false || inputs.tag == 'nightly'
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           output_result: true
-
       - name: Release Drafter
         uses: release-drafter/release-drafter@v6
         if: steps.verify-ci-status.outputs.result == 'success' && inputs.dev == false && inputs.tag != 'nightly'
@@ -61,7 +60,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check interesting categories
-        uses: jenkins-infra/interesting-category-action@v1.2.1
+        uses: jenkins-infra/interesting-category-action@78f4b74509528c18790d9c36b2cccb5b21ed3451  #v1.2.1
         id: interesting-categories
         if: steps.verify-ci-status.outputs.result == 'success' || inputs.dev == false || inputs.tag != 'nightly'
         with:
@@ -82,7 +81,7 @@ jobs:
           distribution: temurin
           java-version: 11
       - name: Release
-        uses: jenkins-infra/jenkins-maven-cd-action@v1.3.3
+        uses: jenkins-infra/jenkins-maven-cd-action@5f5529707ac2bef1ff86da2553ce465ed669aa65  #v1.3.3
         if: inputs.dev == false && inputs.tag != 'nightly'
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -90,7 +89,7 @@ jobs:
           MAVEN_TOKEN: ${{ secrets.MAVEN_TOKEN }}
       - name: Upload Release Asset
         id: upload-release-asset
-        uses: shogo82148/actions-upload-release-asset@v1
+        uses: shogo82148/actions-upload-release-asset@dccd6d23e64fd6a746dce6814c0bde0a04886085 #v1
         if: inputs.dev == false && inputs.tag != 'nightly'
         env:
           GITHUB_TOKEN: ${{ github.token}}
@@ -106,7 +105,7 @@ jobs:
         run: |
           mvn package -DskipTests -Dset.changelist
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 #v1
         if: inputs.dev == true || inputs.tag == 'nightly'
         env:
           GITHUB_TOKEN: ${{ github.token}}
