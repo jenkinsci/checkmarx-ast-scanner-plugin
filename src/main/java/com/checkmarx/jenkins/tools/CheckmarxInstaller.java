@@ -129,7 +129,7 @@ public class CheckmarxInstaller extends ToolInstaller {
         EnvVars envVars = getEnvVars(node);
         String httpProxyStr = envVars.get(HTTP_PROXY);
         if (StringUtils.isNotEmpty(httpProxyStr)) {
-            log.info("Installer using roxy: " + httpProxyStr);
+            log.info("Installer using proxy: " + httpProxyStr);
         }
         return httpProxyStr;
     }
@@ -248,7 +248,7 @@ public class CheckmarxInstaller extends ToolInstaller {
                     connection = source.openConnection(proxy);
                     if (StringUtils.isNotEmpty(proxyUrl.getUserInfo())) {
                         // Proxy With UserInfo Not Checked !
-                        String authHeader = new String(proxyUrl.getUserInfo().getBytes(UTF_8)).replace("\r\n", "");
+                        String authHeader = new String(Base64.getEncoder().encode(proxyUrl.getUserInfo().getBytes(UTF_8)), UTF_8).replace("\r\n", "");
                         connection.setRequestProperty("Proxy-Authorization", getAuthProxyPrefix(proxyType) + authHeader);
                         String[] userPass = proxyUrl.getUserInfo().split(":");
                         Authenticator.setDefault(new MyAuthenticator(userPass[0], userPass[1]));
@@ -267,16 +267,12 @@ public class CheckmarxInstaller extends ToolInstaller {
                 FileUtils.copyInputStreamToFile(stream, destination);
             } catch (Throwable var15) {
                 var6 = var15;
-                throw new ToolDetectionException("failed to download file by URL: " + source + proxyStr != null ? ". proxy: " + proxyStr : "", var15);
+                throw new ToolDetectionException("failed to download file by URL" , var6);
             } finally {
-                if (stream != null && var6 != null) {
-                    try {
-                        stream.close();
-                    } catch (Throwable var14) {
-                        var6.addSuppressed(var14);
-                    }
-                } else {
+                try {
                     stream.close();
+                } catch (Throwable var14) {
+                    var6.addSuppressed(var14);
                 }
             }
         }
