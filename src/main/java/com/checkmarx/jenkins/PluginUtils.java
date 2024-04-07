@@ -38,7 +38,6 @@ public class PluginUtils {
         log.info("Submitting the scan details to the CLI wrapper.");
 
         final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
-        cxConfig.setAdditionalParameters(scanConfig.getAdditionalOptions());
 
         final Map<String, String> params = new HashMap<>();
         params.put(CxConstants.AGENT, JENKINS);

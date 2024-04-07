@@ -30,6 +30,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
@@ -244,7 +245,7 @@ public class CheckmarxInstaller extends ToolInstaller {
                     if (StringUtils.isNotEmpty(proxyUrl.getUserInfo())) {
                         // Proxy With UserInfo Not Checked !
 
-                        String authHeader = new String(proxyUrl.getUserInfo().getBytes()).replace("\r\n", "");
+                        String authHeader = new String(Base64.getEncoder().encode(proxyUrl.getUserInfo().getBytes(UTF_8))).replace("\r\n", "");
                         connection.setRequestProperty("Proxy-Authorization", getAuthProxyPrefix(proxyType) + authHeader);
                         String[] userPass = proxyUrl.getUserInfo().split(":");
                         Authenticator.setDefault(new MyAuthenticator(userPass[0], userPass[1]));
