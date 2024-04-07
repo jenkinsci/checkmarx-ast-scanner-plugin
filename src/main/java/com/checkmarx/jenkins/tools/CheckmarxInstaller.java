@@ -243,7 +243,8 @@ public class CheckmarxInstaller extends ToolInstaller {
                     connection = source.openConnection(proxy);
                     if (StringUtils.isNotEmpty(proxyUrl.getUserInfo())) {
                         // Proxy With UserInfo Not Checked !
-                        String authHeader = new String(Base64.getEncoder().encode(proxyUrl.getUserInfo().getBytes())).replace("\r\n", "");
+
+                        String authHeader = new String(proxyUrl.getUserInfo().getBytes()).replace("\r\n", "");
                         connection.setRequestProperty("Proxy-Authorization", getAuthProxyPrefix(proxyType) + authHeader);
                         String[] userPass = proxyUrl.getUserInfo().split(":");
                         Authenticator.setDefault(new MyAuthenticator(userPass[0], userPass[1]));
