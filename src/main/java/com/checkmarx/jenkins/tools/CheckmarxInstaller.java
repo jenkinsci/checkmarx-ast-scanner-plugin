@@ -31,6 +31,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.*;
 import java.net.*;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 import static hudson.Util.fixEmptyAndTrim;
@@ -43,7 +44,7 @@ public class CheckmarxInstaller extends ToolInstaller {
 
     private static final String INSTALLED_FROM = ".installedFrom";
     private static final String TIMESTAMP_FILE = ".timestamp";
-    private static final String HTTP_PROXY = "HTTP_PROXY";
+    public static final String HTTP_PROXY = "HTTP_PROXY";
     private final String version;
     private final Long updatePolicyIntervalHours;
     private CxLoggerAdapter log;
@@ -104,11 +105,11 @@ public class CheckmarxInstaller extends ToolInstaller {
         Platform platform = nodeChannel.call(new GetPlatform(node.getDisplayName()));
 
         try {
-            Proxy proxy = getProxy(node);
+            String proxyStr = getProxy(node);
             URL checkmarxDownloadUrl = DownloadService.getDownloadUrlForCli(version, platform);
 
             expected.mkdirs();
-            nodeChannel.call(new Downloader(checkmarxDownloadUrl, proxy,
+            nodeChannel.call(new Downloader(checkmarxDownloadUrl, proxyStr,
                     expected.child(DownloadService.buildFileName(version, platform)),
                     expected.child(platform.checkmarxWrapperFileName)
             ));
@@ -123,18 +124,10 @@ public class CheckmarxInstaller extends ToolInstaller {
         return expected;
     }
 
-    private Proxy getProxy(Node node) throws ToolDetectionException {
+    private String getProxy(Node node) {
         EnvVars envVars = getEnvVars(node);
         String httpProxyStr = envVars.get(HTTP_PROXY);
-        if (StringUtils.isEmpty(httpProxyStr)) {
-            return null;
-        }
-        try {
-            URI proxyUrl = new URI(httpProxyStr);
-            return new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyUrl.getHost(), proxyUrl.getPort()));
-        } catch (Exception e) {
-           throw new ToolDetectionException("failed to create proxy with "+httpProxyStr, e);
-        }
+        return httpProxyStr;
     }
 
     private static EnvVars getEnvVars(Node node) {
@@ -185,15 +178,31 @@ public class CheckmarxInstaller extends ToolInstaller {
         }
     }
 
+    public static class MyAuthenticator extends Authenticator {
+        String username;
+        String password;
+
+        public MyAuthenticator(String username, String password) {
+            this.username = username;
+            this.password = password;
+        }
+        protected PasswordAuthentication getPasswordAuthentication() {
+            if (getRequestorType().equals(RequestorType.PROXY)) {
+                return new PasswordAuthentication(username, password.toCharArray());
+            }
+            return super.getPasswordAuthentication();
+        }
+    }
+
     private static class Downloader extends MasterToSlaveCallable<Void, IOException> {
         private static final long serialVersionUID = 1L;
 
         private final URL downloadUrl;
         private final FilePath output;
         private final FilePath executableFile;
-        private final Proxy proxy;
+        private final String proxy;
 
-        Downloader(URL downloadUrl, Proxy proxy, FilePath output, FilePath executableFile) {
+        Downloader(URL downloadUrl, String proxy, FilePath output, FilePath executableFile) {
             this.downloadUrl = downloadUrl;
             this.output = output;
             this.executableFile = executableFile;
@@ -203,7 +212,7 @@ public class CheckmarxInstaller extends ToolInstaller {
         @Override
         public Void call() throws IOException {
             final File downloadedFile = new File(output.getRemote());
-            copyURLToFile(downloadUrl, proxy, downloadedFile, 10000, 10000);
+            copyURLToFile(downloadUrl, proxy,"", downloadedFile, 10000, 10000);
 
             try {
                 extract(downloadedFile.getAbsolutePath(), downloadedFile.getParent());
@@ -223,18 +232,31 @@ public class CheckmarxInstaller extends ToolInstaller {
             return null;
         }
 
-        public static void copyURLToFile(URL source, Proxy proxy, File destination, int connectionTimeoutMillis, int readTimeoutMillis) throws IOException {
+        public static void copyURLToFile(URL source, String proxyStr, String proxyType, File destination, int connectionTimeoutMillis, int readTimeoutMillis) throws IOException {
             URLConnection connection;
-            if (proxy == null) {
+            if (proxyStr == null) {
                 connection = source.openConnection();
             } else {
-                connection = source.openConnection(proxy);
+                try {
+                    URI proxyUrl = new URI(proxyStr);
+                    Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyUrl.getHost(), proxyUrl.getPort()));
+                    connection = source.openConnection(proxy);
+                    if (StringUtils.isNotEmpty(proxyUrl.getUserInfo())) {
+                        String authHeader = new String(Base64.getEncoder().encode(proxyUrl.getUserInfo().getBytes())).replace("\r\n", "");
+                        connection.setRequestProperty("Proxy-Authorization", getAuthProxyPrefix(proxyType) + authHeader);
+                        String[] userPass = proxyUrl.getUserInfo().split(":");
+                        Authenticator.setDefault(new MyAuthenticator(userPass[0], userPass[1]));
+                    }
+                } catch (Exception e) {
+                    throw new ToolDetectionException("failed to create proxy with " + proxyStr, e);
+                }
             }
+
             connection.setConnectTimeout(connectionTimeoutMillis);
             connection.setReadTimeout(readTimeoutMillis);
+            connection.connect();
             InputStream stream = connection.getInputStream();
             Throwable var6 = null;
-
             try {
                 FileUtils.copyInputStreamToFile(stream, destination);
             } catch (Throwable var15) {
@@ -251,6 +273,10 @@ public class CheckmarxInstaller extends ToolInstaller {
                     stream.close();
                 }
             }
+        }
+
+        private static String getAuthProxyPrefix(String proxyType) {
+            return proxyType != null && proxyType.equals("ntlm") ? "Basic " : "NTLM ";
         }
 
         public static void extract(String srcFile, String dest) throws ArchiveException, IOException, CompressorException {

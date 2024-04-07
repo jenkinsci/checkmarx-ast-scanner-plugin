@@ -43,6 +43,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.*;
 
+import static com.checkmarx.jenkins.tools.CheckmarxInstaller.HTTP_PROXY;
 import static com.cloudbees.plugins.credentials.CredentialsMatchers.anyOf;
 import static com.cloudbees.plugins.credentials.CredentialsMatchers.withId;
 import static com.cloudbees.plugins.credentials.CredentialsProvider.findCredentialById;
@@ -462,6 +463,9 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         scanConfig.setBranchName(branchName);
 
         String additionalOptions = getUseOwnAdditionalOptions() ? getAdditionalOptions() : descriptor.getAdditionalOptions();
+        if (envVars.containsKey(HTTP_PROXY)) {
+            additionalOptions = additionalOptions.concat(" --http-proxy " + envVars.get(HTTP_PROXY));
+        }
         if (fixEmptyAndTrim(additionalOptions) != null) {
             scanConfig.setAdditionalOptions(envVars.expand(additionalOptions));
         }
