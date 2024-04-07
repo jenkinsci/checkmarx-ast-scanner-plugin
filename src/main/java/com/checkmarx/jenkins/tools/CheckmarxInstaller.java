@@ -128,6 +128,9 @@ public class CheckmarxInstaller extends ToolInstaller {
     private String getProxy(Node node) {
         EnvVars envVars = getEnvVars(node);
         String httpProxyStr = envVars.get(HTTP_PROXY);
+        if (StringUtils.isNotEmpty(httpProxyStr)) {
+            log.info("Installer using roxy: " + httpProxyStr);
+        }
         return httpProxyStr;
     }
 
@@ -187,6 +190,7 @@ public class CheckmarxInstaller extends ToolInstaller {
             this.username = username;
             this.password = password;
         }
+
         protected PasswordAuthentication getPasswordAuthentication() {
             if (getRequestorType().equals(RequestorType.PROXY)) {
                 return new PasswordAuthentication(username, password.toCharArray());
@@ -213,7 +217,7 @@ public class CheckmarxInstaller extends ToolInstaller {
         @Override
         public Void call() throws IOException {
             final File downloadedFile = new File(output.getRemote());
-            copyURLToFile(downloadUrl, proxy,"", downloadedFile, 10000, 10000);
+            copyURLToFile(downloadUrl, proxy, "", downloadedFile, 10000, 10000);
 
             try {
                 extract(downloadedFile.getAbsolutePath(), downloadedFile.getParent());
@@ -244,8 +248,7 @@ public class CheckmarxInstaller extends ToolInstaller {
                     connection = source.openConnection(proxy);
                     if (StringUtils.isNotEmpty(proxyUrl.getUserInfo())) {
                         // Proxy With UserInfo Not Checked !
-
-                        String authHeader = new String(Base64.getEncoder().encode(proxyUrl.getUserInfo().getBytes(UTF_8))).replace("\r\n", "");
+                        String authHeader = new String(proxyUrl.getUserInfo().getBytes(UTF_8)).replace("\r\n", "");
                         connection.setRequestProperty("Proxy-Authorization", getAuthProxyPrefix(proxyType) + authHeader);
                         String[] userPass = proxyUrl.getUserInfo().split(":");
                         Authenticator.setDefault(new MyAuthenticator(userPass[0], userPass[1]));
@@ -264,7 +267,7 @@ public class CheckmarxInstaller extends ToolInstaller {
                 FileUtils.copyInputStreamToFile(stream, destination);
             } catch (Throwable var15) {
                 var6 = var15;
-                throw var15;
+                throw new ToolDetectionException("failed to download file by URL: " + source + proxyStr != null ? ". proxy: " + proxyStr : "", var15);
             } finally {
                 if (stream != null && var6 != null) {
                     try {
