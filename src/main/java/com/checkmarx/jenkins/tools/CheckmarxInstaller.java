@@ -262,18 +262,12 @@ public class CheckmarxInstaller extends ToolInstaller {
             connection.setReadTimeout(readTimeoutMillis);
             connection.connect();
             InputStream stream = connection.getInputStream();
-            Throwable var6 = null;
             try {
                 FileUtils.copyInputStreamToFile(stream, destination);
             } catch (Throwable var15) {
-                var6 = var15;
-                throw new ToolDetectionException("failed to download file by URL" , var6);
+                throw new ToolDetectionException("failed to download file by URL" , var15);
             } finally {
-                try {
-                    stream.close();
-                } catch (Throwable var14) {
-                    var6.addSuppressed(var14);
-                }
+                stream.close();
             }
         }
 
