@@ -242,33 +242,42 @@ public class CheckmarxInstaller extends ToolInstaller {
             if (proxyStr == null) {
                 connection = source.openConnection();
             } else {
-                try {
-                    URI proxyUrl = new URI(proxyStr);
-                    Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyUrl.getHost(), proxyUrl.getPort()));
-                    connection = source.openConnection(proxy);
-                    if (StringUtils.isNotEmpty(proxyUrl.getUserInfo())) {
-                        // Proxy With UserInfo Not Checked !
-                        String authHeader = new String(Base64.getEncoder().encode(proxyUrl.getUserInfo().getBytes(UTF_8)), UTF_8).replace("\r\n", "");
-                        connection.setRequestProperty("Proxy-Authorization", "Basic " + authHeader);
-                        String[] userPass = proxyUrl.getUserInfo().split(":");
-                        Authenticator.setDefault(new MyAuthenticator(userPass[0], userPass[1]));
-                    }
-                } catch (Exception e) {
-                    throw new ToolDetectionException("failed to create proxy with " + proxyStr, e);
-                }
+                connection = getUrlConnectionWithProxy(source, proxyStr);
             }
-
             connection.setConnectTimeout(connectionTimeoutMillis);
             connection.setReadTimeout(readTimeoutMillis);
-            connection.connect();
             InputStream stream = connection.getInputStream();
             try {
                 FileUtils.copyInputStreamToFile(stream, destination);
-            } catch (Throwable var15) {
-                throw new ToolDetectionException("failed to download file by URL" , var15);
+            } catch (Throwable e) {
+                throw new ToolDetectionException("failed to download file by URL" , e);
             } finally {
-                stream.close();
+                if (stream != null) {
+                    stream.close();
+                }
             }
+        }
+
+        private static URLConnection getUrlConnectionWithProxy(URL source, String proxyStr) throws ToolDetectionException {
+            try {
+                URI proxyUrl = new URI(proxyStr);
+                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyUrl.getHost(), proxyUrl.getPort()));
+                URLConnection connection = source.openConnection(proxy);
+                if (StringUtils.isNotEmpty(proxyUrl.getUserInfo())) {
+                    setUserAndPassword(connection, proxyUrl);
+                }
+                return connection;
+            } catch (Exception e) {
+                throw new ToolDetectionException("failed to create proxy with " + proxyStr, e);
+            }
+        }
+
+        private static void setUserAndPassword(URLConnection connection, URI proxyUrl) {
+            // Proxy With UserName And Password Not Checked !
+            String authHeader = new String(Base64.getEncoder().encode(proxyUrl.getUserInfo().getBytes(UTF_8)), UTF_8).replace("\r\n", "");
+            connection.setRequestProperty("Proxy-Authorization", "Basic " + authHeader);
+            String[] userPass = proxyUrl.getUserInfo().split(":");
+            Authenticator.setDefault(new MyAuthenticator(userPass[0], userPass[1]));
         }
 
         public static void extract(String srcFile, String dest) throws ArchiveException, IOException, CompressorException {
