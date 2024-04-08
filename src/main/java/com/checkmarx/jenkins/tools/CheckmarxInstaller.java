@@ -217,7 +217,7 @@ public class CheckmarxInstaller extends ToolInstaller {
         @Override
         public Void call() throws IOException {
             final File downloadedFile = new File(output.getRemote());
-            copyURLToFile(downloadUrl, proxy, "", downloadedFile, 10000, 10000);
+            copyURLToFile(downloadUrl, proxy, downloadedFile, 10000, 10000);
 
             try {
                 extract(downloadedFile.getAbsolutePath(), downloadedFile.getParent());
@@ -237,7 +237,7 @@ public class CheckmarxInstaller extends ToolInstaller {
             return null;
         }
 
-        public static void copyURLToFile(URL source, String proxyStr, String proxyType, File destination, int connectionTimeoutMillis, int readTimeoutMillis) throws IOException {
+        public static void copyURLToFile(URL source, String proxyStr, File destination, int connectionTimeoutMillis, int readTimeoutMillis) throws IOException {
             URLConnection connection;
             if (proxyStr == null) {
                 connection = source.openConnection();
@@ -249,7 +249,7 @@ public class CheckmarxInstaller extends ToolInstaller {
                     if (StringUtils.isNotEmpty(proxyUrl.getUserInfo())) {
                         // Proxy With UserInfo Not Checked !
                         String authHeader = new String(Base64.getEncoder().encode(proxyUrl.getUserInfo().getBytes(UTF_8)), UTF_8).replace("\r\n", "");
-                        connection.setRequestProperty("Proxy-Authorization", getAuthProxyPrefix(proxyType) + authHeader);
+                        connection.setRequestProperty("Proxy-Authorization", "Basic " + authHeader);
                         String[] userPass = proxyUrl.getUserInfo().split(":");
                         Authenticator.setDefault(new MyAuthenticator(userPass[0], userPass[1]));
                     }
@@ -269,10 +269,6 @@ public class CheckmarxInstaller extends ToolInstaller {
             } finally {
                 stream.close();
             }
-        }
-
-        private static String getAuthProxyPrefix(String proxyType) {
-            return proxyType != null && proxyType.equals("ntlm") ? "Basic " : "NTLM ";
         }
 
         public static void extract(String srcFile, String dest) throws ArchiveException, IOException, CompressorException {
