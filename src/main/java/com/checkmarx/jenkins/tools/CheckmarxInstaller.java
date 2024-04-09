@@ -15,6 +15,10 @@ import hudson.tools.ToolInstallation;
 import hudson.tools.ToolInstaller;
 import hudson.tools.ToolInstallerDescriptor;
 import jenkins.security.MasterToSlaveCallable;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -30,7 +34,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.*;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
@@ -217,12 +220,13 @@ public class CheckmarxInstaller extends ToolInstaller {
         @Override
         public Void call() throws IOException {
             final File downloadedFile = new File(output.getRemote());
-            copyURLToFile(downloadUrl, proxy, downloadedFile, 10000, 10000);
-
             try {
+                copyURLToFile(downloadUrl, proxy, downloadedFile, 10000, 10000);
                 extract(downloadedFile.getAbsolutePath(), downloadedFile.getParent());
             } catch (ArchiveException | CompressorException e) {
                 throw new IOException(format("Could not extract cli: %s", downloadedFile.getAbsolutePath()));
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
             }
 
             final File cxExecutable = new File(executableFile.getRemote());
@@ -237,16 +241,12 @@ public class CheckmarxInstaller extends ToolInstaller {
             return null;
         }
 
-        public static void copyURLToFile(URL source, String proxyStr, File destination, int connectionTimeoutMillis, int readTimeoutMillis) throws IOException {
-            URLConnection connection;
-            if (proxyStr == null) {
-                connection = source.openConnection();
-            } else {
-                connection = getUrlConnectionWithProxy(source, proxyStr);
-            }
-            connection.setConnectTimeout(connectionTimeoutMillis);
-            connection.setReadTimeout(readTimeoutMillis);
-            InputStream stream = connection.getInputStream();
+        public static void copyURLToFile(URL source, String proxyStr, File destination, int connectionTimeoutMillis, int readTimeoutMillis) throws IOException, URISyntaxException {
+            OkHttpClient client = new ProxyHttpClient().getHttpClient(proxyStr, connectionTimeoutMillis,readTimeoutMillis);
+            Request request = new Request.Builder().url(source).build();
+            Response response = client.newCall(request).execute();
+            ResponseBody responseBody = response.body();
+            InputStream stream = responseBody.byteStream();
             try {
                 FileUtils.copyInputStreamToFile(stream, destination);
             } catch (Throwable e) {
@@ -256,28 +256,6 @@ public class CheckmarxInstaller extends ToolInstaller {
                     stream.close();
                 }
             }
-        }
-
-        private static URLConnection getUrlConnectionWithProxy(URL source, String proxyStr) throws ToolDetectionException {
-            try {
-                URI proxyUrl = new URI(proxyStr);
-                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyUrl.getHost(), proxyUrl.getPort()));
-                URLConnection connection = source.openConnection(proxy);
-                if (StringUtils.isNotEmpty(proxyUrl.getUserInfo())) {
-                    setUserAndPassword(connection, proxyUrl);
-                }
-                return connection;
-            } catch (Exception e) {
-                throw new ToolDetectionException("failed to create proxy with " + proxyStr, e);
-            }
-        }
-
-        private static void setUserAndPassword(URLConnection connection, URI proxyUrl) {
-            // Proxy With UserName And Password Not Checked !
-            String authHeader = new String(Base64.getEncoder().encode(proxyUrl.getUserInfo().getBytes(UTF_8)), UTF_8).replace("\r\n", "");
-            connection.setRequestProperty("Proxy-Authorization", "Basic " + authHeader);
-            String[] userPass = proxyUrl.getUserInfo().split(":");
-            Authenticator.setDefault(new MyAuthenticator(userPass[0], userPass[1]));
         }
 
         public static void extract(String srcFile, String dest) throws ArchiveException, IOException, CompressorException {
