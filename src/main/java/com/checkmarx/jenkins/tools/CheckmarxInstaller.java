@@ -185,23 +185,6 @@ public class CheckmarxInstaller extends ToolInstaller {
         }
     }
 
-    public static class MyAuthenticator extends Authenticator {
-        String username;
-        String password;
-
-        public MyAuthenticator(String username, String password) {
-            this.username = username;
-            this.password = password;
-        }
-
-        protected PasswordAuthentication getPasswordAuthentication() {
-            if (getRequestorType().equals(RequestorType.PROXY)) {
-                return new PasswordAuthentication(username, password.toCharArray());
-            }
-            return super.getPasswordAuthentication();
-        }
-    }
-
     private static class Downloader extends MasterToSlaveCallable<Void, IOException> {
         private static final long serialVersionUID = 1L;
 
