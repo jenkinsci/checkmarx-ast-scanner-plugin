@@ -23,7 +23,11 @@ public class ProxyHttpClient {
                 Proxy _httpProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy.getHost(), proxy.getPort()));
                 if (StringUtils.isNotEmpty(proxy.getUserInfo())) {
                     String[] userPass = proxy.getUserInfo().split(":");
-                    Authenticator _httpProxyAuth = getAuthenticator(userPass);
+                    Authenticator _httpProxyAuth = (route, response) -> {
+                        String credential = Credentials.basic(userPass[0], userPass[1]);
+                        return response.request().newBuilder()
+                                .header("Proxy-Authorization", credential).build();
+                    };
                     return okClientBuilder.proxyAuthenticator(_httpProxyAuth).proxy(_httpProxy).build();
                 } else {
                     return okClientBuilder.proxy(_httpProxy).build();
@@ -31,14 +35,6 @@ public class ProxyHttpClient {
             }
         }
         return okClientBuilder.build();
-    }
-
-    private static Authenticator getAuthenticator(String[] userPass) {
-        return (route, response) -> {
-            String credential = Credentials.basic(userPass[0], userPass[1]);
-            return response.request().newBuilder()
-                    .header("Proxy-Authorization", credential).build();
-        };
     }
 
     private static boolean isValidProxy(String proxyHost, int proxyPort) {
