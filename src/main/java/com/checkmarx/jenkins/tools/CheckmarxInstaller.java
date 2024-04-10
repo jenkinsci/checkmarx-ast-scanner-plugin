@@ -2,16 +2,23 @@ package com.checkmarx.jenkins.tools;
 
 import com.checkmarx.jenkins.CxLoggerAdapter;
 import com.checkmarx.jenkins.tools.internal.DownloadService;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Functions;
+import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
+import hudson.slaves.EnvironmentVariablesNodeProperty;
 import hudson.tools.ToolInstallation;
 import hudson.tools.ToolInstaller;
 import hudson.tools.ToolInstallerDescriptor;
 import jenkins.security.MasterToSlaveCallable;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
@@ -26,8 +33,9 @@ import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.*;
-import java.net.URL;
+import java.net.*;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 import static hudson.Util.fixEmptyAndTrim;
@@ -40,6 +48,7 @@ public class CheckmarxInstaller extends ToolInstaller {
 
     private static final String INSTALLED_FROM = ".installedFrom";
     private static final String TIMESTAMP_FILE = ".timestamp";
+    public static final String HTTP_PROXY = "HTTP_PROXY";
     private final String version;
     private final Long updatePolicyIntervalHours;
     private CxLoggerAdapter log;
@@ -100,10 +109,11 @@ public class CheckmarxInstaller extends ToolInstaller {
         Platform platform = nodeChannel.call(new GetPlatform(node.getDisplayName()));
 
         try {
+            String proxyStr = getProxy(node);
             URL checkmarxDownloadUrl = DownloadService.getDownloadUrlForCli(version, platform);
 
             expected.mkdirs();
-            nodeChannel.call(new Downloader(checkmarxDownloadUrl,
+            nodeChannel.call(new Downloader(checkmarxDownloadUrl, proxyStr,
                     expected.child(DownloadService.buildFileName(version, platform)),
                     expected.child(platform.checkmarxWrapperFileName)
             ));
@@ -116,6 +126,22 @@ public class CheckmarxInstaller extends ToolInstaller {
         }
 
         return expected;
+    }
+
+    private String getProxy(Node node) {
+        EnvVars envVars = getEnvVars(node);
+        String httpProxyStr = envVars.get(HTTP_PROXY);
+        if (StringUtils.isNotEmpty(httpProxyStr)) {
+            log.info("Installer using proxy: " + httpProxyStr);
+        }
+        return httpProxyStr;
+    }
+
+    private static EnvVars getEnvVars(Node node) {
+        EnvironmentVariablesNodeProperty environmentVariablesNodeProperty =
+                ((Hudson) node).getGlobalNodeProperties().get(EnvironmentVariablesNodeProperty.class);
+        EnvVars envVars = environmentVariablesNodeProperty != null ? environmentVariablesNodeProperty.getEnvVars() : new EnvVars();
+        return envVars;
     }
 
     public String getVersion() {
@@ -165,22 +191,25 @@ public class CheckmarxInstaller extends ToolInstaller {
         private final URL downloadUrl;
         private final FilePath output;
         private final FilePath executableFile;
+        private final String proxy;
 
-        Downloader(URL downloadUrl, FilePath output, FilePath executableFile) {
+        Downloader(URL downloadUrl, String proxy, FilePath output, FilePath executableFile) {
             this.downloadUrl = downloadUrl;
             this.output = output;
             this.executableFile = executableFile;
+            this.proxy = proxy;
         }
 
         @Override
         public Void call() throws IOException {
             final File downloadedFile = new File(output.getRemote());
-            FileUtils.copyURLToFile(downloadUrl, downloadedFile, 10000, 10000);
-
             try {
+                copyURLToFile(downloadUrl, proxy, downloadedFile, 10000, 10000);
                 extract(downloadedFile.getAbsolutePath(), downloadedFile.getParent());
             } catch (ArchiveException | CompressorException e) {
                 throw new IOException(format("Could not extract cli: %s", downloadedFile.getAbsolutePath()));
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
             }
 
             final File cxExecutable = new File(executableFile.getRemote());
@@ -193,6 +222,23 @@ public class CheckmarxInstaller extends ToolInstaller {
                 }
             }
             return null;
+        }
+
+        public static void copyURLToFile(URL source, String proxyStr, File destination, int connectionTimeoutMillis, int readTimeoutMillis) throws IOException, URISyntaxException {
+            OkHttpClient client = new ProxyHttpClient().getHttpClient(proxyStr, connectionTimeoutMillis,readTimeoutMillis);
+            Request request = new Request.Builder().url(source).build();
+            Response response = client.newCall(request).execute();
+            ResponseBody responseBody = response.body();
+            InputStream stream = responseBody.byteStream();
+            try {
+                FileUtils.copyInputStreamToFile(stream, destination);
+            } catch (Throwable e) {
+                throw new ToolDetectionException("failed to download file by URL" , e);
+            } finally {
+                if (stream != null) {
+                    stream.close();
+                }
+            }
         }
 
         public static void extract(String srcFile, String dest) throws ArchiveException, IOException, CompressorException {
