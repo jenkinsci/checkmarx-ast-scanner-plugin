@@ -1,6 +1,7 @@
 package com.checkmarx.jenkins.tools;
 
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URI;
@@ -9,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.*;
 import org.apache.commons.lang.StringUtils;
+
+import javax.annotation.Nullable;
 
 
 public class ProxyHttpClient {
@@ -23,11 +26,15 @@ public class ProxyHttpClient {
                 Proxy _httpProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy.getHost(), proxy.getPort()));
                 if (StringUtils.isNotEmpty(proxy.getUserInfo())) {
                     String[] userPass = proxy.getUserInfo().split(":");
-                    Authenticator _httpProxyAuth = (route, response) -> {
-                        String credential = Credentials.basic(userPass[0], userPass[1]);
-                        return response.request().newBuilder()
-                                .header("Proxy-Authorization", credential).build();
-                    };
+                    Authenticator _httpProxyAuth = new Authenticator() {
+                        @Nullable
+                        @Override
+                        public Request authenticate(Route route, Response response) throws IOException {
+                            String credential = Credentials.basic(userPass[0], userPass[1]);
+                            return response.request().newBuilder()
+                                    .header("Proxy-Authorization", credential).build();
+                        }
+                    } ;
                     return okClientBuilder.proxyAuthenticator(_httpProxyAuth).proxy(_httpProxy).build();
                 } else {
                     return okClientBuilder.proxy(_httpProxy).build();
