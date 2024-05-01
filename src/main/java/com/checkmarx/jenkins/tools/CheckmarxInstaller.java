@@ -1,6 +1,7 @@
 package com.checkmarx.jenkins.tools;
 
 import com.checkmarx.jenkins.CxLoggerAdapter;
+import com.checkmarx.jenkins.exception.CheckmarxException;
 import com.checkmarx.jenkins.tools.internal.DownloadService;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -14,6 +15,7 @@ import hudson.slaves.EnvironmentVariablesNodeProperty;
 import hudson.tools.ToolInstallation;
 import hudson.tools.ToolInstaller;
 import hudson.tools.ToolInstallerDescriptor;
+import jenkins.model.Jenkins;
 import jenkins.security.MasterToSlaveCallable;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -109,7 +111,7 @@ public class CheckmarxInstaller extends ToolInstaller {
         Platform platform = nodeChannel.call(new GetPlatform(node.getDisplayName()));
 
         try {
-            String proxyStr = getProxy(node);
+            String proxyStr = getProxy();
             URL checkmarxDownloadUrl = DownloadService.getDownloadUrlForCli(version, platform);
 
             expected.mkdirs();
@@ -128,8 +130,8 @@ public class CheckmarxInstaller extends ToolInstaller {
         return expected;
     }
 
-    private String getProxy(Node node) {
-        EnvVars envVars = getEnvVars(node);
+    private String getProxy() {
+        EnvVars envVars = getEnvVars();
         String httpProxyStr = envVars.get(HTTP_PROXY);
         if (StringUtils.isNotEmpty(httpProxyStr)) {
             log.info("Installer using proxy: " + httpProxyStr);
@@ -137,11 +139,10 @@ public class CheckmarxInstaller extends ToolInstaller {
         return httpProxyStr;
     }
 
-    private static EnvVars getEnvVars(Node node) {
+    private static EnvVars getEnvVars() {
         EnvironmentVariablesNodeProperty environmentVariablesNodeProperty =
-                ((Hudson) node).getGlobalNodeProperties().get(EnvironmentVariablesNodeProperty.class);
-        EnvVars envVars = environmentVariablesNodeProperty != null ? environmentVariablesNodeProperty.getEnvVars() : new EnvVars();
-        return envVars;
+                Jenkins.get().getGlobalNodeProperties().get(EnvironmentVariablesNodeProperty.class);
+        return environmentVariablesNodeProperty != null ? environmentVariablesNodeProperty.getEnvVars() : new EnvVars();
     }
 
     public String getVersion() {
@@ -208,7 +209,7 @@ public class CheckmarxInstaller extends ToolInstaller {
                 extract(downloadedFile.getAbsolutePath(), downloadedFile.getParent());
             } catch (ArchiveException | CompressorException e) {
                 throw new IOException(format("Could not extract cli: %s", downloadedFile.getAbsolutePath()));
-            } catch (URISyntaxException e) {
+            } catch (CheckmarxException | URISyntaxException e) {
                 throw new RuntimeException(e);
             }
 
@@ -224,7 +225,7 @@ public class CheckmarxInstaller extends ToolInstaller {
             return null;
         }
 
-        public static void copyURLToFile(URL source, String proxyStr, File destination, int connectionTimeoutMillis, int readTimeoutMillis) throws IOException, URISyntaxException {
+        public static void copyURLToFile(URL source, String proxyStr, File destination, int connectionTimeoutMillis, int readTimeoutMillis) throws IOException, URISyntaxException, CheckmarxException {
             OkHttpClient client = new ProxyHttpClient().getHttpClient(proxyStr, connectionTimeoutMillis,readTimeoutMillis);
             Request request = new Request.Builder().url(source).build();
             Response response = client.newCall(request).execute();
