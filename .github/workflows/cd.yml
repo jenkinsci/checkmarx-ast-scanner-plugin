@@ -105,7 +105,7 @@ jobs:
         run: |
           mvn package -DskipTests -Dset.changelist
       - name: Create Release
-        uses: softprops/action-gh-release@3198ee18f814cdf787321b4a32a26ddbf37acc52 #v2.0.3
+        uses: softprops/action-gh-release@a74c6b72af54cfa997e81df42d94703d6313a2d0 #v2.0.6
         if: inputs.dev == true || inputs.tag == 'nightly'
         env:
           GITHUB_TOKEN: ${{ github.token}}
