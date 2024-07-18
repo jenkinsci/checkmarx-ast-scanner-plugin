@@ -131,6 +131,11 @@
         width: 24.5%;
         }
 
+        .top-row .risk-level-tile.critical {
+        background-color: #C54A50;
+        color: #fcfdff;
+        }
+
         .top-row .risk-level-tile.high {
         background: #f1605d;
         color: #fcfdff;
@@ -206,6 +211,10 @@
         width: 100%;
         }
 
+        .bar-chart .progress .progress-bar.bg-critical {
+        background-color: #C54A50 !important;
+        }
+
         .bar-chart .progress .progress-bar.bg-danger {
         background-color: #f1605d !important;
         }
@@ -250,6 +259,10 @@
         .severity-legend-dot {
         font-size: 14px;
         padding-left: 5px;
+        }
+
+        .severity-legend-dot.critical {
+        background-color: #C54A50;
         }
 
         .severity-engines-text,
@@ -378,6 +391,10 @@
                                         <div class="total">Total Vulnerabilities</div>
                                         <div>
                                             <div class="legend">
+                                                <span class="severity-legend-dot">critical</span>
+                                                <div class="severity-legend-text bg-darkred"></div>
+                                            </div>
+                                            <div class="legend">
                                                 <span class="severity-legend-dot">high</span>
                                                 <div class="severity-legend-text bg-red"></div>
                                             </div>
@@ -394,12 +411,17 @@
                                             <div id="total" class="total">${resultSummary.getTotalIssues()}</div>
                                             <div class="single-stacked-bar-chart bar-chart">
                                                 <div class="progress">
-                                                    <div class="progress-bar bg-danger value">${resultSummary.getHighIssues()}
+                                                    <div class="progress-bar bg-critical value">
+                                                        ${resultSummary.getCriticalIssues()}
+                                                    </div>
+                                                    <div class="progress-bar bg-danger value">
+                                                        ${resultSummary.getHighIssues()}
                                                     </div>
                                                     <div class="progress-bar bg-warning value">
                                                         ${resultSummary.getMediumIssues()}
                                                     </div>
-                                                    <div class="progress-bar bg-success value">${resultSummary.getLowIssues()}
+                                                    <div class="progress-bar bg-success value">
+                                                        ${resultSummary.getLowIssues()}
                                                     </div>
                                                 </div>
                                             </div>
@@ -447,13 +469,13 @@
     </l:layout>
     <script>
         window.addEventListener('load', function () {
-            var totalVal = document.getElementById("total").textContent;
-            var elements = document.getElementsByClassName("value");
-            Array.prototype.forEach.call(elements, function (element) {
-                if (element.style) {
-                    element.style.width = ((element.textContent / totalVal) * 100) + "%";
-                }
-            });
+        var totalVal = document.getElementById("total").textContent;
+        var elements = document.getElementsByClassName("value");
+        Array.prototype.forEach.call(elements, function (element) {
+        if (element.style) {
+        element.style.width = ((element.textContent / totalVal) * 100) + "%";
+        }
+        });
         }, false);
     </script>
 
