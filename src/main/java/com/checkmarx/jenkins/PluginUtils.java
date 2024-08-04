@@ -8,6 +8,7 @@ import com.checkmarx.ast.wrapper.CxWrapper;
 import com.checkmarx.jenkins.model.ScanConfig;
 import com.checkmarx.jenkins.tools.CheckmarxInstallation;
 import hudson.EnvVars;
+import hudson.slaves.EnvironmentVariablesNodeProperty;
 import jenkins.model.Jenkins;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class PluginUtils {
     private static final String JENKINS = "Jenkins";
     static final String CX_CLIENT_ID_ENV_KEY = "CX_CLIENT_ID";
     static final String CX_CLIENT_SECRET_ENV_KEY = "CX_CLIENT_SECRET";
+    public static final String HTTP_PROXY = "HTTP_PROXY";
 
     public static CheckmarxInstallation findCheckmarxInstallation(final String checkmarxInstallation) {
         final CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor descriptor = Jenkins.get().getDescriptorByType(CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor.class);
@@ -102,5 +104,15 @@ public class PluginUtils {
         envVars.put(CX_CLIENT_ID_ENV_KEY,scanConfig.getCheckmarxToken().getClientId());
         envVars.put(CX_CLIENT_SECRET_ENV_KEY, scanConfig.getCheckmarxToken().getToken().getPlainText());
     }
+    public static String getProxy() {
+        EnvVars envVars = getEnvVars();
+        String httpProxyStr = envVars.get(HTTP_PROXY);
+        return httpProxyStr;
+    }
 
+    private static EnvVars getEnvVars() {
+        EnvironmentVariablesNodeProperty environmentVariablesNodeProperty =
+                Jenkins.get().getGlobalNodeProperties().get(EnvironmentVariablesNodeProperty.class);
+        return environmentVariablesNodeProperty != null ? environmentVariablesNodeProperty.getEnvVars() : new EnvVars();
+    }
 }
