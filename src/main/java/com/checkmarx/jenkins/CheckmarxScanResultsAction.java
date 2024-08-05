@@ -65,7 +65,7 @@ public class CheckmarxScanResultsAction implements RunAction2 {
                     String json = IOUtils.toString(stream);
                     ObjectMapper objectMapper = new ObjectMapper();
                     return objectMapper.readValue(json, ResultsSummary.class);
-                } catch (IOException | URISyntaxException | CheckmarxException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
