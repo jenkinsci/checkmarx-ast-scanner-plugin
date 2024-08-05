@@ -68,6 +68,5 @@ public class CheckmarxScanPipelineTest extends CheckmarxTestBase {
 
         ResultsSummary resultsSummary = action.getResultsSummary();
         assertNotNull(resultsSummary);
-        log.info("Results Summary: " + resultsSummary);
     }
 }
