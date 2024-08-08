@@ -25,7 +25,7 @@ jobs:
 
       - name: Delete releases and tags
         continue-on-error: true
-        uses: dev-drprasad/delete-older-releases@5494cd8b61c31b3c7a15f6267901195ec7df64e8  #v0.3.2
+        uses: dev-drprasad/delete-older-releases@0bf4e6748f08135170c2294f877ba7d9b633b028  #v0.3.3
         env:
           GITHUB_TOKEN: ${{ github.token}}
         with:
