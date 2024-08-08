@@ -102,7 +102,7 @@ Checkmarx - CxOne Integrations Team
 Find more integrations from our team [here](https://github.com/Checkmarx/ci-cd-integrations#checkmarx-ast-integrations)
 
 
-© 2022 Checkmarx Ltd. All Rights Reserved.
+© 2024 Checkmarx Ltd. All Rights Reserved.
 
 [contributors-shield]: https://img.shields.io/github/contributors/jenkinsci/checkmarx-ast-scanner-plugin.svg
 [contributors-url]: https://github.com/jenkinsci/checkmarx-ast-scanner-plugin/graphs/contributors
