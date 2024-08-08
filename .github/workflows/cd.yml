@@ -76,7 +76,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up JDK 8
-        uses: actions/setup-java@v4.0.0
+        uses: actions/setup-java@v4.2.1
         with:
           distribution: temurin
           java-version: 11
@@ -105,7 +105,7 @@ jobs:
         run: |
           mvn package -DskipTests -Dset.changelist
       - name: Create Release
-        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 #v1
+        uses: softprops/action-gh-release@3198ee18f814cdf787321b4a32a26ddbf37acc52 #v2.0.3
         if: inputs.dev == true || inputs.tag == 'nightly'
         env:
           GITHUB_TOKEN: ${{ github.token}}
