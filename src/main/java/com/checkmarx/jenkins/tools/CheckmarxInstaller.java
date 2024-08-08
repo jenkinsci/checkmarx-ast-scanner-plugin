@@ -1,6 +1,7 @@
 package com.checkmarx.jenkins.tools;
 
 import com.checkmarx.jenkins.CxLoggerAdapter;
+import com.checkmarx.jenkins.PluginUtils;
 import com.checkmarx.jenkins.exception.CheckmarxException;
 import com.checkmarx.jenkins.tools.internal.DownloadService;
 import hudson.EnvVars;
@@ -50,7 +51,6 @@ public class CheckmarxInstaller extends ToolInstaller {
 
     private static final String INSTALLED_FROM = ".installedFrom";
     private static final String TIMESTAMP_FILE = ".timestamp";
-    public static final String HTTP_PROXY = "HTTP_PROXY";
     private final String version;
     private final Long updatePolicyIntervalHours;
     private CxLoggerAdapter log;
@@ -111,7 +111,10 @@ public class CheckmarxInstaller extends ToolInstaller {
         Platform platform = nodeChannel.call(new GetPlatform(node.getDisplayName()));
 
         try {
-            String proxyStr = getProxy();
+            String proxyStr = PluginUtils.getProxy();
+            if (StringUtils.isNotEmpty(proxyStr)) {
+                log.getLogger().println("Installer using proxy: " + proxyStr);
+            }
             URL checkmarxDownloadUrl = DownloadService.getDownloadUrlForCli(version, platform);
 
             expected.mkdirs();
@@ -130,20 +133,6 @@ public class CheckmarxInstaller extends ToolInstaller {
         return expected;
     }
 
-    private String getProxy() {
-        EnvVars envVars = getEnvVars();
-        String httpProxyStr = envVars.get(HTTP_PROXY);
-        if (StringUtils.isNotEmpty(httpProxyStr)) {
-            log.info("Installer using proxy: " + httpProxyStr);
-        }
-        return httpProxyStr;
-    }
-
-    private static EnvVars getEnvVars() {
-        EnvironmentVariablesNodeProperty environmentVariablesNodeProperty =
-                Jenkins.get().getGlobalNodeProperties().get(EnvironmentVariablesNodeProperty.class);
-        return environmentVariablesNodeProperty != null ? environmentVariablesNodeProperty.getEnvVars() : new EnvVars();
-    }
 
     public String getVersion() {
         return version;
