@@ -9,10 +9,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Checkmarx AST CLI Action
-        uses: checkmarx/ast-github-action@main
+        uses: checkmarx/ast-github-action@0b99738bf8a3c684087db9dccebb8114e90fa191 # main
         with:
           base_uri: ${{ secrets.BASE_URI }}
           cx_tenant: ${{ secrets.TENANT }}
           cx_client_id: ${{ secrets.CLIENT_ID }}
           cx_client_secret: ${{ secrets.CLIENT_SECRET }}
-          additional_params: --tags phoenix --threshold "sast-high=1;sca-high=1;sca-medium=1;sca-low=1"
+          additional_params: --tags phoenix --threshold "sast-high=1;sca-critical=1;sca-high=1;sca-medium=1;sca-low=1;iac-security-critical=1;iac-security-high=1;iac-security-medium=1;iac-security-low=1"
