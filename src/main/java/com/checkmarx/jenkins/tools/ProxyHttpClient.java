@@ -23,15 +23,19 @@ public class ProxyHttpClient {
                 .readTimeout(readTimeoutMillis, TimeUnit.MILLISECONDS);
         if (proxyString != null) {
             URI proxy = new URI(proxyString);
+            if (!"https".equalsIgnoreCase(proxy.getScheme())) {
+                throw new CheckmarxException("Proxy URL must use HTTPS");
+            }
             if (isValidProxy(proxy.getHost(), proxy.getPort())) {
                 Proxy _httpProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy.getHost(), proxy.getPort()));
-                if (StringUtils.isNotEmpty(proxy.getUserInfo())) {
-                    String[] userPass = proxy.getUserInfo().split(":");
+                String proxyUser = System.getenv("PROXY_USER");
+                String proxyPass = System.getenv("PROXY_PASS");
+                if (StringUtils.isNotEmpty(proxyUser) && StringUtils.isNotEmpty(proxyPass)) {
                     Authenticator _httpProxyAuth = new Authenticator() {
                         @Nullable
                         @Override
                         public Request authenticate(Route route, Response response) throws IOException {
-                            String credential = Credentials.basic(userPass[0], userPass[1]);
+                            String credential = Credentials.basic(proxyUser, proxyPass);
                             return response.request().newBuilder()
                                     .header("Proxy-Authorization", credential).build();
                         }
