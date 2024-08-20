@@ -215,7 +215,12 @@ public class CheckmarxInstaller extends ToolInstaller {
         }
 
         public static void copyURLToFile(URL source, String proxyStr, File destination, int connectionTimeoutMillis, int readTimeoutMillis) throws IOException, URISyntaxException, CheckmarxException {
-            OkHttpClient client = new ProxyHttpClient().getHttpClient(proxyStr, connectionTimeoutMillis,readTimeoutMillis);
+            OkHttpClient client;
+            try {
+                client = new ProxyHttpClient().getHttpClient(proxyStr, connectionTimeoutMillis,readTimeoutMillis);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             Request request = new Request.Builder().url(source).build();
             Response response = client.newCall(request).execute();
             ResponseBody responseBody = response.body();
