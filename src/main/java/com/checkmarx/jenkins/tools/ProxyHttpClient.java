@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.checkmarx.jenkins.exception.CheckmarxException;
 import okhttp3.*;
+import okio.ByteString;
 import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nullable;
@@ -26,12 +27,13 @@ public class ProxyHttpClient {
             if (isValidProxy(proxy.getHost(), proxy.getPort())) {
                 Proxy _httpProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy.getHost(), proxy.getPort()));
                 if (StringUtils.isNotEmpty(proxy.getUserInfo())) {
-                    String[] userPass = proxy.getUserInfo().split(":");
                     Authenticator _httpProxyAuth = new Authenticator() {
                         @Nullable
                         @Override
                         public Request authenticate(Route route, Response response) throws IOException {
-                            String credential = Credentials.basic(userPass[0], userPass[1]);
+                            byte[] bytes = proxy.getUserInfo().getBytes("ISO-8859-1");
+                            String encoded = ByteString.of(bytes).base64();
+                            String credential = "Basic " + encoded;
                             return response.request().newBuilder()
                                     .header("Proxy-Authorization", credential).build();
                         }
