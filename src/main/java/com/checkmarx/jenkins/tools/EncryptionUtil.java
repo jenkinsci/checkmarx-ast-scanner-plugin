@@ -21,7 +21,7 @@ public class EncryptionUtil {
         cipher.init(Cipher.DECRYPT_MODE, key);
         byte[] decodedData = Base64.getDecoder().decode(encryptedData);
         byte[] decryptedData = cipher.doFinal(decodedData);
-        return new String(decryptedData);
+        return new String(decryptedData, StandardCharsets.UTF_8);
     }
 
     public static SecretKey generateKey() throws Exception {
