@@ -18,13 +18,22 @@ import javax.crypto.SecretKey;
 public class ProxyHttpClient {
     private static SecretKey SECRET_KEY;
 
-    public ProxyHttpClient() throws CheckmarxException {
+    static {
         try {
             SECRET_KEY = EncryptionUtil.generateKey();
         } catch (Exception e) {
-            throw new CheckmarxException("Failed to generate encryption key");
+            throw new RuntimeException(e);
+//            throw new CheckmarxException("Failed to generate encryption key");
         }
     }
+
+//    public ProxyHttpClient() throws CheckmarxException {
+//        try {
+//            SECRET_KEY = EncryptionUtil.generateKey();
+//        } catch (Exception e) {
+//            throw new CheckmarxException("Failed to generate encryption key");
+//        }
+//    }
 
 
     public OkHttpClient getHttpClient(String proxyString, int connectionTimeoutMillis, int readTimeoutMillis) throws Exception {
