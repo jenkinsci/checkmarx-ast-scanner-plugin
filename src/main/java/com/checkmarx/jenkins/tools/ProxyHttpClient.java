@@ -38,11 +38,13 @@ public class ProxyHttpClient {
             }
             if (isValidProxy(proxy.getHost(), proxy.getPort())) {
                 Proxy _httpProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy.getHost(), proxy.getPort()));
-                String proxyUser = System.getenv("PROXY_USER");
-                String proxyPass = System.getenv("PROXY_PASS");
-                if (StringUtils.isNotEmpty(proxyUser) && StringUtils.isNotEmpty(proxyPass)) {
-                    String encryptedUser = EncryptionUtil.encrypt(proxyUser, SECRET_KEY);
-                    String encryptedPass = EncryptionUtil.encrypt(proxyPass, SECRET_KEY);
+//                String proxyUser = System.getenv("PROXY_USER");
+//                String proxyPass = System.getenv("PROXY_PASS");
+//                if (StringUtils.isNotEmpty(proxyUser) && StringUtils.isNotEmpty(proxyPass)) {
+                if (StringUtils.isNotEmpty(proxy.getUserInfo())) {
+                    String[] userPass = proxy.getUserInfo().split(":");
+                    String encryptedUser = EncryptionUtil.encrypt(userPass[0], SECRET_KEY);
+                    String encryptedPass = EncryptionUtil.encrypt(userPass[1], SECRET_KEY);
                     Authenticator _httpProxyAuth = new Authenticator() {
                         @Nullable
                         @Override
