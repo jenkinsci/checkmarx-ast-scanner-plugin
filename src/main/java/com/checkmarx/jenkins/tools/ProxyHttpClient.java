@@ -41,7 +41,7 @@ public class ProxyHttpClient {
                     return okClientBuilder.proxy(_httpProxy).build();
                 }
             } else {
-                throw new CheckmarxException("Invalid proxy configuration");
+                throw new CheckmarxException("Invalid proxy configuration!!");
             }
         }
         return okClientBuilder.build();
