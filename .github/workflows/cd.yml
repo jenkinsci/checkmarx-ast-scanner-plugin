@@ -50,7 +50,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           output_result: true
       - name: Release Drafter
-        uses: release-drafter/release-drafter@v6 #3f0f87098bd6b5c5b9a36d49c41d998ea58f9348 #v6
+        uses: release-drafter/release-drafter@3f0f87098bd6b5c5b9a36d49c41d998ea58f9348 #v6
         if: steps.verify-ci-status.outputs.result == 'success' && inputs.dev == false && inputs.tag != 'nightly'
         with:
           name: next
