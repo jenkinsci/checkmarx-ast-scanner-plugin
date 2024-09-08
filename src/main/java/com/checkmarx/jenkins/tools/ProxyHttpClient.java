@@ -31,7 +31,7 @@ public class ProxyHttpClient {
                 if (StringUtils.isNotEmpty(proxy.getUserInfo())) {
                     String basicAuth = new String(
                             Base64.getEncoder() // get the base64 encoder
-                                    .encode(proxyUserInfo.getBytes(StandardCharsets.UTF_8)));
+                                    .encode(proxyUserInfo.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
                     Authenticator _httpProxyAuth = new Authenticator() {
                         @Nullable
                         @Override
