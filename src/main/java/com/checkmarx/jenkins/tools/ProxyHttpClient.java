@@ -6,6 +6,8 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 import com.checkmarx.jenkins.exception.CheckmarxException;
@@ -25,15 +27,18 @@ public class ProxyHttpClient {
             URI proxy = new URI(proxyString);
             if (isValidProxy(proxy.getHost(), proxy.getPort())) {
                 Proxy _httpProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy.getHost(), proxy.getPort()));
-                if (StringUtils.isNotEmpty(proxy.getUserInfo())) {
-                    String[] userPass = proxy.getUserInfo().split(":");
+                String proxyUserInfo = proxy.getUserInfo();
+                if (StringUtils.isNotEmpty(proxyUserInfo)) {
+                    String basicAuth = new String(
+                            Base64.getEncoder() // get the base64 encoder
+                                    .encode(proxyUserInfo.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
                     Authenticator _httpProxyAuth = new Authenticator() {
                         @Nullable
                         @Override
                         public Request authenticate(Route route, Response response) throws IOException {
-                            String credential = Credentials.basic(userPass[0], userPass[1]);
                             return response.request().newBuilder()
-                                    .header("Proxy-Authorization", credential).build();
+                                    .addHeader("Proxy-Authorization", "Basic " + basicAuth) // add auth
+                                    .build();
                         }
                     } ;
                     return okClientBuilder.proxyAuthenticator(_httpProxyAuth).proxy(_httpProxy).build();
