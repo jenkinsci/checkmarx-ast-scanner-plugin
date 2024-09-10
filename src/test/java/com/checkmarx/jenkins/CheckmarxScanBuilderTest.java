@@ -123,7 +123,7 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
 
         final FreeStyleBuild build = freeStyleProject.scheduleBuild2(0).get();
         this.jenkins.assertBuildStatus(Result.FAILURE, build);
-        this.jenkins.assertLogContains("Please provide a valid project name.", build);
+        this.jenkins.assertLogContains("Please provide a valid project name...", build);
     }
 
     /**
