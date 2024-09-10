@@ -28,7 +28,7 @@ public class ProxyHttpClient {
             if (isValidProxy(proxy.getHost(), proxy.getPort())) {
                 Proxy _httpProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy.getHost(), proxy.getPort()));
                 String proxyUserInfo = proxy.getUserInfo();
-                if (StringUtils.isNotEmpty(proxy.getUserInfo())) {
+                if (StringUtils.isNotEmpty(proxyUserInfo)) {
                     String basicAuth = new String(
                             Base64.getEncoder() // get the base64 encoder
                                     .encode(proxyUserInfo.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
