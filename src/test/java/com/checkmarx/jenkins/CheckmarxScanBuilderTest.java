@@ -101,7 +101,7 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
 
         final FreeStyleBuild build = freeStyleProject.scheduleBuild2(0).get();
         this.jenkins.assertBuildStatus(Result.FAILURE, build);
-        this.jenkins.assertLogContains("Please configure the build properly and retry...", build);
+        this.jenkins.assertLogContains("Please configure the build properly and retry.", build);
     }
 
     @Test
