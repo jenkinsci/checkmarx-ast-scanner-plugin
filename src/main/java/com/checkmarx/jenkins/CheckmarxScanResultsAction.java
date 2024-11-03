@@ -12,7 +12,9 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.apache.commons.io.IOUtils;
-
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.nio.charset.Charset;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -67,6 +69,15 @@ public class CheckmarxScanResultsAction implements RunAction2 {
                     return objectMapper.readValue(json, ResultsSummary.class);
                 } catch (Exception e) {
                     e.printStackTrace();
+                    try{
+                    byte[] encoded = Files.readAllBytes(Paths.get(((Run.Artifact) artifact).getFile().getCanonicalPath()));
+                    String json = new String(encoded, Charset.defaultCharset());
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    return objectMapper.readValue(json, ResultsSummary.class);
+                    }catch (Exception e1){
+                        e1.printStackTrace();
+                    }
+
                 }
             }
         }
