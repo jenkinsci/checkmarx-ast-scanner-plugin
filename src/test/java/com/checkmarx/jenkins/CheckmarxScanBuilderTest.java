@@ -1,10 +1,17 @@
 package com.checkmarx.jenkins;
 
+import java.util.List;
+import java.util.Arrays;
+
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
+import jenkins.model.ArtifactManager;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.logging.Logger;
 
@@ -102,6 +109,39 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
         final FreeStyleBuild build = freeStyleProject.scheduleBuild2(0).get();
         this.jenkins.assertBuildStatus(Result.FAILURE, build);
         this.jenkins.assertLogContains("Please configure the build properly and retry.", build);
+    }
+    @Test
+    public void successCheckmarxScanAndVerifyArtifacts() throws Exception {
+        log.info("successCheckmarxScanAndVerifyArtifacts");
+
+        // Run the Checkmarx scan
+        final FreeStyleProject freeStyleProject = createSimpleProject("JenkinsNormalScan");
+        final CheckmarxScanBuilder checkmarxScanBuilder = new CheckmarxScanBuilder();
+        checkmarxScanBuilder.setUseOwnServerCredentials(true);
+        checkmarxScanBuilder.setProjectName("JenkinsNormalScan");
+        checkmarxScanBuilder.setServerUrl(this.astServerUrl);
+        checkmarxScanBuilder.setTenantName(astTenantName);
+        checkmarxScanBuilder.setBranchName(CheckmarxTestBase.BRANCH_MAIN);
+        checkmarxScanBuilder.setUseAuthenticationUrl(StringUtils.isNotEmpty(this.astBaseAuthUrl));
+        checkmarxScanBuilder.setBaseAuthUrl(this.astBaseAuthUrl);
+        checkmarxScanBuilder.setCheckmarxInstallation(CheckmarxTestBase.JT_LATEST);
+        checkmarxScanBuilder.setCredentialsId(CheckmarxTestBase.JENKINS_CREDENTIALS_TOKEN_ID);
+        checkmarxScanBuilder.setAdditionalOptions("--scan-types sast");
+        checkmarxScanBuilder.setUseOwnAdditionalOptions(true);
+
+        freeStyleProject.getBuildersList().add(checkmarxScanBuilder);
+
+        final FreeStyleBuild build = freeStyleProject.scheduleBuild2(0).get();
+        this.jenkins.assertBuildStatus(Result.SUCCESS, build);
+
+        // Verify that the expected artifact files are present
+        ArtifactManager artifactManager = build.getArtifactManager();
+        assertNotNull("ArtifactManager should not be null", artifactManager);
+
+        List<String> expectedArtifacts = Arrays.asList("checkmarx-ast-results.html", "checkmarx-ast-results.json", "reportTest.sarif", "reportTest.pdf");
+        for (String artifact : expectedArtifacts) {
+            assertTrue("Artifact " + artifact + " should be present", artifactManager.root().child(artifact).exists());
+        }
     }
 
     @Test
