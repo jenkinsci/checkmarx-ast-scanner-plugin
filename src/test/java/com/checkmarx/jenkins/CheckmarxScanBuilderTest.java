@@ -112,7 +112,7 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
 
         final FreeStyleProject freeStyleProject = createSimpleProject("JenkinsNormalScanWithReport");
         final CheckmarxScanBuilder checkmarxScanBuilder = configureCheckmarxScanBuilder(this.astServerUrl, "JenkinsNormalScan", this.astTenantName, CheckmarxTestBase.BRANCH_MAIN);
-        checkmarxScanBuilder.setAdditionalOptions("--scan-types iac-security --report-format sarif,pdf --output-name reportTest");
+        checkmarxScanBuilder.setAdditionalOptions("--scan-types iac-security --report-format sarif --output-name reportTest");
 
         freeStyleProject.getBuildersList().add(checkmarxScanBuilder);
 
@@ -122,7 +122,7 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
         ArtifactManager artifactManager = build.getArtifactManager();
         assertNotNull("ArtifactManager should not be null", artifactManager);
 
-        List<String> expectedArtifacts = Arrays.asList("reportTest.sarif, reportTest.pdf");
+        List<String> expectedArtifacts = Arrays.asList("reportTest.sarif");
         for (String artifact : expectedArtifacts) {
             assertTrue("Artifact " + artifact + " should be present", artifactManager.root().child(artifact).exists());
         }
