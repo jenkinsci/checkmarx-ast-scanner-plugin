@@ -107,27 +107,22 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
         this.jenkins.assertLogContains("Please configure the build properly and retry.", build);
     }
     @Test
-    public void successCheckmarxScanAndVerifyArtifacts() throws Exception {
+    public void CheckmarxScanIsSuccessful_withReportFormat_ArtifactsShouldBeVerified() throws Exception {
         log.info("successCheckmarxScanAndVerifyArtifacts");
 
-        // Run the Checkmarx scan
         final FreeStyleProject freeStyleProject = createSimpleProject("JenkinsNormalScanWithReport");
         final CheckmarxScanBuilder checkmarxScanBuilder = configureCheckmarxScanBuilder(this.astServerUrl, "JenkinsNormalScan", this.astTenantName, CheckmarxTestBase.BRANCH_MAIN);
+        checkmarxScanBuilder.setAdditionalOptions("--scan-types sast --report-format sarif,pdf --output-name reportTest");
 
         freeStyleProject.getBuildersList().add(checkmarxScanBuilder);
-        log.info("CheckmarxScanBuilder added to FreeStyleProject");
 
         final FreeStyleBuild build = freeStyleProject.scheduleBuild2(0).get();
-        log.info("Build scheduled and executed");
-
         this.jenkins.assertBuildStatus(Result.SUCCESS, build);
-        log.info("Build status verified as SUCCESS");
 
-        // Verify that the expected artifact files are present
         ArtifactManager artifactManager = build.getArtifactManager();
         assertNotNull("ArtifactManager should not be null", artifactManager);
 
-        List<String> expectedArtifacts = Arrays.asList("reportTest.sarif");
+        List<String> expectedArtifacts = Arrays.asList("reportTest.sarif, reportTest.pdf");
         for (String artifact : expectedArtifacts) {
             assertTrue("Artifact " + artifact + " should be present", artifactManager.root().child(artifact).exists());
         }
@@ -185,7 +180,6 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
         checkmarxScanBuilder.setBaseAuthUrl(this.astBaseAuthUrl);
         checkmarxScanBuilder.setCheckmarxInstallation(CheckmarxTestBase.JT_LATEST);
         checkmarxScanBuilder.setCredentialsId(CheckmarxTestBase.JENKINS_CREDENTIALS_TOKEN_ID);
-        checkmarxScanBuilder.setAdditionalOptions("--scan-types sast --report-format sarif --output-name reportTest");
         checkmarxScanBuilder.setUseOwnAdditionalOptions(true);
 
         return checkmarxScanBuilder;

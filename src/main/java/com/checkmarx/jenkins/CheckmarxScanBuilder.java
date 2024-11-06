@@ -374,12 +374,11 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
                     new FilePath(new File(fullFilePath)).copyTo(destinationPath);
 
-                    ArtifactArchiver artifactArchiverSarif = new ArtifactArchiver(fileName);
-                    artifactArchiverSarif.perform(run, workspace, envVars, launcher, listener);
+                    ArtifactArchiver artifactArchiver = new ArtifactArchiver(fileName);
+                    artifactArchiver.perform(run, workspace, envVars, launcher, listener);
 
                 }
             }
-
 
         } finally {
             //Deleting temporary directory to clean up the workspace env
