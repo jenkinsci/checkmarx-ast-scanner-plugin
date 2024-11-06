@@ -112,7 +112,7 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
 
         final FreeStyleProject freeStyleProject = createSimpleProject("JenkinsNormalScanWithReport");
         final CheckmarxScanBuilder checkmarxScanBuilder = configureCheckmarxScanBuilder(this.astServerUrl, "JenkinsNormalScan", this.astTenantName, CheckmarxTestBase.BRANCH_MAIN);
-        checkmarxScanBuilder.setAdditionalOptions("--scan-types sast --report-format sarif,pdf --output-name reportTest");
+        checkmarxScanBuilder.setAdditionalOptions("--scan-types iac-security --report-format sarif,pdf --output-name reportTest");
 
         freeStyleProject.getBuildersList().add(checkmarxScanBuilder);
 
@@ -162,6 +162,7 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
     private void runSuccessCheckmarxScan(String serverUrl, String projectName, String tenant, String branch) throws Exception {
         final FreeStyleProject freeStyleProject = createSimpleProject("JenkinsNormalScan");
         final CheckmarxScanBuilder checkmarxScanBuilder = configureCheckmarxScanBuilder(serverUrl, projectName, tenant, branch);
+        checkmarxScanBuilder.setAdditionalOptions("--scan-types iac-security");
 
         freeStyleProject.getBuildersList().add(checkmarxScanBuilder);
 
