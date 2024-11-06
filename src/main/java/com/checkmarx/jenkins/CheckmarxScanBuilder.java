@@ -356,29 +356,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             ArtifactArchiver artifactArchiverJson = new ArtifactArchiver(workspace.toURI().relativize(jsonReportFilePath.toURI()).toString());
             artifactArchiverJson.perform(run, workspace, envVars, launcher, listener);
 
-            if (scanConfig.getAdditionalOptions().contains("--report-format")) {
-                String additionalOptions = scanConfig.getAdditionalOptions();
-
-                String formatTypes = extractOptionValue(additionalOptions, "--report-format");
-                String[] formats = formatTypes.split(",");
-
-                for (String formatType : formats) {
-                    String fileName = (additionalOptions.contains("--output-name")
-                            ? extractOptionValue(additionalOptions, "--output-name")
-                            : PluginUtils.defaultOutputName) + "." + formatType;
-                    String outputPath = additionalOptions.contains("--output-path")
-                            ? extractOptionValue(additionalOptions, "--output-path")
-                            : ".";
-                    String fullFilePath = new File(outputPath, fileName).getPath();
-                    FilePath destinationPath = workspace.child(fileName);
-
-                    new FilePath(new File(fullFilePath)).copyTo(destinationPath);
-
-                    ArtifactArchiver artifactArchiver = new ArtifactArchiver(fileName);
-                    artifactArchiver.perform(run, workspace, envVars, launcher, listener);
-
-                }
-            }
+            saveInArtifactAdditionalReports(scanConfig, workspace, envVars, launcher, listener, run);
 
         } finally {
             //Deleting temporary directory to clean up the workspace env
@@ -390,6 +368,31 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             run.addAction(new CheckmarxScanResultsAction());
         }
         run.setResult(Result.SUCCESS);
+    }
+
+    private void saveInArtifactAdditionalReports(ScanConfig scanConfig, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener, Run<?, ?> run) throws IOException, InterruptedException {
+        if (scanConfig.getAdditionalOptions().contains("--report-format")) {
+            String additionalOptions = scanConfig.getAdditionalOptions();
+
+            String formatTypes = extractOptionValue(additionalOptions, "--report-format");
+            String[] formats = formatTypes.split(",");
+
+            for (String formatType : formats) {
+                String fileName = (additionalOptions.contains("--output-name")
+                        ? extractOptionValue(additionalOptions, "--output-name")
+                        : PluginUtils.defaultOutputName) + "." + formatType;
+                String outputPath = additionalOptions.contains("--output-path")
+                        ? extractOptionValue(additionalOptions, "--output-path")
+                        : ".";
+                String fullFilePath = new File(outputPath, fileName).getPath();
+                FilePath destinationPath = workspace.child(fileName);
+
+                new FilePath(new File(fullFilePath)).copyTo(destinationPath);
+
+                ArtifactArchiver artifactArchiver = new ArtifactArchiver(fileName);
+                artifactArchiver.perform(run, workspace, envVars, launcher, listener);
+            }
+        }
     }
 
     private String extractOptionValue(String options, String optionKey) {
