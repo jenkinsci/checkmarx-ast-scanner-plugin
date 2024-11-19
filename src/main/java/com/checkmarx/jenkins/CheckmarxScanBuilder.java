@@ -372,26 +372,35 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
     private void saveInArtifactAdditionalReports(ScanConfig scanConfig, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener, Run<?, ?> run) throws IOException, InterruptedException {
         if (scanConfig.getAdditionalOptions().contains("--report-format")) {
-            String additionalOptions = scanConfig.getAdditionalOptions();
+            try {
+                String additionalOptions = scanConfig.getAdditionalOptions();
 
-            String formatTypes = extractOptionValue(additionalOptions, "--report-format");
-            String[] formats = formatTypes.split(",");
+                String formatTypes = extractOptionValue(additionalOptions, "--report-format");
+                String[] formats = formatTypes.split(",");
 
-            for (String formatType : formats) {
-                String fileName = (additionalOptions.contains("--output-name")
-                        ? extractOptionValue(additionalOptions, "--output-name")
-                        : PluginUtils.defaultOutputName) + "." + formatType;
-                String outputPath = additionalOptions.contains("--output-path")
-                        ? extractOptionValue(additionalOptions, "--output-path")
-                        : ".";
-                String fullFilePath = new File(outputPath, fileName).getPath();
-                FilePath destinationPath = workspace.child(fileName);
+                for (String formatType : formats) {
+                    String fileName = (additionalOptions.contains("--output-name")
+                            ? extractOptionValue(additionalOptions, "--output-name")
+                            : PluginUtils.defaultOutputName) + "." + formatType;
+                    String outputPath = additionalOptions.contains("--output-path")
+                            ? extractOptionValue(additionalOptions, "--output-path")
+                            : ".";
+                    String fullFilePath = new File(outputPath, fileName).getPath();
+                    FilePath destinationPath = workspace.child(fileName);
 
-                new FilePath(new File(fullFilePath)).copyTo(destinationPath);
+                    File fileToCopy = new File(fullFilePath);
 
-                ArtifactArchiver artifactArchiver = new ArtifactArchiver(fileName);
-                artifactArchiver.perform(run, workspace, envVars, launcher, listener);
+                    if (fileToCopy.exists()) {
+                        new FilePath(fileToCopy).copyTo(destinationPath);
+
+                        ArtifactArchiver artifactArchiver = new ArtifactArchiver(fileName);
+                        artifactArchiver.perform(run, workspace, envVars, launcher, listener);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Error saving additional reports: " + e.getMessage());
             }
+
         }
     }
 
