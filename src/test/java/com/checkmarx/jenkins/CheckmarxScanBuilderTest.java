@@ -1,11 +1,14 @@
 package com.checkmarx.jenkins;
-
+import java.util.List;
+import java.util.Arrays;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
+import jenkins.model.ArtifactManager;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
-
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.logging.Logger;
 
 public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
@@ -103,6 +106,27 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
         this.jenkins.assertBuildStatus(Result.FAILURE, build);
         this.jenkins.assertLogContains("Please configure the build properly and retry.", build);
     }
+    @Test
+    public void CheckmarxScanIsSuccessful_withReportFormat_ArtifactsShouldBeVerified() throws Exception {
+        log.info("successCheckmarxScanAndVerifyArtifacts");
+
+        final FreeStyleProject freeStyleProject = createSimpleProject("JenkinsNormalScanWithReport");
+        final CheckmarxScanBuilder checkmarxScanBuilder = configureCheckmarxScanBuilder(this.astServerUrl, "JenkinsNormalScan", this.astTenantName, CheckmarxTestBase.BRANCH_MAIN);
+        checkmarxScanBuilder.setAdditionalOptions("--scan-types iac-security --report-format sarif --output-name reportTest");
+
+        freeStyleProject.getBuildersList().add(checkmarxScanBuilder);
+
+        final FreeStyleBuild build = freeStyleProject.scheduleBuild2(0).get();
+        this.jenkins.assertBuildStatus(Result.SUCCESS, build);
+
+        ArtifactManager artifactManager = build.getArtifactManager();
+        assertNotNull("ArtifactManager should not be null", artifactManager);
+
+        List<String> expectedArtifacts = Arrays.asList("reportTest.sarif");
+        for (String artifact : expectedArtifacts) {
+            assertTrue("Artifact " + artifact + " should be present", artifactManager.root().child(artifact).exists());
+        }
+    }
 
     @Test
     public void failIfProjectNameNotProvided() throws Exception {
@@ -137,8 +161,17 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
      */
     private void runSuccessCheckmarxScan(String serverUrl, String projectName, String tenant, String branch) throws Exception {
         final FreeStyleProject freeStyleProject = createSimpleProject("JenkinsNormalScan");
+        final CheckmarxScanBuilder checkmarxScanBuilder = configureCheckmarxScanBuilder(serverUrl, projectName, tenant, branch);
+        checkmarxScanBuilder.setAdditionalOptions("--scan-types iac-security");
 
-        final CheckmarxScanBuilder checkmarxScanBuilder = new CheckmarxScanBuilder();
+        freeStyleProject.getBuildersList().add(checkmarxScanBuilder);
+
+        final FreeStyleBuild build = freeStyleProject.scheduleBuild2(0).get();
+        this.jenkins.assertBuildStatus(Result.SUCCESS, build);
+    }
+
+    private CheckmarxScanBuilder configureCheckmarxScanBuilder(String serverUrl, String projectName, String tenant, String branch) {
+        CheckmarxScanBuilder checkmarxScanBuilder = new CheckmarxScanBuilder();
         checkmarxScanBuilder.setUseOwnServerCredentials(true);
         checkmarxScanBuilder.setProjectName(projectName);
         checkmarxScanBuilder.setServerUrl(serverUrl);
@@ -148,12 +181,8 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
         checkmarxScanBuilder.setBaseAuthUrl(this.astBaseAuthUrl);
         checkmarxScanBuilder.setCheckmarxInstallation(CheckmarxTestBase.JT_LATEST);
         checkmarxScanBuilder.setCredentialsId(CheckmarxTestBase.JENKINS_CREDENTIALS_TOKEN_ID);
-        checkmarxScanBuilder.setAdditionalOptions("--scan-types sast");
         checkmarxScanBuilder.setUseOwnAdditionalOptions(true);
 
-        freeStyleProject.getBuildersList().add(checkmarxScanBuilder);
-
-        final FreeStyleBuild build = freeStyleProject.scheduleBuild2(0).get();
-        this.jenkins.assertBuildStatus(Result.SUCCESS, build);
+        return checkmarxScanBuilder;
     }
 }

@@ -66,7 +66,7 @@ full functionality and flexibility of the CLI tool.
 <!-- GETTING STARTED -->
 ## Getting Started
 
-The plugin can be configured as build step within the Job Configuration.
+The plugin can be configured as a build step within the Job Configuration.
 
 ### Prerequisites
 
