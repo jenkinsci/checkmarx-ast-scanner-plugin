@@ -65,16 +65,10 @@ public class CheckmarxScanResultsAction implements RunAction2 {
                     Request request = new Request.Builder().url(fullUrl).build();
                     Response response = client.newCall(request).execute();
                     ResponseBody responseBody = response.body();
-
-                    if (responseBody != null) {
-                        InputStream stream = responseBody.byteStream();
-                        String json = IOUtils.toString(stream);
-                        ObjectMapper objectMapper = new ObjectMapper();
-                        return objectMapper.readValue(json, ResultsSummary.class);
-                    } else {
-                        // Handle the case where responseBody is null
-                        System.err.println("Response body is null for URL: " + fullUrl);
-                    }
+                    InputStream stream = responseBody.byteStream();
+                    String json = IOUtils.toString(stream);
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    return objectMapper.readValue(json, ResultsSummary.class);
                 } catch (Exception e) {
                     e.printStackTrace();
                     try{
