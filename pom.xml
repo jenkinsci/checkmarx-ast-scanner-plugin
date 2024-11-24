@@ -158,6 +158,11 @@
             <version>2.0.15</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.10.12</version>
+        </dependency>
     </dependencies>
 
     <repositories>
@@ -178,19 +183,31 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins
-                </groupId>  <!-- This override has been added for building with Java 11 -->
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
-                <configuration>
-                    <release>8</release>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.jenkins-ci.tools</groupId>  <!-- This override has been added for building with Java 11 -->
-                <artifactId>maven-hpi-plugin</artifactId>
-                <version>3.53</version>
-                <extensions>true</extensions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <!-- Create directory -->
+                                <mkdir dir="C:\cxOne\checkmarx-ast-scanner-plugin\target/tmp" />
+
+                                <!-- Tar task -->
+                                <tar destfile="C:\cxOne\checkmarx-ast-scanner-plugin\target\archive.tar">
+                                    <fileset dir="C:\cxOne\checkmarx-ast-scanner-plugin\target/tmp" />
+                                </tar>
+
+                                <!-- Untar task -->
+                                <untar src="C:\cxOne\checkmarx-ast-scanner-plugin\target\archive.tar" dest="C:\cxOne\checkmarx-ast-scanner-plugin\target\output" />
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <!--            <plugin>-->
             <!--                 This override has been skipped for building with Java 11-->
