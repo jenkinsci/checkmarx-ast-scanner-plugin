@@ -219,6 +219,9 @@ public class CheckmarxInstaller extends ToolInstaller {
             Request request = new Request.Builder().url(source).build();
             Response response = client.newCall(request).execute();
             ResponseBody responseBody = response.body();
+            if (responseBody == null) {
+                throw new IOException("Response body is null");
+            }
             InputStream stream = responseBody.byteStream();
             try {
                 FileUtils.copyInputStreamToFile(stream, destination);
