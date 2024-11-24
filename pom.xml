@@ -53,6 +53,9 @@
         <jenkins.baseline>2.452</jenkins.baseline>
         <jenkins.version>${jenkins.baseline}.4</jenkins.version>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
+        <output.dir>${project.build.directory}/output</output.dir>
+        <tmp.dir>${project.build.directory}/tmp</tmp.dir>
+        <archive.file>${project.build.directory}/archive.tar</archive.file>
     </properties>
 
 
@@ -193,18 +196,18 @@
                             <goal>run</goal>
                         </goals>
                         <configuration>
-                            <tasks>
+                            <target>
                                 <!-- Create directory -->
-                                <mkdir dir="C:\cxOne\checkmarx-ast-scanner-plugin\target/tmp" />
+                                <mkdir dir="${tmp.dir}" />
 
                                 <!-- Tar task -->
-                                <tar destfile="C:\cxOne\checkmarx-ast-scanner-plugin\target\archive.tar">
-                                    <fileset dir="C:\cxOne\checkmarx-ast-scanner-plugin\target/tmp" />
+                                <tar destfile="${archive.file}">
+                                    <fileset dir="${tmp.dir}" />
                                 </tar>
 
                                 <!-- Untar task -->
-                                <untar src="C:\cxOne\checkmarx-ast-scanner-plugin\target\archive.tar" dest="C:\cxOne\checkmarx-ast-scanner-plugin\target\output" />
-                            </tasks>
+                                <untar src="${archive.file}" dest="${output.dir}" />
+                            </target>
                         </configuration>
                     </execution>
                 </executions>
