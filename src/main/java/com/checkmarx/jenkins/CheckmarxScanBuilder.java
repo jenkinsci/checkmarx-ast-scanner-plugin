@@ -371,7 +371,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void saveInArtifactAdditionalReports(ScanConfig scanConfig, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener, Run<?, ?> run) throws IOException, InterruptedException {
-        if (scanConfig.getAdditionalOptions().contains("--report-format")) {
+        if (scanConfig.getAdditionalOptions() != null && scanConfig.getAdditionalOptions().contains("--report-format")) {
             try {
                 String additionalOptions = scanConfig.getAdditionalOptions();
 
@@ -384,7 +384,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                             : PluginUtils.defaultOutputName) + "." + formatType;
                     String outputPath = additionalOptions.contains("--output-path")
                             ? extractOptionValue(additionalOptions, "--output-path")
-                            : ".";
+                            : workspace.getRemote();
                     String fullFilePath = new File(outputPath, fileName).getPath();
                     FilePath destinationPath = workspace.child(fileName);
 
@@ -509,6 +509,9 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         String additionalOptions = getUseOwnAdditionalOptions() ? getAdditionalOptions() : descriptor.getAdditionalOptions();
         if (fixEmptyAndTrim(additionalOptions) != null) {
+            if (additionalOptions.contains("--report-format") && !additionalOptions.contains("--output-path")) {
+                additionalOptions += " --output-path " + workspace.getRemote();
+            }
             scanConfig.setAdditionalOptions(envVars.expand(additionalOptions));
         }
 
