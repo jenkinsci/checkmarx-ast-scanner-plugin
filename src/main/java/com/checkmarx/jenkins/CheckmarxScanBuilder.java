@@ -517,7 +517,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         String additionalOptions = getUseOwnAdditionalOptions() ? getAdditionalOptions() : descriptor.getAdditionalOptions();
         if (fixEmptyAndTrim(additionalOptions) != null) {
             if (additionalOptions.contains("--report-format") && !additionalOptions.contains("--output-path")) {
-                additionalOptions += " --output-path " + workspace.getRemote();
+                additionalOptions += String.format(" --output-path \"%s\"", workspace.getRemote());
             }
             scanConfig.setAdditionalOptions(envVars.expand(additionalOptions));
         }
