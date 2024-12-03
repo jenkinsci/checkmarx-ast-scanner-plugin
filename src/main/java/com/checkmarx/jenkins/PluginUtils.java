@@ -28,6 +28,7 @@ public class PluginUtils {
     static final String CX_CLIENT_ID_ENV_KEY = "CX_CLIENT_ID";
     static final String CX_CLIENT_SECRET_ENV_KEY = "CX_CLIENT_SECRET";
     public static final String HTTP_PROXY = "HTTP_PROXY";
+    public static final String defaultOutputName = "cx_result";
 
     public static CheckmarxInstallation findCheckmarxInstallation(final String checkmarxInstallation) {
         final CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor descriptor = Jenkins.get().getDescriptorByType(CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor.class);

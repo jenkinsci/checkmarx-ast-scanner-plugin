@@ -4,6 +4,7 @@ import com.checkmarx.jenkins.CxLoggerAdapter;
 import com.checkmarx.jenkins.PluginUtils;
 import com.checkmarx.jenkins.exception.CheckmarxException;
 import com.checkmarx.jenkins.tools.internal.DownloadService;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -214,6 +215,7 @@ public class CheckmarxInstaller extends ToolInstaller {
             return null;
         }
 
+        @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
         public static void copyURLToFile(URL source, String proxyStr, File destination, int connectionTimeoutMillis, int readTimeoutMillis) throws IOException, URISyntaxException, CheckmarxException {
             OkHttpClient client = new ProxyHttpClient().getHttpClient(proxyStr, connectionTimeoutMillis,readTimeoutMillis);
             Request request = new Request.Builder().url(source).build();
