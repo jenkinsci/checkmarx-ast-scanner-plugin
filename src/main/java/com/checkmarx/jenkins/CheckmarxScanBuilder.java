@@ -371,7 +371,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     }
 
     private void saveInArtifactAdditionalReports(ScanConfig scanConfig, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener, Run<?, ?> run) throws IOException, InterruptedException {
-        if (scanConfig.getAdditionalOptions().contains("--report-format")) {
+        if (scanConfig.getAdditionalOptions() != null && scanConfig.getAdditionalOptions().contains("--report-format")) {
             try {
                 String additionalOptions = scanConfig.getAdditionalOptions();
 
@@ -382,9 +382,8 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                     String fileName = (additionalOptions.contains("--output-name")
                             ? extractOptionValue(additionalOptions, "--output-name")
                             : PluginUtils.defaultOutputName) + "." + formatType;
-                    String outputPath = additionalOptions.contains("--output-path")
-                            ? extractOptionValue(additionalOptions, "--output-path")
-                            : ".";
+                    String outputPath =  extractOptionValue(additionalOptions, "--output-path");
+
                     String fullFilePath = new File(outputPath, fileName).getPath();
                     FilePath destinationPath = workspace.child(fileName);
 
@@ -408,7 +407,15 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         if (options.contains(optionKey)) {
             String[] parts = options.split(optionKey, 2);
             if (parts.length > 1) {
-                return parts[1].trim().split(" ")[0];
+                String remaining = parts[1].trim();
+                if (remaining.startsWith("\"")) {
+                    int endIndex = remaining.indexOf("\"", 1);
+                    if (endIndex > 0) {
+                        return remaining.substring(1, endIndex);
+                    }
+                } else {
+                    return remaining.split(" ")[0];
+                }
             }
         }
         return "";
@@ -509,6 +516,9 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         String additionalOptions = getUseOwnAdditionalOptions() ? getAdditionalOptions() : descriptor.getAdditionalOptions();
         if (fixEmptyAndTrim(additionalOptions) != null) {
+            if (additionalOptions.contains("--report-format") && !additionalOptions.contains("--output-path")) {
+                additionalOptions += String.format(" --output-path \"%s\"", workspace.getRemote());
+            }
             scanConfig.setAdditionalOptions(envVars.expand(additionalOptions));
         }
 
