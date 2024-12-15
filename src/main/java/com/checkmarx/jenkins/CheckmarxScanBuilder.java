@@ -62,6 +62,12 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     public static final String SVN_REVISION_VAR = "${SVN_REVISION}";
     public static final String LOGFILE = "./output.log";
 
+    private static final List<String> SENSITIVE_KEYS = Arrays.asList(
+            "--apikey",
+            "--scs-repo-token",
+            "--client-secret",
+            "--token"
+    );
 
     CxLoggerAdapter log;
     @Nullable
@@ -443,6 +449,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
      * @param envVars
      * @return
      */
+
     private String getBranchToPrint(EnvVars envVars) {
 
         if (StringUtils.isNotEmpty(getBranchName())) return getBranchName();
@@ -452,6 +459,16 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
 
         return "";
     }
+
+    private String maskSensitiveValues(String input, List<String> sensitiveKeys) {
+        if (StringUtils.isNotEmpty(input)) {
+            return sensitiveKeys.stream()
+                    .reduce(input, (maskedInput, key) ->
+                            maskedInput.replaceAll(key + "\\s+\\S+", key + " ********"));
+        }
+        return input; // Return the input as-is if empty or null
+    }
+
 
     /**
      * Prints scan configuration which is gonna be used by the CLI
@@ -482,6 +499,9 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         log.info("Using global additional options: " + !getUseOwnAdditionalOptions());
 
         String additionalOptions = getUseOwnAdditionalOptions() ? getAdditionalOptions() : descriptor.getAdditionalOptions();
+
+        additionalOptions = maskSensitiveValues(additionalOptions, SENSITIVE_KEYS);
+
         log.info("Additional Options: " + Optional.ofNullable(additionalOptions).orElse(""));
 
     }
