@@ -404,7 +404,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                     createArchiveFile(tempDir, fileName, fileToCopy, run, workspace, envVars, launcher, listener);
                 }
             } catch (Exception e) {
-                log.error("Error saving additional reports: " + e.getMessage());
+                log.error(String.format("Error saving additional reports (%s format): %s", formatType, e.getMessage()));
             }
         }
     }
