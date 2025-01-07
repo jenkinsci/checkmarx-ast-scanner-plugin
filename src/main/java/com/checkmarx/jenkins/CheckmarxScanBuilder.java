@@ -380,7 +380,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         if(scanConfig.getAdditionalOptions() == null || !scanConfig.getAdditionalOptions().contains("--report-format")){
             return;
         }
-        try {
             String additionalOptions = scanConfig.getAdditionalOptions();
             String formatTypes = extractOptionValue(additionalOptions, "--report-format");
             String[] formats = formatTypes.split(",");
@@ -398,14 +397,19 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 File fileToCopy = new File(outputPath, fileName);
 
                 if (fileToCopy.exists()) {
-                    log.info("Copying file to workspace");
-                    FilePath tempDirPath = tempDir.child(fileName);
-                    new FilePath(fileToCopy).copyTo(tempDirPath);
-                    ArtifactArchiver artifactArchiver = new ArtifactArchiver(tempDirPath.getName());
-                    artifactArchiver.perform(run, workspace, envVars, launcher, listener);
+                    createArchiveFile(tempDir, fileName, fileToCopy, run, workspace, envVars, launcher, listener);
                 }
             }
-        } catch (Exception e) {
+    }
+    
+    private void createArchiveFile(FilePath tempDir, String fileName, File fileToCopy, Run<?, ?> run, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener) {
+        try{
+            log.info("Copying file to workspace");
+            FilePath tempDirPath = tempDir.child(fileName);
+            new FilePath(fileToCopy).copyTo(tempDirPath);
+            ArtifactArchiver artifactArchiver = new ArtifactArchiver(tempDirPath.getName());
+            artifactArchiver.perform(run, workspace, envVars, launcher, listener);
+        }  catch (Exception e) {
             log.error("Error saving additional reports: " + e.getMessage());
         }
     }
