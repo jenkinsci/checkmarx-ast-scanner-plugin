@@ -410,7 +410,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
     }
     
     private void createArchiveFile(FilePath tempDir, String fileName, File fileToCopy, Run<?, ?> run, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
-            log.info("Copying file to workspace");
+            log.info("Copying file to workspace: " + tempDir.getRemote());
             FilePath tempDirPath = tempDir.child(fileName);
             new FilePath(fileToCopy).copyTo(tempDirPath);
             ArtifactArchiver artifactArchiver = new ArtifactArchiver(tempDirPath.getName());
