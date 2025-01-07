@@ -394,6 +394,9 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 if(outputPath == null || outputPath.isEmpty()) {
                     outputPath = workspace.getRemote();
                 }
+                else {
+                    workspace = new FilePath(new File(outputPath));
+                }
                 File fileToCopy = new File(outputPath, fileName);
 
                 if (fileToCopy.exists()) {
