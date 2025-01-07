@@ -376,15 +376,16 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         run.setResult(Result.SUCCESS);
     }
 
-    private void saveInArtifactAdditionalReports(ScanConfig scanConfig, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener, Run<?, ?> run, FilePath tempDir) throws IOException, InterruptedException {
+    private void saveInArtifactAdditionalReports(ScanConfig scanConfig, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener, Run<?, ?> run, FilePath tempDir) {
         if(scanConfig.getAdditionalOptions() == null || !scanConfig.getAdditionalOptions().contains("--report-format")){
             return;
         }
-            String additionalOptions = scanConfig.getAdditionalOptions();
-            String formatTypes = extractOptionValue(additionalOptions, "--report-format");
-            String[] formats = formatTypes.split(",");
+        String additionalOptions = scanConfig.getAdditionalOptions();
+        String formatTypes = extractOptionValue(additionalOptions, "--report-format");
+        String[] formats = formatTypes.split(",");
 
-            for (String formatType : formats) {
+        for (String formatType : formats) {
+            try {
                 String fileName = (additionalOptions.contains("--output-name")
                         ? extractOptionValue(additionalOptions, "--output-name")
                         : PluginUtils.defaultOutputName) + "." + formatType;
@@ -402,19 +403,18 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 if (fileToCopy.exists()) {
                     createArchiveFile(tempDir, fileName, fileToCopy, run, workspace, envVars, launcher, listener);
                 }
+            } catch (Exception e) {
+                log.error("Error saving additional reports: " + e.getMessage());
             }
+        }
     }
     
-    private void createArchiveFile(FilePath tempDir, String fileName, File fileToCopy, Run<?, ?> run, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener) {
-        try{
+    private void createArchiveFile(FilePath tempDir, String fileName, File fileToCopy, Run<?, ?> run, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener) throws IOException, InterruptedException {
             log.info("Copying file to workspace");
             FilePath tempDirPath = tempDir.child(fileName);
             new FilePath(fileToCopy).copyTo(tempDirPath);
             ArtifactArchiver artifactArchiver = new ArtifactArchiver(tempDirPath.getName());
             artifactArchiver.perform(run, workspace, envVars, launcher, listener);
-        }  catch (Exception e) {
-            log.error("Error saving additional reports: " + e.getMessage());
-        }
     }
 
     private String extractOptionValue(String options, String optionKey) {
