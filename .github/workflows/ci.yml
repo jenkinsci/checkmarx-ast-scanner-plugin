@@ -40,7 +40,10 @@ jobs:
       - name: Print total number of covered lines
         run: |
           COVERED_LINES=$(xmllint --xpath "string(//report/counter[@type='LINE']/@covered)" target/site/jacoco/jacoco.xml)
-          echo "Total number of covered lines: $COVERED_LINES"
+          MISSED_LINES=$(xmllint --xpath "string(//report/counter[@type='LINE']/@missed)" target/site/jacoco/jacoco.xml)
+          TOTAL_LINES=$((COVERED_LINES + MISSED_LINES))
+          COVERAGE_PERCENTAGE=$(echo "scale=2; $COVERED_LINES / $TOTAL_LINES * 100" | bc)
+          echo "Total coverage percentage: $COVERAGE_PERCENTAGE%"
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v3
