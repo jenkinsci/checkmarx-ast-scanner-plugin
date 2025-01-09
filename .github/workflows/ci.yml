@@ -34,8 +34,10 @@ jobs:
       - name: Run tests with coverage
         run: mvn test jacoco:report
 
-      - name: Print coverage report
-        run: cat target/site/jacoco/index.html
+      - name: Print total number of covered lines
+        run: |
+          COVERED_LINES=$(xmllint --xpath "string(//report/counter[@type='LINE']/@covered)" target/site/jacoco/jacoco.xml)
+          echo "Total number of covered lines: $COVERED_LINES"
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v3
