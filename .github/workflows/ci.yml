@@ -34,6 +34,9 @@ jobs:
       - name: Run tests with coverage
         run: mvn test jacoco:report
 
+      - name: Print coverage report
+        run: cat target/site/jacoco/index.html
+
       - name: Upload coverage report
         uses: actions/upload-artifact@v3
         with:
