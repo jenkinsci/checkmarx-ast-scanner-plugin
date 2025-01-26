@@ -8,6 +8,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 import static java.lang.String.format;
 
@@ -36,6 +37,12 @@ public class DownloadService {
     }
 
     public static String buildFileName(String tagName, Platform platform) {
+        if (Objects.isNull(platform)) {
+            throw new IllegalArgumentException("Platform cannot be null");
+        }
+        if (Objects.isNull(tagName)) {
+            throw new IllegalArgumentException("Tag name cannot be null");
+        }
         return String.format("%s_%s_%s", CHECKMARX_FILE_NAME, tagName, platform.packageExtension);
     }
 

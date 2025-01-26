@@ -1,6 +1,8 @@
-package com.checkmarx.jenkins;
+package com.checkmarx.jenkins.integration;
 import java.util.List;
 import java.util.Arrays;
+
+import com.checkmarx.jenkins.CheckmarxScanBuilder;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;

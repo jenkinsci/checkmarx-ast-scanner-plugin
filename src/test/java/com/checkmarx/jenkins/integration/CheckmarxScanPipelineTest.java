@@ -1,6 +1,7 @@
-package com.checkmarx.jenkins;
+package com.checkmarx.jenkins.integration;
 
 import com.checkmarx.ast.results.ResultsSummary;
+import com.checkmarx.jenkins.CheckmarxScanResultsAction;
 import hudson.model.Result;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;

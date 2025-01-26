@@ -825,7 +825,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         }
 
         public String getCredentialsDescription() {
-            if (this.getServerUrl() == null || this.getServerUrl().isEmpty()) {
+            if (this.getServerUrl() == null || this.getServerUrl().trim().isEmpty()) {
                 return "not set";
             }
 

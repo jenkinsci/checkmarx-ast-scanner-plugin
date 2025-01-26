@@ -1,5 +1,6 @@
-package com.checkmarx.jenkins;
+package com.checkmarx.jenkins.integration;
 
+import com.checkmarx.jenkins.CheckmarxScanBuilder;
 import com.checkmarx.jenkins.credentials.DefaultCheckmarxApiToken;
 import com.checkmarx.jenkins.tools.CheckmarxInstallation;
 import com.checkmarx.jenkins.tools.CheckmarxInstaller;
