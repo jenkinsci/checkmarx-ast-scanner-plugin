@@ -256,8 +256,8 @@
                                 <!-- Add other patterns as needed -->
                             </includes>
                             <excludes>
-                                <exclude>**/src/main/java/com/checkmarx/jenkins/exception/**</exclude>
-                                <exclude>**/src/main/java/com/checkmarx/jenkins/model/**</exclude>
+                                <exclude>com/checkmarx/jenkins/exception/**</exclude>
+                                <exclude>com/checkmarx/jenkins/model/**</exclude>
                                 <!-- Add other patterns as needed -->
                             </excludes>
                         </configuration>
