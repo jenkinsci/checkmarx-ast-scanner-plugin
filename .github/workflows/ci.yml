@@ -4,7 +4,7 @@ on: [pull_request]
 
 jobs:
   integration-tests:
-    depends-on: unit-tests
+    needs: unit-tests
     runs-on: ubuntu-latest
     permissions:
       contents: read
