@@ -248,6 +248,7 @@
                         <exclude>**/com/checkmarx/jenkins/exception/**</exclude>
                         <exclude>**/com/checkmarx/jenkins/model/**</exclude>
                         <exclude>**/com/checkmarx/jenkins/logger/**</exclude>
+                        <exclude>**/com/checkmarx/jenkins/credentials/**</exclude>
                         <!-- Add other patterns as needed -->
                     </excludes>
                 </configuration>
