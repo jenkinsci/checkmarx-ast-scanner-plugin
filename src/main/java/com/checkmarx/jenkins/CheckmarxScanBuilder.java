@@ -3,6 +3,7 @@ package com.checkmarx.jenkins;
 import com.checkmarx.ast.wrapper.CxException;
 import com.checkmarx.jenkins.credentials.CheckmarxApiToken;
 import com.checkmarx.jenkins.exception.CheckmarxException;
+import com.checkmarx.jenkins.logger.CxLoggerAdapter;
 import com.checkmarx.jenkins.model.ScanConfig;
 import com.checkmarx.jenkins.tools.CheckmarxInstallation;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
