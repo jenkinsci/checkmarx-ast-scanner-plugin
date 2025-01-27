@@ -270,7 +270,7 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
     }
 
     @Test
-    public void testCheckmarxInstallationDescriptor() throws Exception {
+    public void testCheckmarxInstallationDescriptor() {
         CheckmarxInstallation.CheckmarxInstallationDescriptor descriptor = new CheckmarxInstallation.CheckmarxInstallationDescriptor();
         
         // Test getDefaultInstallers
