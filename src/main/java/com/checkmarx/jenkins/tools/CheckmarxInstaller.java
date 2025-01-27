@@ -1,5 +1,6 @@
 package com.checkmarx.jenkins.tools;
 
+import com.checkmarx.jenkins.exception.ToolDetectionException;
 import com.checkmarx.jenkins.logger.CxLoggerAdapter;
 import com.checkmarx.jenkins.PluginUtils;
 import com.checkmarx.jenkins.exception.CheckmarxException;
