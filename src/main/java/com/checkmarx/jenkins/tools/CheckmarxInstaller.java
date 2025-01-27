@@ -1,23 +1,20 @@
 package com.checkmarx.jenkins.tools;
 
-import com.checkmarx.jenkins.CxLoggerAdapter;
+import com.checkmarx.jenkins.exception.ToolDetectionException;
+import com.checkmarx.jenkins.logger.CxLoggerAdapter;
 import com.checkmarx.jenkins.PluginUtils;
 import com.checkmarx.jenkins.exception.CheckmarxException;
 import com.checkmarx.jenkins.tools.internal.DownloadService;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Functions;
-import hudson.model.Hudson;
 import hudson.model.Node;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
-import hudson.slaves.EnvironmentVariablesNodeProperty;
 import hudson.tools.ToolInstallation;
 import hudson.tools.ToolInstaller;
 import hudson.tools.ToolInstallerDescriptor;
-import jenkins.model.Jenkins;
 import jenkins.security.MasterToSlaveCallable;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -39,7 +36,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.*;
 import java.net.*;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 import static hudson.Util.fixEmptyAndTrim;

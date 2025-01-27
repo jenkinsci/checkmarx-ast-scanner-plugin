@@ -1,14 +1,21 @@
-package com.checkmarx.jenkins;
+package com.checkmarx.jenkins.integration;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Collections;
+
+import com.checkmarx.jenkins.CheckmarxScanBuilder;
+import com.checkmarx.jenkins.tools.CheckmarxInstallation;
+import com.checkmarx.jenkins.tools.CheckmarxInstaller;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
+import hudson.tools.ToolInstaller;
+import hudson.tools.ToolProperty;
+import hudson.util.FormValidation;
 import jenkins.model.ArtifactManager;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.logging.Logger;
 
 public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
@@ -184,5 +191,130 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
         checkmarxScanBuilder.setUseOwnAdditionalOptions(true);
 
         return checkmarxScanBuilder;
+    }
+
+    @Test
+    public void testDoCheckServerUrl() throws Exception {
+        CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor descriptor = new CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor();
+        
+        // Test with valid URL
+        FormValidation result = descriptor.doCheckServerUrl("https://valid-server.checkmarx.com");
+        assertEquals(FormValidation.Kind.OK, result.kind);
+        
+        // Test with empty URL
+        result = descriptor.doCheckServerUrl("");
+        assertEquals(FormValidation.Kind.ERROR, result.kind);
+        assertEquals("Server Url cannot be empty", result.getMessage());
+        
+        // Test with null URL
+        result = descriptor.doCheckServerUrl(null);
+        assertEquals(FormValidation.Kind.ERROR, result.kind);
+        assertEquals("Server Url cannot be empty", result.getMessage());
+        
+        // Test with whitespace URL
+        result = descriptor.doCheckServerUrl("   ");
+        assertEquals(FormValidation.Kind.ERROR, result.kind);
+        assertEquals("Server Url cannot be empty", result.getMessage());
+    }
+
+    @Test
+    public void testHasInstallationsAvailable() throws Exception {
+        CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor descriptor = new CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor();
+        
+        // Get current installations
+        CheckmarxInstallation[] installations = descriptor.getInstallations();
+        
+        if (installations != null && installations.length > 0) {
+            assertTrue("Should have installations available", descriptor.hasInstallationsAvailable());
+        } else {
+            // Set up a test installation if none exists
+            CheckmarxInstallation installation = new CheckmarxInstallation(
+                CheckmarxTestBase.JT_LATEST, 
+                "/usr/local/checkmarx",
+                Collections.<ToolProperty<?>>emptyList()
+            );
+            descriptor.setInstallations(installation);
+            
+            assertTrue("Should have installations available after adding one", descriptor.hasInstallationsAvailable());
+            
+            // Clean up - restore original installations
+            descriptor.setInstallations(installations);
+        }
+        
+        // Test with no installations
+        descriptor.setInstallations();
+        assertFalse("Should have no installations available", descriptor.hasInstallationsAvailable());
+        
+        // Restore original installations
+        descriptor.setInstallations(installations);
+    }
+
+    @Test
+    public void testDoTestConnection() throws Exception {
+        CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor descriptor = new CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor();
+        
+        // Test with valid connection parameters
+        FormValidation result = descriptor.doTestConnection(
+            "https://valid-server.checkmarx.com",
+            false,
+            "",
+            "test-tenant",
+            CheckmarxTestBase.JENKINS_CREDENTIALS_TOKEN_ID,
+            CheckmarxTestBase.JT_LATEST,
+            null,
+            null
+        );
+        
+        // The actual result will depend on the server response, but we can verify the method executes
+        assertNotNull("Test connection result should not be null", result);
+    }
+
+    @Test
+    public void testCheckmarxInstallationDescriptor() {
+        CheckmarxInstallation.CheckmarxInstallationDescriptor descriptor = new CheckmarxInstallation.CheckmarxInstallationDescriptor();
+        
+        // Test getDefaultInstallers
+        List<? extends ToolInstaller> defaultInstallers = descriptor.getDefaultInstallers();
+        assertNotNull("Default installers should not be null", defaultInstallers);
+        assertEquals("Should have one default installer", 1, defaultInstallers.size());
+        assertTrue("Default installer should be CheckmarxInstaller", defaultInstallers.get(0) instanceof CheckmarxInstaller);
+        
+        // Test getInstallations and setInstallations
+        CheckmarxInstallation[] originalInstallations = descriptor.getInstallations();
+        
+        try {
+            // Create test installations
+            CheckmarxInstallation installation1 = new CheckmarxInstallation(
+                "test-installation-1", 
+                "/usr/local/checkmarx1",
+                Collections.<ToolProperty<?>>emptyList()
+            );
+            
+            CheckmarxInstallation installation2 = new CheckmarxInstallation(
+                "test-installation-2", 
+                "/usr/local/checkmarx2",
+                Collections.<ToolProperty<?>>emptyList()
+            );
+            
+            // Set new installations
+            descriptor.setInstallations(installation1, installation2);
+            
+            // Verify installations were set correctly
+            CheckmarxInstallation[] installations = descriptor.getInstallations();
+            assertNotNull("Installations should not be null", installations);
+            assertEquals("Should have two installations", 2, installations.length);
+            assertEquals("First installation name should match", "test-installation-1", installations[0].getName());
+            assertEquals("Second installation name should match", "test-installation-2", installations[1].getName());
+            
+            // Test setting empty installations
+            descriptor.setInstallations();
+            installations = descriptor.getInstallations();
+            assertNotNull("Installations should not be null when empty", installations);
+            assertEquals("Should have no installations", 0, installations.length);
+            
+        } finally {
+            // Restore original installations
+            descriptor.setInstallations(originalInstallations);
+        }
     }
 }

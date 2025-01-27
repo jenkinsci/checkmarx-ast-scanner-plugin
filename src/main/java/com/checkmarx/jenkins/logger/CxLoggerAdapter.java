@@ -1,4 +1,4 @@
-package com.checkmarx.jenkins;
+package com.checkmarx.jenkins.logger;
 
 
 import org.slf4j.Logger;

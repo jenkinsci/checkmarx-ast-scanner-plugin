@@ -1,5 +1,6 @@
 package com.checkmarx.jenkins.tools;
 
+import com.checkmarx.jenkins.exception.ToolDetectionException;
 import lombok.NonNull;
 import java.util.Locale;
 import java.util.Map;

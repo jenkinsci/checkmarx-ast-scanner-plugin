@@ -31,12 +31,12 @@ jobs:
         run: sudo apt-get install -y libxml2-utils
 
       - name: Build with Maven
-        run: mvn -B package --file pom.xml -s $GITHUB_WORKSPACE/settings.xml
+        run: mvn -B package --file pom.xml -s $GITHUB_WORKSPACE/settings.xml -DskipTests
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Run tests with coverage
-        run: mvn test jacoco:report
+        run: mvn test -Dtest=com.checkmarx.jenkins.integration.\*\* jacoco:report
 
       - name: Print total coverage percentage
         run: |
@@ -46,8 +46,67 @@ jobs:
           COVERAGE_PERCENTAGE=$(echo "scale=2; $COVERED_LINES / $TOTAL_LINES * 100" | bc)
           echo "Total coverage percentage: $COVERAGE_PERCENTAGE%"
 
+      - name: Generate JaCoCo Badge
+        uses: cicirello/jacoco-badge-generator@f33476a5a3fd5a4f77cb5eef2ebe728c1dd5b921 #v2.11.0
+        with:
+          jacoco-csv-file: target/site/jacoco/jacoco.csv
+
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-report
+          name: integration-coverage-report
+          path: target/site/jacoco
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      CX_BASE_URI: ${{ secrets.CX_BASE_URI}}
+      CX_BASE_AUTH_URI: ${{ secrets.CX_BASE_AUTH_URI}}
+      CX_TENANT: ${{ secrets.CX_TENANT }}
+      CX_CLIENT_ID: ${{ secrets.CX_CLIENT_ID }}
+      CX_CLIENT_SECRET: ${{ secrets.CX_CLIENT_SECRET }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4.2.1
+        with:
+          java-version: 11
+          distribution: 'temurin'
+          server-id: github
+          settings-path: ${{ github.workspace }}
+
+      - name: Install xmllint
+        run: sudo apt-get install -y libxml2-utils
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml -s $GITHUB_WORKSPACE/settings.xml -DskipTests
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Run tests with coverage
+        run: mvn test -Dtest=com.checkmarx.jenkins.unit.\*\* jacoco:report
+
+      - name: Print total coverage percentage
+        run: |
+          COVERED_LINES=$(xmllint --xpath "string(//report/counter[@type='LINE']/@covered)" target/site/jacoco/jacoco.xml)
+          MISSED_LINES=$(xmllint --xpath "string(//report/counter[@type='LINE']/@missed)" target/site/jacoco/jacoco.xml)
+          TOTAL_LINES=$((COVERED_LINES + MISSED_LINES))
+          COVERAGE_PERCENTAGE=$(echo "scale=2; $COVERED_LINES / $TOTAL_LINES * 100" | bc)
+          echo "Total coverage percentage: $COVERAGE_PERCENTAGE%"
+
+      - name: Generate JaCoCo Badge
+        uses: cicirello/jacoco-badge-generator@f33476a5a3fd5a4f77cb5eef2ebe728c1dd5b921 #v2.11.0
+        with:
+          jacoco-csv-file: target/site/jacoco/jacoco.csv
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-coverage-report
           path: target/site/jacoco
