@@ -1,16 +1,19 @@
 package com.checkmarx.jenkins.integration;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Collections;
 
 import com.checkmarx.jenkins.CheckmarxScanBuilder;
+import com.checkmarx.jenkins.tools.CheckmarxInstallation;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
+import hudson.tools.ToolProperty;
+import hudson.util.FormValidation;
 import jenkins.model.ArtifactManager;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.logging.Logger;
 
 public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
@@ -186,5 +189,81 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
         checkmarxScanBuilder.setUseOwnAdditionalOptions(true);
 
         return checkmarxScanBuilder;
+    }
+
+    @Test
+    public void testDoCheckServerUrl() throws Exception {
+        CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor descriptor = new CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor();
+        
+        // Test with valid URL
+        FormValidation result = descriptor.doCheckServerUrl("https://valid-server.checkmarx.com");
+        assertEquals(FormValidation.Kind.OK, result.kind);
+        
+        // Test with empty URL
+        result = descriptor.doCheckServerUrl("");
+        assertEquals(FormValidation.Kind.ERROR, result.kind);
+        assertEquals("Server Url cannot be empty", result.getMessage());
+        
+        // Test with null URL
+        result = descriptor.doCheckServerUrl(null);
+        assertEquals(FormValidation.Kind.ERROR, result.kind);
+        assertEquals("Server Url cannot be empty", result.getMessage());
+        
+        // Test with whitespace URL
+        result = descriptor.doCheckServerUrl("   ");
+        assertEquals(FormValidation.Kind.ERROR, result.kind);
+        assertEquals("Server Url cannot be empty", result.getMessage());
+    }
+
+    @Test
+    public void testHasInstallationsAvailable() throws Exception {
+        CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor descriptor = new CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor();
+        
+        // Get current installations
+        CheckmarxInstallation[] installations = descriptor.getInstallations();
+        
+        if (installations != null && installations.length > 0) {
+            assertTrue("Should have installations available", descriptor.hasInstallationsAvailable());
+        } else {
+            // Set up a test installation if none exists
+            CheckmarxInstallation installation = new CheckmarxInstallation(
+                CheckmarxTestBase.JT_LATEST, 
+                "/usr/local/checkmarx",
+                Collections.<ToolProperty<?>>emptyList()
+            );
+            descriptor.setInstallations(installation);
+            
+            assertTrue("Should have installations available after adding one", descriptor.hasInstallationsAvailable());
+            
+            // Clean up - restore original installations
+            descriptor.setInstallations(installations);
+        }
+        
+        // Test with no installations
+        descriptor.setInstallations();
+        assertFalse("Should have no installations available", descriptor.hasInstallationsAvailable());
+        
+        // Restore original installations
+        descriptor.setInstallations(installations);
+    }
+
+    @Test
+    public void testDoTestConnection() throws Exception {
+        CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor descriptor = new CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor();
+        
+        // Test with valid connection parameters
+        FormValidation result = descriptor.doTestConnection(
+            "https://valid-server.checkmarx.com",
+            false,
+            "",
+            "test-tenant",
+            CheckmarxTestBase.JENKINS_CREDENTIALS_TOKEN_ID,
+            CheckmarxTestBase.JT_LATEST,
+            null,
+            null
+        );
+        
+        // The actual result will depend on the server response, but we can verify the method executes
+        assertNotNull("Test connection result should not be null", result);
     }
 }
