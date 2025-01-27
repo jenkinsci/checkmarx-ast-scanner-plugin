@@ -5,9 +5,11 @@ import java.util.Collections;
 
 import com.checkmarx.jenkins.CheckmarxScanBuilder;
 import com.checkmarx.jenkins.tools.CheckmarxInstallation;
+import com.checkmarx.jenkins.tools.CheckmarxInstaller;
 import hudson.model.FreeStyleBuild;
 import hudson.model.FreeStyleProject;
 import hudson.model.Result;
+import hudson.tools.ToolInstaller;
 import hudson.tools.ToolProperty;
 import hudson.util.FormValidation;
 import jenkins.model.ArtifactManager;
@@ -265,5 +267,54 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
         
         // The actual result will depend on the server response, but we can verify the method executes
         assertNotNull("Test connection result should not be null", result);
+    }
+
+    @Test
+    public void testCheckmarxInstallationDescriptor() throws Exception {
+        CheckmarxInstallation.CheckmarxInstallationDescriptor descriptor = new CheckmarxInstallation.CheckmarxInstallationDescriptor();
+        
+        // Test getDefaultInstallers
+        List<? extends ToolInstaller> defaultInstallers = descriptor.getDefaultInstallers();
+        assertNotNull("Default installers should not be null", defaultInstallers);
+        assertEquals("Should have one default installer", 1, defaultInstallers.size());
+        assertTrue("Default installer should be CheckmarxInstaller", defaultInstallers.get(0) instanceof CheckmarxInstaller);
+        
+        // Test getInstallations and setInstallations
+        CheckmarxInstallation[] originalInstallations = descriptor.getInstallations();
+        
+        try {
+            // Create test installations
+            CheckmarxInstallation installation1 = new CheckmarxInstallation(
+                "test-installation-1", 
+                "/usr/local/checkmarx1",
+                Collections.<ToolProperty<?>>emptyList()
+            );
+            
+            CheckmarxInstallation installation2 = new CheckmarxInstallation(
+                "test-installation-2", 
+                "/usr/local/checkmarx2",
+                Collections.<ToolProperty<?>>emptyList()
+            );
+            
+            // Set new installations
+            descriptor.setInstallations(installation1, installation2);
+            
+            // Verify installations were set correctly
+            CheckmarxInstallation[] installations = descriptor.getInstallations();
+            assertNotNull("Installations should not be null", installations);
+            assertEquals("Should have two installations", 2, installations.length);
+            assertEquals("First installation name should match", "test-installation-1", installations[0].getName());
+            assertEquals("Second installation name should match", "test-installation-2", installations[1].getName());
+            
+            // Test setting empty installations
+            descriptor.setInstallations();
+            installations = descriptor.getInstallations();
+            assertNotNull("Installations should not be null when empty", installations);
+            assertEquals("Should have no installations", 0, installations.length);
+            
+        } finally {
+            // Restore original installations
+            descriptor.setInstallations(originalInstallations);
+        }
     }
 }
