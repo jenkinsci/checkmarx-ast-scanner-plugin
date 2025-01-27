@@ -49,7 +49,7 @@ jobs:
       - name: Generate JaCoCo Badge
         uses: cicirello/jacoco-badge-generator@f33476a5a3fd5a4f77cb5eef2ebe728c1dd5b921 #v2.11.0
         with:
-          jacoco-csv-file: target/site/jacoco/jacoco/jacoco.csv
+          jacoco-csv-file: target/site/jacoco/jacoco.csv
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -103,7 +103,7 @@ jobs:
       - name: Generate JaCoCo Badge
         uses: cicirello/jacoco-badge-generator@f33476a5a3fd5a4f77cb5eef2ebe728c1dd5b921 #v2.11.0
         with:
-          jacoco-csv-file: target/site/jacoco/jacoco/jacoco.csv
+          jacoco-csv-file: target/site/jacoco/jacoco.csv
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
