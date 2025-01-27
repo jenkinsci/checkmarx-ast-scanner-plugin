@@ -243,6 +243,14 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.8</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/com/checkmarx/jenkins/exception/**</exclude>
+                        <exclude>**/com/checkmarx/jenkins/model/**</exclude>
+                        <exclude>**/com/checkmarx/jenkins/logger/**</exclude>
+                        <!-- Add other patterns as needed -->
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -255,18 +263,6 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
-                        <configuration>
-                            <includes>
-                                <include>**/src/main/java/**</include>
-                                <!-- Add other patterns as needed -->
-                            </includes>
-                            <excludes>
-                                <exclude>**/com/checkmarx/jenkins/exception/**</exclude>
-                                <exclude>**/com/checkmarx/jenkins/model/**</exclude>
-                                <exclude>**/com/checkmarx/jenkins/logger/**</exclude>
-                                <!-- Add other patterns as needed -->
-                            </excludes>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>
