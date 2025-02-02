@@ -74,7 +74,7 @@ jobs:
 
       - name: Update ast-cli-java-wrapper version in pom.xml
         run: |
-          perl -i -pe 'BEGIN{undef $/;} s|<groupId>com.checkmarx.ast</groupId>\s*<artifactId>ast-cli-java-wrapper</artifactId>\s*<version>.*?</version>|<groupId>com.checkmarx.ast</groupId>\n\t        <artifactId>ast-cli-java-wrapper</artifactId>\n\t        <version>2.1.8</version>|sg' pom.xml
+          perl -i -pe 'BEGIN{undef $/;} s|<groupId>com.checkmarx.ast</groupId>\s*<artifactId>ast-cli-java-wrapper</artifactId>\s*<version>.*?</version>|<groupId>com.checkmarx.ast</groupId>\n\t        <artifactId>ast-cli-java-wrapper</artifactId>\n\t        <version>${{ env.release_tag }}</version>|sg' pom.xml
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c #v6
