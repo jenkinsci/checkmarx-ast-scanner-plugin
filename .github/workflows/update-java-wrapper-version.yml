@@ -18,6 +18,9 @@ jobs:
         with:
           fetch-depth: 0 # Ensures we have full branch history
 
+      - name: Install required dependencies
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
       - name: Get current version from pom.xml
         id: checkmarx-ast-cli
         run: |
@@ -33,7 +36,7 @@ jobs:
             echo "Using specified version: $VERSION"
           else
             VERSION=$(curl -s "https://repo1.maven.org/maven2/com/checkmarx/ast/ast-cli-java-wrapper/maven-metadata.xml" | \
-            xmllint --xpath "string(//latest)" -)
+            xmllint --xpath "string(//metadata/versioning/latest/text())" -)
             echo "Fetched latest version: $VERSION"
           fi
           echo "release_tag=$VERSION" >> $GITHUB_ENV
