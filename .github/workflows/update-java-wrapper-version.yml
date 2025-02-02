@@ -82,7 +82,7 @@ jobs:
         uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c #v6
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          branch: update-ast-cli-java-wrapper
+          branch: "update-ast-cli-java-wrapper-to-${{ env.release_tag }}"
           title: "Update ast-cli-java-wrapper to version ${{ env.release_tag }}"
           body: "This PR updates the ast-cli-java-wrapper dependency in pom.xml to version ${{ env.release_tag }}."
           commit-message: "Update ast-cli-java-wrapper to version ${{ env.release_tag }}"
