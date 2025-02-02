@@ -1,0 +1,60 @@
+name: Update AST CLI Java Wrapper Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Specify a version of ast-cli-java-wrapper (leave empty for latest)"
+        required: false
+        type: string
+
+jobs:
+  update-ast-cli-wrapper:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Ensures we have full branch history
+
+      - name: Get current version from pom.xml
+        id: checkmarx-ast-cli
+        run: |
+          CURRENT_VERSION=$(grep -oP '(?<=<groupId>com.checkmarx.ast</groupId>\s*<artifactId>ast-cli-java-wrapper</artifactId>\s*<version>).*?(?=</version>)' pom.xml | head -1)
+          echo "Current version: $CURRENT_VERSION"
+          echo "current_tag=$CURRENT_VERSION" >> $GITHUB_ENV
+
+      - name: Determine version to use
+        id: determine-version
+        run: |
+          if [[ -n "${{ github.event.inputs.version }}" ]]; then
+            VERSION=${{ github.event.inputs.version }}
+            echo "Using specified version: $VERSION"
+          else
+            VERSION=$(curl -s "https://repo1.maven.org/maven2/com/checkmarx/ast/ast-cli-java-wrapper/maven-metadata.xml" | \
+            xmllint --xpath "string(//latest)" -)
+            echo "Fetched latest version: $VERSION"
+          fi
+          echo "release_tag=$VERSION" >> $GITHUB_ENV
+
+      - name: Check if update is needed
+        run: |
+          if [[ "${{ env.current_tag }}" == "${{ env.release_tag }}" ]]; then
+            echo "✅ Already using the latest version (${{ env.release_tag }}) in Maven."
+            exit 0
+          fi
+
+      - name: Update ast-cli-java-wrapper version in pom.xml
+        run: |
+          sed -i "s|<groupId>com.checkmarx.ast</groupId>\n\s*<artifactId>ast-cli-java-wrapper</artifactId>\n\s*<version>.*</version>|<groupId>com.checkmarx.ast</groupId>\n        <artifactId>ast-cli-java-wrapper</artifactId>\n        <version>${{ env.release_tag }}</version>|g" pom.xml
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c #v6
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          branch: update-ast-cli-java-wrapper
+          title: "Update ast-cli-java-wrapper to version ${{ env.release_tag }}"
+          body: "This PR updates the ast-cli-java-wrapper dependency in pom.xml to version ${{ env.release_tag }}."
+          commit-message: "Update ast-cli-java-wrapper to version ${{ env.release_tag }}"
+          delete-branch: true
