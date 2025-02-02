@@ -36,17 +36,17 @@ jobs:
         id: checkmarx-ast-cli
         run: |
           # Ensure the script is running from the correct directory
-          if [[ ! -f "../../pom.xml" ]]; then
+          if [[ ! -f "pom.xml" ]]; then
             echo "❌ pom.xml not found in $(pwd)"
             exit 1
           fi
 
           # Extract the version using grep
-          CURRENT_VERSION=$(grep -oPm1 "(?<=<groupId>com.checkmarx.ast</groupId>\s*<artifactId>ast-cli-java-wrapper</artifactId>\s*<version>)[^<]+" ../../pom.xml | tr -d '[:space:]')
+          CURRENT_VERSION=$(grep -oPm1 "(?<=<groupId>com.checkmarx.ast</groupId>\s*<artifactId>ast-cli-java-wrapper</artifactId>\s*<version>)[^<]+" pom.xml | tr -d '[:space:]')
 
           # If grep fails, use sed as a fallback
           if [[ -z "$CURRENT_VERSION" ]]; then
-            CURRENT_VERSION=$(sed -n '/<groupId>com.checkmarx.ast<\/groupId>/,/<\/dependency>/p' ../../pom.xml | grep -oPm1 "(?<=<version>)[^<]+")
+            CURRENT_VERSION=$(sed -n '/<groupId>com.checkmarx.ast<\/groupId>/,/<\/dependency>/p' pom.xml | grep -oPm1 "(?<=<version>)[^<]+")
           fi
 
           # Exit if we still couldn't extract the version
@@ -87,7 +87,7 @@ jobs:
 
       - name: Update ast-cli-java-wrapper version in pom.xml
         run: |
-          sed -i "s|<groupId>com.checkmarx.ast</groupId>\n\s*<artifactId>ast-cli-java-wrapper</artifactId>\n\s*<version>.*</version>|<groupId>com.checkmarx.ast</groupId>\n        <artifactId>ast-cli-java-wrapper</artifactId>\n        <version>${{ env.release_tag }}</version>|g" ../../pom.xml
+          sed -i "s|<groupId>com.checkmarx.ast</groupId>\n\s*<artifactId>ast-cli-java-wrapper</artifactId>\n\s*<version>.*</version>|<groupId>com.checkmarx.ast</groupId>\n        <artifactId>ast-cli-java-wrapper</artifactId>\n        <version>${{ env.release_tag }}</version>|g" pom.xml
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c #v6
