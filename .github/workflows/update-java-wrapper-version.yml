@@ -27,11 +27,6 @@ jobs:
       - name: Install xmllint
         run: sudo apt-get install -y libxml2-utils
 
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml -s $GITHUB_WORKSPACE/settings.xml -DskipTests
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
       - name: Get current version from pom.xml
         id: checkmarx-ast-cli
         run: |
