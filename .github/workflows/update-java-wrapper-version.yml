@@ -65,17 +65,20 @@ jobs:
 
           if [[ "${{ env.current_tag }}" == "${{ env.release_tag }}" ]]; then
             echo "✅ Already using the latest version (${{ env.release_tag }}) in Maven."
-            exit 0
+            echo update_needed=false >> $GITHUB_ENV
           fi
 
       - name: Update ast-cli-java-wrapper version in pom.xml
+        if : env.update_needed != 'false'
         run: |
           perl -i -pe 'BEGIN{undef $/;} s|<groupId>com.checkmarx.ast</groupId>\s*<artifactId>ast-cli-java-wrapper</artifactId>\s*<version>.*?</version>|<groupId>com.checkmarx.ast</groupId>\n        <artifactId>ast-cli-java-wrapper</artifactId>\n        <version>${{ env.release_tag }}</version>|sg' pom.xml
 
       - name: Format pom.xml
+        if: env.update_needed != 'false'
         run: xmllint --format pom.xml --output pom.xml
 
       - name: Create Pull Request
+        if: env.update_needed != 'false'
         uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c #v6
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
