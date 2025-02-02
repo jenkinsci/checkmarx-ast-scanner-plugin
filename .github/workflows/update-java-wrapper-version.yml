@@ -64,7 +64,7 @@ jobs:
           echo "Latest version: ${{ env.release_tag }}"
 
           if [[ "${{ env.current_tag }}" == "${{ env.release_tag }}" ]]; then
-            echo "✅ Already using the latest version (${{ env.release_tag }}) in Maven."
+            echo "✅ Already using the wanted version ${{ env.release_tag }}"
             echo update_needed=false >> $GITHUB_ENV
           fi
 
