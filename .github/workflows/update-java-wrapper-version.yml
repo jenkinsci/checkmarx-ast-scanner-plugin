@@ -1,0 +1,89 @@
+name: Update AST CLI Java Wrapper Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Specify a version of ast-cli-java-wrapper (leave empty for latest)"
+        required: false
+        type: string
+
+jobs:
+  update-ast-cli-wrapper:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install xmllint
+        run: sudo apt-get install -y libxml2-utils
+
+      - name: Get current version from pom.xml
+        id: checkmarx-ast-cli
+        run: |
+          if [[ ! -f "pom.xml" ]]; then
+            echo "❌ pom.xml not found in $(pwd)"
+            exit 1
+          fi
+
+          CURRENT_VERSION=$(grep -oPm1 "(?<=<groupId>com.checkmarx.ast</groupId>\s*<artifactId>ast-cli-java-wrapper</artifactId>\s*<version>)[^<]+" pom.xml | tr -d '[:space:]')
+
+          if [[ -z "$CURRENT_VERSION" ]]; then
+            CURRENT_VERSION=$(sed -n '/<groupId>com.checkmarx.ast<\/groupId>/,/<\/dependency>/p' pom.xml | grep -oPm1 "(?<=<version>)[^<]+")
+          fi
+
+          if [[ -z "$CURRENT_VERSION" ]]; then
+            echo "❌ Failed to extract current version from pom.xml"
+            exit 1
+          fi
+
+          echo "Current version: $CURRENT_VERSION"
+          echo "current_tag=$CURRENT_VERSION" >> $GITHUB_ENV
+
+      - name: Determine version to use
+        id: determine-version
+        run: |
+          if [[ -n "${{ github.event.inputs.version }}" ]]; then
+            VERSION=${{ github.event.inputs.version }}
+            echo "Using specified version: $VERSION"
+          else
+            VERSION=$(curl -s "https://repo1.maven.org/maven2/com/checkmarx/ast/ast-cli-java-wrapper/maven-metadata.xml" | \
+            xmllint --xpath "string(//metadata/versioning/latest/text())" -)
+            if [[ -z "$VERSION" ]]; then
+              echo "❌ Failed to fetch latest version from Maven repository"
+              exit 1
+            fi
+            echo "Fetched latest version: $VERSION"
+          fi
+          echo "release_tag=$VERSION" >> $GITHUB_ENV
+
+      - name: Check if update is needed
+        run: |
+          echo "Current version: ${{ env.current_tag }}"
+          echo "Latest version: ${{ env.release_tag }}"
+
+          if [[ "${{ env.current_tag }}" == "${{ env.release_tag }}" ]]; then
+            echo "✅ Already using the wanted version ${{ env.release_tag }}"
+            echo update_needed=false >> $GITHUB_ENV
+          fi
+
+      - name: Update ast-cli-java-wrapper version in pom.xml
+        if : env.update_needed != 'false'
+        run: |
+          perl -i -pe 'BEGIN{undef $/;} s|<groupId>com.checkmarx.ast</groupId>\s*<artifactId>ast-cli-java-wrapper</artifactId>\s*<version>.*?</version>|<groupId>com.checkmarx.ast</groupId>\n        <artifactId>ast-cli-java-wrapper</artifactId>\n        <version>${{ env.release_tag }}</version>|sg' pom.xml
+
+      - name: Format pom.xml
+        if: env.update_needed != 'false'
+        run: xmllint --format pom.xml --output pom.xml
+
+      - name: Create Pull Request
+        if: env.update_needed != 'false'
+        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c #v6
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          branch: "update-ast-cli-java-wrapper-to-${{ env.release_tag }}"
+          title: "Update ast-cli-java-wrapper to version ${{ env.release_tag }}"
+          body: "This PR updates the ast-cli-java-wrapper dependency in pom.xml to version ${{ env.release_tag }}."
+          commit-message: "Update ast-cli-java-wrapper to version ${{ env.release_tag }}"
+          delete-branch: true
