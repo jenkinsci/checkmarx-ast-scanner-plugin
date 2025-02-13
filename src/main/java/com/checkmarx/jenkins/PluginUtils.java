@@ -13,7 +13,6 @@ import hudson.slaves.EnvironmentVariablesNodeProperty;
 import jenkins.model.Jenkins;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,7 +37,7 @@ public class PluginUtils {
                 .findFirst().orElse(null);
     }
 
-    public static List<String> submitScanDetailsToWrapper(final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, URISyntaxException, CxConfig.InvalidCLIConfigException, CxException {
+    public static List<String> submitScanDetailsToWrapper(final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException {
         log.info("Submitting the scan details to the CLI wrapper.");
 
         final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
@@ -53,28 +52,28 @@ public class PluginUtils {
         return cxWrapper.buildScanCreateArguments(params, scanConfig.getAdditionalOptions());
     }
 
-    public static List<String> scanCancel(UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxConfig.InvalidCLIConfigException {
+    public static List<String> scanCancel(UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException {
         final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
 
         final CxWrapper cxWrapper = new CxWrapper(cxConfig, log);
         return cxWrapper.buildScanCancelArguments(scanId);
     }
 
-    public static List<String> generateHTMLReport(UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxConfig.InvalidCLIConfigException {
+    public static List<String> generateHTMLReport(UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException {
         final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
 
         final CxWrapper cxWrapper = new CxWrapper(cxConfig, log);
         return cxWrapper.buildResultsArguments(scanId, ReportFormat.summaryHTML);
     }
 
-    public static List<String> generateJsonReport(UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException, InterruptedException, CxException, URISyntaxException, CxConfig.InvalidCLIConfigException {
+    public static List<String> generateJsonReport(UUID scanId, final ScanConfig scanConfig, final String checkmarxCliExecutable, final CxLoggerAdapter log) throws IOException {
         final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
 
         final CxWrapper cxWrapper = new CxWrapper(cxConfig, log);
         return cxWrapper.buildResultsArguments(scanId, ReportFormat.summaryJSON);
     }
 
-    public static String authValidate(final ScanConfig scanConfig, final String checkmarxCliExecutable) throws IOException, InterruptedException, CxConfig.InvalidCLIConfigException, URISyntaxException, CxException {
+    public static String authValidate(final ScanConfig scanConfig, final String checkmarxCliExecutable) throws IOException, InterruptedException, CxException {
         final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
         cxConfig.setClientId(scanConfig.getCheckmarxToken().getClientId());
         cxConfig.setClientSecret(scanConfig.getCheckmarxToken().getToken().getPlainText());
@@ -82,7 +81,7 @@ public class PluginUtils {
         return cxWrapper.authValidate();
     }
 
-    private static CxConfig initiateWrapperObject(final ScanConfig scanConfig, final String checkmarxCliExecutable) throws IOException, InterruptedException {
+    private static CxConfig initiateWrapperObject(final ScanConfig scanConfig, final String checkmarxCliExecutable) {
         return CxConfig.builder()
                 .baseUri(scanConfig.getServerUrl())
                 .baseAuthUri(scanConfig.getBaseAuthUrl())
