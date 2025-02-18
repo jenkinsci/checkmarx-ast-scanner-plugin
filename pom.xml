@@ -8,6 +8,7 @@
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
         <version>4.88</version>
+        <relativePath/>
     </parent>
     <groupId>com.checkmarx.jenkins</groupId>
     <artifactId>checkmarx-ast-scanner</artifactId>
@@ -26,19 +27,11 @@
             <url>https://opensource.org/licenses/MIT</url>
         </license>
     </licenses>
-    <!-- If you want this to appear on the plugin site page: -->
-    <developers>
-        <developer>
-            <id>mithilesh_pawar</id>
-            <name>Mithilesh Pawar</name>
-            <email>Mithilesh.Pawar@checkmarx.com</email>
-        </developer>
-    </developers>
     <contributors/>
 
     <!-- Environment Settings -->
     <scm>
-        <connection>scm:git:git://github.com/${gitHubRepo}.git</connection>
+        <connection>scm:git:https://github.com/${gitHubRepo}.git</connection>
         <developerConnection>scm:git:git@github.com:${gitHubRepo}.git</developerConnection>
         <tag>${scmTag}</tag>
         <url>https://github.com/${gitHubRepo}</url>
@@ -50,8 +43,8 @@
         <changelist>-SNAPSHOT</changelist>
         <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
         <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
-        <jenkins.baseline>2.452</jenkins.baseline>
-        <jenkins.version>${jenkins.baseline}.4</jenkins.version>
+        <jenkins.baseline>2.462</jenkins.baseline>
+        <jenkins.version>${jenkins.baseline}.3</jenkins.version>
         <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
         <output.dir>${project.build.directory}/output</output.dir>
         <tmp.dir>${project.build.directory}/tmp</tmp.dir>
@@ -65,7 +58,7 @@
                 <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
                 <groupId>io.jenkins.tools.bom</groupId>
                 <artifactId>bom-${jenkins.baseline}.x</artifactId>
-                <version>3654.v237e4a_f2d8da_</version>
+                <version>4136.vca_c3202a_7fd1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -75,8 +68,7 @@
     <dependencies>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.5.0</version> <!-- או גרסה עדכנית -->
+            <artifactId>mockito-junit-jupiter</artifactId> <!-- או גרסה עדכנית -->
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -169,7 +161,6 @@
         <dependency>
             <groupId>org.apache.ant</groupId>
             <artifactId>ant</artifactId>
-            <version>1.10.12</version>
         </dependency>
     </dependencies>
 
@@ -193,7 +184,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
-                <version>3.0.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -242,7 +232,6 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.8</version>
                 <configuration>
                     <excludes>
                         <exclude>**/com/checkmarx/jenkins/exception/**</exclude>
