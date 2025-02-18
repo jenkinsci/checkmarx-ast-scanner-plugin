@@ -62,6 +62,29 @@ jobs:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       #     MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
       #     MAVEN_TOKEN: ${{ secrets.MAVEN_TOKEN }}
+      - name: Create a new Git tag
+        id: create-tag
+        run: |
+          TAG_NAME="daniel-test"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG_NAME" -m "Automatically created tag: $TAG_NAME"
+          git push origin "$TAG_NAME"
+          echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+
+      - name: Create a new GitHub Release
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.TAG_NAME }}
+          release_name: "Release ${{ env.TAG_NAME }}"
+          body: "This release was automatically created."
+          draft: false
+          prerelease: false
+
 
       - name: Get the new tag
         id: get_new_tag
