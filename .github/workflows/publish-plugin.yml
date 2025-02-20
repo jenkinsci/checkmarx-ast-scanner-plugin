@@ -42,7 +42,7 @@ jobs:
     if: needs.validate.outputs.should_release == 'true'
     outputs:
       TAG_NAME: ${{ steps.get_new_tag.outputs.TAG_NAME }}
-      CLI_VERSION: ${{ steps.extract_cli_version.outputs.CLI_VERSION }}
+      CLI_VERSION: ${{ steps.set_outputs.outputs.CLI_VERSION }}
     steps:
       - name: Check out
         uses: actions/checkout@v4
@@ -77,8 +77,15 @@ jobs:
         run: |
           chmod +x .github/scripts/extract_cli_version.sh
           .github/scripts/extract_cli_version.sh cx-linux
+
+      - name: Print Extracted CLI Version
+        run: |
           echo "Extracted CLI Version: ${{ env.CLI_VERSION }}"
-          echo "CLI_VERSION=$CLI_VERSION" | tee -a $GITHUB_ENV $GITHUB_OUTPUT          
+
+      - name: Echo CLI version and tag name to outputs
+        id: set_outputs
+        run: |
+          echo "::set-output name=CLI_VERSION::${{ env.CLI_VERSION }}"       
 
       - name: Get GitHub Release Upload URL
         id: get-release
