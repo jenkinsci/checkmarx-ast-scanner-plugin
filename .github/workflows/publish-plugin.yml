@@ -97,6 +97,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
+
       - name: Extract CLI Version from Wrapper
         id: extract_cli_version
         run: |
