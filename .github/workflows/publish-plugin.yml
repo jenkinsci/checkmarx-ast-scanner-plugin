@@ -96,20 +96,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: mvn compile and package
+      - name: Extract CLI version
         run: |
-          mvn package -DskipTests -Dset.changelist
-
-      - name: Extract CLI Version from Wrapper
-        id: extract_cli_version
-        run: |
-          CLI_VERSION=$(mvn -B -ntp help:evaluate -Dexpression=cli.version -q -DforceStdout)
-          if [[ -z "$CLI_VERSION" ]]; then
-            echo "❌ ERROR: Failed to extract CLI version"
-            exit 1
-          fi
-          echo "Extracted CLI Version: $CLI_VERSION"
-          echo "CLI_VERSION=$CLI_VERSION" | tee -a $GITHUB_ENV $GITHUB_OUTPUT
+          chmod +x ./.github/scripts/extract_cli_version.sh
+          ./.github/scripts/extract_cli_version.sh cx-linux
 
       - name: Upload Release Asset
         id: upload-release-asset
