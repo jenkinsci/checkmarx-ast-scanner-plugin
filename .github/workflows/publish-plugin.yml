@@ -76,6 +76,9 @@ jobs:
       #     body: "This release was automatically created."
       #     draft: false
       #     prerelease: false
+      
+      - name: Ensure Maven Dependencies are Downloaded
+        run: mvn dependency:resolve
 
       - name: Get the new tag
         id: get_new_tag
@@ -83,18 +86,6 @@ jobs:
           TAG_NAME=$(git describe --tags --abbrev=0)
           echo "Extracted Tag Name: $TAG_NAME"
           echo "TAG_NAME=$TAG_NAME" | tee -a $GITHUB_ENV $GITHUB_OUTPUT
-
-      - name: Get GitHub Release Upload URL
-        id: get-release
-        run: |
-          UPLOAD_URL=$(gh api /repos/${{ github.repository }}/releases/tags/${{ env.TAG_NAME }} --jq '.upload_url')
-          if [[ -z "$UPLOAD_URL" ]]; then
-            echo "❌ ERROR: Failed to retrieve upload URL"
-            exit 1
-          fi
-          echo "UPLOAD_URL=$UPLOAD_URL" | tee -a $GITHUB_ENV $GITHUB_OUTPUT
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract CLI version
         run: |
@@ -109,6 +100,18 @@ jobs:
         id: set_outputs
         run: |
           echo "::set-output name=CLI_VERSION::${{ env.CLI_VERSION }}"
+
+      - name: Get GitHub Release Upload URL
+        id: get-release
+        run: |
+          UPLOAD_URL=$(gh api /repos/${{ github.repository }}/releases/tags/${{ env.TAG_NAME }} --jq '.upload_url')
+          if [[ -z "$UPLOAD_URL" ]]; then
+            echo "❌ ERROR: Failed to retrieve upload URL"
+            exit 1
+          fi
+          echo "UPLOAD_URL=$UPLOAD_URL" | tee -a $GITHUB_ENV $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Release Asset
         id: upload-release-asset
