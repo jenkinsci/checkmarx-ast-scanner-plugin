@@ -55,27 +55,12 @@ jobs:
           distribution: temurin
           java-version: 11
 
-      # - name: Create a new Git tag
-      #   id: create-tag
-      #   run: |
-      #     TAG_NAME="daniel-test"
-      #     git config --global user.name "github-actions[bot]"
-      #     git config --global user.email "github-actions[bot]@users.noreply.github.com"
-      #     git tag -a "$TAG_NAME" -m "Automatically created tag: $TAG_NAME"
-      #     git push origin "$TAG_NAME"
-      #     echo "TAG_NAME=$TAG_NAME" | tee -a $GITHUB_ENV $GITHUB_OUTPUT
-
-      # - name: Create a new GitHub Release
-      #   id: create-release
-      #   uses: actions/create-release@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Release
+      #   uses: jenkins-infra/jenkins-maven-cd-action@5f5529707ac2bef1ff86da2553ce465ed669aa65  #v1.3.3
       #   with:
-      #     tag_name: ${{ env.TAG_NAME }}
-      #     release_name: "${{ env.TAG_NAME }}"
-      #     body: "This release was automatically created."
-      #     draft: false
-      #     prerelease: false
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+      #     MAVEN_TOKEN: ${{ secrets.MAVEN_TOKEN }}
 
       - name: Ensure Maven Dependencies are Downloaded
         run: mvn dependency:resolve
@@ -88,18 +73,12 @@ jobs:
           echo "TAG_NAME=$TAG_NAME" | tee -a $GITHUB_ENV $GITHUB_OUTPUT
 
       - name: Extract CLI version
+        id: extract_cli_version
         run: |
           chmod +x .github/scripts/extract_cli_version.sh
           .github/scripts/extract_cli_version.sh cx-linux
-
-      - name: Print Extracted CLI Version
-        run: |
           echo "Extracted CLI Version: ${{ env.CLI_VERSION }}"
-
-      - name: Echo CLI version and tag name to outputs
-        id: set_outputs
-        run: |
-          echo "::set-output name=CLI_VERSION::${{ env.CLI_VERSION }}"
+          echo "CLI_VERSION=$CLI_VERSION" | tee -a $GITHUB_ENV $GITHUB_OUTPUT          
 
       - name: Get GitHub Release Upload URL
         id: get-release
