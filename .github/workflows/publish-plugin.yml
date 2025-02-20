@@ -98,8 +98,16 @@ jobs:
 
       - name: Extract CLI version
         run: |
-          chmod +x ./.github/scripts/extract_cli_version.sh
-          ./.github/scripts/extract_cli_version.sh cx-linux
+          chmod +x .github/scripts/extract_cli_version.sh
+          .github/scripts/extract_cli_version.sh cx-linux
+
+      - name: Print Extracted CLI Version
+        run: echo "Extracted CLI Version: $CLI_VERSION"
+
+      - name: Echo CLI version and tag name to outputs
+        id: set_outputs
+        run: |
+          echo "::set-output name=CLI_VERSION::${{ env.CLI_VERSION }}"
 
       - name: Upload Release Asset
         id: upload-release-asset
