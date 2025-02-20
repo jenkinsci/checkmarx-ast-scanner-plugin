@@ -55,12 +55,12 @@ jobs:
           distribution: temurin
           java-version: 11
 
-      # - name: Release
-      #   uses: jenkins-infra/jenkins-maven-cd-action@5f5529707ac2bef1ff86da2553ce465ed669aa65  #v1.3.3
-      #   with:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
-      #     MAVEN_TOKEN: ${{ secrets.MAVEN_TOKEN }}
+      - name: Release
+        uses: jenkins-infra/jenkins-maven-cd-action@5f5529707ac2bef1ff86da2553ce465ed669aa65  #v1.3.3
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_TOKEN: ${{ secrets.MAVEN_TOKEN }}
 
       - name: Ensure Maven Dependencies are Downloaded
         run: mvn dependency:resolve
