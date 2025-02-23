@@ -1,0 +1,200 @@
+name: Notify Teams and JIRA On New Release
+
+on:
+  workflow_call:
+    inputs:
+      product_name:
+        required: true
+        type: string
+      release_version:
+        required: true
+        type: string
+      cli_release_version:
+        required: true
+        type: string
+      release_author:
+        required: true
+        type: string
+      release_url:
+        required: true
+        type: string
+      jira_product_name:
+        required: true
+        type: string
+
+jobs:
+  notify-teams:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fetch Release Notes
+        id: fetch_release_notes
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const releaseUrl = '${{ inputs.release_url }}';
+            const urlPattern = /https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/releases\/tag\/(.+)/;
+            const match = releaseUrl.match(urlPattern);
+            if (!match) {
+              throw new Error('Invalid release URL format.');
+            }
+            const [_, owner, repo, tag] = match;
+            const { data: release } = await github.rest.repos.getReleaseByTag({
+              owner,
+              repo,
+              tag
+            });
+            core.setOutput('release_notes', release.body);
+
+      - name: Sanitize Release Notes
+        id: sanitize_release_notes
+        run: |
+          sanitized=$(echo "${{ steps.fetch_release_notes.outputs.release_notes }}" | sed '1{/^<!--/d}')
+          sanitized=$(echo "$sanitized" | jq -Rs '.')
+          echo $sanitized
+          echo "sanitized_release_notes=$sanitized" >> $GITHUB_OUTPUT
+
+      - name: Extract Contributors
+        id: extract_contributors
+        run: |
+      
+          contributors=$(echo "${{ steps.fetch_release_notes.outputs.release_notes }}" | grep -o '@[a-zA-Z0-9_-]\+' | sort -u)
+          
+          echo "Contributors: $contributors"
+          
+          # Format contributors as a comma-separated list
+          formatted_contributors=$(echo "$contributors" | tr '\n' ', ' | sed 's/, $//')
+          formatted_contributors=$(echo "$contributors" | paste -sd ' , ' -)
+          echo "Formatted Contributors: $formatted_contributors"
+          
+          # Initialize an empty string to hold formatted contributors
+          formatted_contributors_links=""
+      
+          # Iterate over each contributor and format as a Markdown link
+          for contributor in $contributors; do
+            username=${contributor#@}
+            formatted_contributors_links+="[${username}](https://github.com/${username}), "
+          done
+          
+          echo "Formatted Contributors Links: $formatted_contributors_links"
+          
+          escaped_contributors_links=$(jq -Rsa . <<< "$formatted_contributors_links")
+          echo "Escaped Contributors Links: $escaped_contributors_links"
+
+          echo "formatted_contributors=$formatted_contributors" >> $GITHUB_OUTPUT
+          echo "escaped_contributors_links=escaped_contributors_links" >> $GITHUB_OUTPUT
+              
+      - name: Extract Jira Ticket IDs
+        id: extract_jira_tickets
+        run: |
+          # Extract all AST-XXX patterns
+          jira_tickets=$(echo "${{ steps.fetch_release_notes.outputs.release_notes }}" | grep -oE 'AST-[0-9]+' | sort -u)
+          
+          echo "Filtered Jira Tickets:"
+          
+          valid_tickets=()
+          for ticket in $jira_tickets; do
+            if ! [[ $ticket =~ ^AST-0{3,}$ ]]; then
+              echo "$ticket"
+              valid_tickets+=("\"$ticket\"")
+            fi
+          done
+          
+          # Format Jira tickets as a JSON array
+          formatted_jira_tickets=$(IFS=,; echo "[${valid_tickets[*]}]")
+          
+          echo "Formatted Jira Tickets: $formatted_jira_tickets"
+          
+          echo "formatted_jira_tickets=$formatted_jira_tickets" >> $GITHUB_OUTPUT
+      
+
+      - name: Send notification to Teams
+        uses: Skitionek/notify-microsoft-teams@v1.0.8
+        with:
+          webhook_url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+          raw: >
+            {
+              "type": "message",
+              "attachments": [
+                {
+                  "contentType": "application/vnd.microsoft.card.adaptive",
+                  "content": {
+                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                    "type": "AdaptiveCard",
+                    "version": "1.4",
+                    "msteams": {
+                      "width": "Full"
+                    },
+                    "body": [
+                      {
+                        "type": "TextBlock",
+                        "text": "New Release: **${{ inputs.product_name }} - ${{ inputs.release_version }}**",
+                        "weight": "Bolder",
+                        "size": "Medium"
+                      },
+                      {
+                        "type": "FactSet",
+                        "facts": [
+                          { "title": "Product:", "value": "${{ inputs.product_name }}" },
+                          { "title": "Version:", "value": "${{ inputs.release_version }}" },
+                          { "title": "CLI Version:", "value": "${{ inputs.cli_release_version }}" },
+                          { "title": "Contributors:", "value": "${{ steps.extract_contributors.outputs.formatted_contributors }}" }
+                        ]
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": ${{ steps.sanitize_release_notes.outputs.sanitized_release_notes }},
+                        "wrap": true
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "Action.OpenUrl",
+                        "title": "View Release",
+                        "url": "${{ inputs.release_url }}"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+
+
+      - name: Get Current Date
+        id: current-date
+        run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_ENV
+
+      - name: Generate Release Version
+        id: generate_jira_release_version
+        run: |
+          jira_release_version="${{ inputs.jira_product_name }}_${{ inputs.release_version }}"
+          echo "Generated Release Version: $jira_release_version"
+          echo "jira_release_version=$jira_release_version" >> $GITHUB_OUTPUT
+
+      - name: Create New JIRA Release
+        uses: satak/webrequest-action@master
+        with:
+          url: ${{ secrets.JIRA_RELEASE_WEBHOOK_URL }}
+          method: POST
+          payload: |
+            {
+              "data": {
+                "version": "${{ steps.generate_jira_release_version.outputs.jira_release_version }}",
+                "startDate": "${{ env.date }}",
+                "date": "${{ env.date }}"
+              }
+            }
+
+      - name: Send Jira Tickets to Webhook
+        uses: satak/webrequest-action@master
+        with:
+          url: ${{ secrets.JIRA_TICKETS_WEBHOOK_URL }}
+          headers: '{"X-Automation-Webhook-Token": "${{ secrets.JIRA_AUTOMATION_WEBHOOK_TOKEN }}"}'
+          method: POST
+          payload: |
+            {
+              "issues": ${{ steps.extract_jira_tickets.outputs.formatted_jira_tickets }},
+              "data": {
+                "releaseVersion": "${{ steps.generate_jira_release_version.outputs.jira_release_version }}"
+              }
+            }
