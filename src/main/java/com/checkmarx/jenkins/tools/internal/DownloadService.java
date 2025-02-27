@@ -24,7 +24,7 @@ public class DownloadService {
     }
 
     public static URL getDownloadUrlForCli(@NonNull String version, @NonNull final Platform platform) throws IOException {
-        version = "latest.".equals(version)? readCLILatestVersionFromVersionFile() : version;
+        version = "latest".equals(version)? readCLILatestVersionFromVersionFile() : version;
         final String jsonString = DownloadService.loadJSON(format(DownloadService.CHECKMARX_RELEASES_TAGS, version));
 
         final JSONObject release = JSONObject.fromObject(jsonString);
