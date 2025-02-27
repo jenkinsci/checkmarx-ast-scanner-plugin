@@ -53,6 +53,7 @@ public class CheckmarxInstaller extends ToolInstaller {
     private static final String INSTALLED_FROM = ".installedFrom";
     private static final String TIMESTAMP_FILE = ".timestamp";
     private static final String cliDefaultVersion = "2.3.14";
+    private static final String cliVersionFileName = "cli.version";
     private final String version;
     private final Long updatePolicyIntervalHours;
     private CxLoggerAdapter log;
@@ -60,7 +61,7 @@ public class CheckmarxInstaller extends ToolInstaller {
     @DataBoundConstructor
     public CheckmarxInstaller(String label, String version, Long updatePolicyIntervalHours) {
         super(label);
-        this.version = "latest".equals(version)? readCLILatestVersionFromVersionFile() : version;
+        this.version = "latest".equals(version) ? readCLILatestVersionFromVersionFile() : version;
         this.updatePolicyIntervalHours = updatePolicyIntervalHours;
     }
 
@@ -82,7 +83,7 @@ public class CheckmarxInstaller extends ToolInstaller {
     private String readCLILatestVersionFromVersionFile() {
         try {
             Path versionFilePath = findVersionFilePath().orElseThrow(() -> new ToolDetectionException("Could not find version file"));
-            return Files.readString(versionFilePath.resolve("cli.version"));
+            return Files.readString(versionFilePath.resolve(cliVersionFileName));
         } catch (Exception e) {
             return cliDefaultVersion;
         }
@@ -91,7 +92,7 @@ public class CheckmarxInstaller extends ToolInstaller {
     public static Optional<Path> findVersionFilePath() {
         Path dir = Paths.get("").toAbsolutePath();
         while (dir != null) {
-            if (Files.exists(dir.resolve("cli.version"))) { // Change "pom.xml" to your marker file
+            if (Files.exists(dir.resolve(cliVersionFileName))) { // Change "pom.xml" to your marker file
                 return Optional.of(dir);
             }
             dir = dir.getParent();
@@ -239,7 +240,7 @@ public class CheckmarxInstaller extends ToolInstaller {
 
         @SuppressFBWarnings("NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE")
         public static void copyURLToFile(URL source, String proxyStr, File destination, int connectionTimeoutMillis, int readTimeoutMillis) throws IOException, URISyntaxException, CheckmarxException {
-            OkHttpClient client = new ProxyHttpClient().getHttpClient(proxyStr, connectionTimeoutMillis,readTimeoutMillis);
+            OkHttpClient client = new ProxyHttpClient().getHttpClient(proxyStr, connectionTimeoutMillis, readTimeoutMillis);
             Request request = new Request.Builder().url(source).build();
             Response response = client.newCall(request).execute();
             ResponseBody responseBody = response.body();
@@ -247,7 +248,7 @@ public class CheckmarxInstaller extends ToolInstaller {
             try {
                 FileUtils.copyInputStreamToFile(stream, destination);
             } catch (Throwable e) {
-                throw new ToolDetectionException("failed to download file by URL" , e);
+                throw new ToolDetectionException("failed to download file by URL", e);
             } finally {
                 if (stream != null) {
                     stream.close();
