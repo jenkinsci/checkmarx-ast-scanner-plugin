@@ -35,12 +35,10 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.*;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -54,7 +52,7 @@ public class CheckmarxInstaller extends ToolInstaller {
 
     private static final String INSTALLED_FROM = ".installedFrom";
     private static final String TIMESTAMP_FILE = ".timestamp";
-    private static final String defaultVersion = "2.3.14";
+    private static final String cliDefaultVersion = "2.3.14";
     private final String version;
     private final Long updatePolicyIntervalHours;
     private CxLoggerAdapter log;
@@ -84,16 +82,16 @@ public class CheckmarxInstaller extends ToolInstaller {
     private String readCLILatestVersionFromVersionFile() {
         try {
             Path versionFilePath = findVersionFilePath().orElseThrow(() -> new ToolDetectionException("Could not find version file"));
-            return Files.readString(versionFilePath.resolve("cli-latest.version"));
+            return Files.readString(versionFilePath.resolve("cli.version"));
         } catch (Exception e) {
-            return defaultVersion;
+            return cliDefaultVersion;
         }
     }
 
     public static Optional<Path> findVersionFilePath() {
         Path dir = Paths.get("").toAbsolutePath();
         while (dir != null) {
-            if (Files.exists(dir.resolve("cli-latest.version"))) { // Change "pom.xml" to your marker file
+            if (Files.exists(dir.resolve("cli.version"))) { // Change "pom.xml" to your marker file
                 return Optional.of(dir);
             }
             dir = dir.getParent();
