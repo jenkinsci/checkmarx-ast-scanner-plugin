@@ -77,6 +77,18 @@ jobs:
         if: env.update_needed != 'false'
         run: xmllint --format pom.xml --output pom.xml
 
+      - name: Extract CLI version
+        run: |
+          chmod +x .github/scripts/extract_cli_version.sh
+          .github/scripts/extract_cli_version.sh cx-linux
+
+      - name: Print Extracted CLI Version
+        run: |
+          echo "Extracted CLI Version: ${{ env.CLI_VERSION }}"
+
+      - name: Write CLI Version to cli-latest.version file
+        run: echo "${{ env.CLI_VERSION }}" > cli-latest.version
+
       - name: Create Pull Request
         if: env.update_needed != 'false'
         uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c #v6
