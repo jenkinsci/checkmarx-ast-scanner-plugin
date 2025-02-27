@@ -36,8 +36,12 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import static hudson.Util.fixEmptyAndTrim;
@@ -50,8 +54,8 @@ public class CheckmarxInstaller extends ToolInstaller {
 
     private static final String INSTALLED_FROM = ".installedFrom";
     private static final String TIMESTAMP_FILE = ".timestamp";
-    private final String defaultVersion = "latest";
-    private String version;
+    private final String defaultVersion = "2.1.14";
+    private final String version;
     private final Long updatePolicyIntervalHours;
     private CxLoggerAdapter log;
 
@@ -79,11 +83,24 @@ public class CheckmarxInstaller extends ToolInstaller {
 
     private String readCLILatestVersionFromVersionFile() {
         try {
-            return IOUtils.toString(Objects.requireNonNull(DownloadService.class.getResourceAsStream("cli-latest.version")), StandardCharsets.UTF_8);
-        } catch (IOException e) {
+            Path versionFilePath = findVersionFilePath().orElseThrow(() -> new ToolDetectionException("Could not find version file"));
+            return Files.readString(versionFilePath.resolve("cli-latest.version"));
+        } catch (Exception e) {
             return defaultVersion;
         }
     }
+
+    public static Optional<Path> findVersionFilePath() {
+        Path dir = Paths.get("").toAbsolutePath();
+        while (dir != null) {
+            if (Files.exists(dir.resolve("cli-latest.version"))) { // Change "pom.xml" to your marker file
+                return Optional.of(dir);
+            }
+            dir = dir.getParent();
+        }
+        return Optional.empty();
+    }
+
 
     private boolean isUpToDate(FilePath expectedLocation, CxLoggerAdapter log) throws IOException, InterruptedException {
         FilePath marker = expectedLocation.child(TIMESTAMP_FILE);
