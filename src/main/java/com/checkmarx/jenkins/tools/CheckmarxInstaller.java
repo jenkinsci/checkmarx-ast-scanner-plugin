@@ -35,7 +35,9 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static hudson.Util.fixEmptyAndTrim;
@@ -48,14 +50,15 @@ public class CheckmarxInstaller extends ToolInstaller {
 
     private static final String INSTALLED_FROM = ".installedFrom";
     private static final String TIMESTAMP_FILE = ".timestamp";
-    private final String version;
+    private final String defaultVersion = "latest";
+    private String version;
     private final Long updatePolicyIntervalHours;
     private CxLoggerAdapter log;
 
     @DataBoundConstructor
     public CheckmarxInstaller(String label, String version, Long updatePolicyIntervalHours) {
         super(label);
-        this.version = version;
+        this.version = "latest".equals(version)? readCLILatestVersionFromVersionFile() : version;
         this.updatePolicyIntervalHours = updatePolicyIntervalHours;
     }
 
@@ -72,6 +75,14 @@ public class CheckmarxInstaller extends ToolInstaller {
         log.info("Installing Checkmarx AST CLI tool (version '" + fixEmptyAndTrim(version) + "')");
 
         return installCheckmarxCliAsSingleBinary(expected, node, taskListener);
+    }
+
+    private String readCLILatestVersionFromVersionFile() {
+        try {
+            return IOUtils.toString(Objects.requireNonNull(DownloadService.class.getResourceAsStream("cli-latest.version")), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            return defaultVersion;
+        }
     }
 
     private boolean isUpToDate(FilePath expectedLocation, CxLoggerAdapter log) throws IOException, InterruptedException {

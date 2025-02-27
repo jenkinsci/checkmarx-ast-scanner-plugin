@@ -24,7 +24,6 @@ public class DownloadService {
     }
 
     public static URL getDownloadUrlForCli(@NonNull String version, @NonNull final Platform platform) throws IOException {
-        version = "latest".equals(version)? readCLILatestVersionFromVersionFile() : version;
         final String jsonString = DownloadService.loadJSON(format(DownloadService.CHECKMARX_RELEASES_TAGS, version));
 
         final JSONObject release = JSONObject.fromObject(jsonString);
@@ -33,15 +32,6 @@ public class DownloadService {
         String url = format(CHECKMARX_DOWNLOAD, tagName, buildFileName(tagName, platform));
         return new URL(url);
     }
-
-    private static String readCLILatestVersionFromVersionFile() throws IOException {
-        String version = IOUtils.toString(Objects.requireNonNull(DownloadService.class.getResourceAsStream("cli-latest.version")), StandardCharsets.UTF_8);
-        if (version == null || version.isEmpty()) {
-            throw new IOException("Failed to read latest version from version file");
-        }
-        return version;
-    }
-
 
     public static String buildFileName(String tagName, Platform platform) {
         if (Objects.isNull(platform)) {
