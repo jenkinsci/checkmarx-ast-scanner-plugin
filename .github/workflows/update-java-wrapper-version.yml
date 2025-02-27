@@ -77,6 +77,9 @@ jobs:
         if: env.update_needed != 'false'
         run: xmllint --format pom.xml --output pom.xml
 
+      - name: Install dependencies
+        run: mvn install -DskipTests
+
       - name: Extract CLI version
         run: |
           chmod +x .github/scripts/extract_cli_version.sh
