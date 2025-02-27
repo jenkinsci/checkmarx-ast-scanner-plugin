@@ -1,5 +1,6 @@
 package com.checkmarx.jenkins.unit.tools.internal;
 
+import com.checkmarx.jenkins.tools.CheckmarxInstaller;
 import com.checkmarx.jenkins.tools.Platform;
 import com.checkmarx.jenkins.tools.internal.DownloadService;
 import org.junit.Test;
@@ -74,10 +75,10 @@ public class DownloadServiceTest {
 
     @Test
     public void testGetDownloadUrlForCli_withLatestVersion() throws IOException {
-        String version = "latest";
+        CheckmarxInstaller installer = new CheckmarxInstaller("test", "latest", 24L);
         Platform platform = Platform.LINUX;
 
-        URL actualUrl = DownloadService.getDownloadUrlForCli(version, platform);
+        URL actualUrl = DownloadService.getDownloadUrlForCli(installer.getVersion(), platform);
         assertNotNull(actualUrl);
     }
 

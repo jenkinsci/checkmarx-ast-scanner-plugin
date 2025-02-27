@@ -92,6 +92,10 @@ jobs:
       - name: Write CLI Version to cli-latest.version file
         run: echo "${{ env.CLI_VERSION }}" > cli-latest.version
 
+      - name: override default version in CheckmarxInstaller.java
+        run: |
+          sed -i 's/\(private final String defaultVersion = "\)[^"]*\(";\)/\1'"${CLI_VERSION}"'\2/' src/main/java/com/checkmarx/jenkins/tools/CheckmarxInstaller.java
+
       - name: Create Pull Request
         if: env.update_needed != 'false'
         uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c #v6
