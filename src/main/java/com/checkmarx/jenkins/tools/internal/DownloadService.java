@@ -38,6 +38,7 @@ public class DownloadService {
         return IOUtils.toString(Objects.requireNonNull(DownloadService.class.getResourceAsStream("/cli-latest.version")), StandardCharsets.UTF_8);
     }
 
+
     public static String buildFileName(String tagName, Platform platform) {
         if (Objects.isNull(platform)) {
             throw new IllegalArgumentException("Platform cannot be null");
