@@ -35,7 +35,11 @@ public class DownloadService {
     }
 
     private static String readCLILatestVersionFromVersionFile() throws IOException {
-        return IOUtils.toString(Objects.requireNonNull(DownloadService.class.getResourceAsStream("/cli-latest.version")), StandardCharsets.UTF_8);
+        String version = IOUtils.toString(Objects.requireNonNull(DownloadService.class.getResourceAsStream("cli-latest.version")), StandardCharsets.UTF_8);
+        if (version == null || version.isEmpty()) {
+            throw new IOException("Failed to read latest version from version file");
+        }
+        return version;
     }
 
 
