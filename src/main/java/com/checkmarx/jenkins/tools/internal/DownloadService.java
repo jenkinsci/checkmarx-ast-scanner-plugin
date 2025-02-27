@@ -16,7 +16,6 @@ public class DownloadService {
 
     private static final String CHECKMARX_FILE_NAME = "ast-cli";
     private static final String CHECKMARX_CLI_REPO = "https://api.github.com/repos/Checkmarx/ast-cli";
-    private static final String CHECKMARX_CLI_RELEASES_LATEST = CHECKMARX_CLI_REPO + "/releases/latest";
     private static final String CHECKMARX_RELEASES_TAGS = CHECKMARX_CLI_REPO +  "/releases/tags/%s";
     private static final String CHECKMARX_DOWNLOAD = "https://github.com/Checkmarx/ast-cli/releases/download/%s/%s";
 
@@ -24,10 +23,8 @@ public class DownloadService {
         // squid:S1118
     }
 
-    public static URL getDownloadUrlForCli(@NonNull final String version, @NonNull final Platform platform) throws IOException {
-        final String jsonString = DownloadService.loadJSON("latest".equals(version) ?
-                DownloadService.CHECKMARX_CLI_RELEASES_LATEST :
-                format(DownloadService.CHECKMARX_RELEASES_TAGS, version));
+    public static URL getDownloadUrlForCli(@NonNull String version, @NonNull final Platform platform) throws IOException {
+        final String jsonString = DownloadService.loadJSON(format(DownloadService.CHECKMARX_RELEASES_TAGS, version));
 
         final JSONObject release = JSONObject.fromObject(jsonString);
         final String tagName = (String) release.get("tag_name");
