@@ -1,0 +1,114 @@
+# Centralized GitHub Workflow for Jira Ticket Creation (.github/workflows/jira_notify.yml)
+name: Notify Jira
+
+on:
+  workflow_call:
+    inputs:
+      title:
+        description: 'Issue title'
+        required: true
+        type: string
+      body:
+        description: 'Body'
+        required: true
+        type: string
+      html_url:
+        description: 'URL'
+        required: true
+        type: string
+      repo:
+        description: 'Repository name'
+        required: true
+        type: string
+
+jobs:
+  notify_jira:
+    runs-on: ubuntu-latest
+    env:
+      JIRA_URL: "https://checkmarx.atlassian.net/"
+    steps:
+      - name: Jira Login
+        uses: atlassian/gajira-login@ca13f8850ea309cf44a6e4e0c49d9aa48ac3ca4c #v3
+        env:
+          JIRA_BASE_URL: ${{ env.JIRA_URL }}
+          JIRA_USER_EMAIL: ${{ secrets.AST_JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.AST_JIRA_API_TOKEN }}
+
+      - name: Determine Issue Type
+        id: issue_type
+        run: |
+          if [[ "${{ inputs.title }}" == *"[Bug]"* ]]; then
+            echo "IS_BUG=true" >> $GITHUB_ENV
+            echo "Selected Issue Type: BUG"
+          else
+            echo "IS_BUG=false" >> $GITHUB_ENV
+            echo "Selected Issue Type: ENHANCEMENT"
+          fi
+
+      - name: Extract Issue Fields
+        id: extract_fields
+        run: |
+          ISSUE_DESCRIPTION=$(echo "${{ inputs.body }}" | awk -v RS='' '/### What happened?/{getline; print}')
+          ISSUE_VERSION=$(echo "${{ inputs.body }}" | awk -v RS='' '/### Version/{getline; print}')
+          ISSUE_OS=$(echo "${{ inputs.body }}" | awk -v RS='' '/### Operating System & Version/{getline; print}')
+          ISSUE_LOGS=$(echo "${{ inputs.body }}" | awk -v RS='' '/### Relevant log output/{getline; print}')
+
+          echo "Extracted Fields:"
+          echo "What Happened: $ISSUE_DESCRIPTION"
+          echo "Version: $ISSUE_VERSION"
+          echo "OS Version: $ISSUE_OS"
+          echo "Logs: $ISSUE_LOGS"
+
+          echo "ISSUE_DESCRIPTION=$ISSUE_DESCRIPTION" >> $GITHUB_ENV
+          echo "ISSUE_VERSION=$ISSUE_VERSION" >> $GITHUB_ENV
+          echo "ISSUE_OS=$ISSUE_OS" >> $GITHUB_ENV
+          echo "ISSUE_LOGS=$ISSUE_LOGS" >> $GITHUB_ENV
+
+      - name: Format Jira Description
+        id: format_description
+        run: |
+          FORMATTED_DESCRIPTION="*Issue Title:* ${{ inputs.title }} \\ \\"
+          FORMATTED_DESCRIPTION+=" *Repository:* ${{ inputs.repo }} \\ \\"
+          FORMATTED_DESCRIPTION+=" *What Happened:* $ISSUE_DESCRIPTION \\ \\"
+          FORMATTED_DESCRIPTION+=" *Version:* $ISSUE_VERSION\n"
+          FORMATTED_DESCRIPTION+=" *Operating System & Version:* $ISSUE_OS \\ \\"
+          if [[ -n "$ISSUE_LOGS" ]]; then
+            FORMATTED_DESCRIPTION+=" *Relevant Logs:*\n{code}$ISSUE_LOGS{code} \\ \\"
+          fi
+          FORMATTED_DESCRIPTION+=" [View original issue|${{ inputs.html_url }}]"
+          
+          echo "FORMATTED_DESCRIPTION=$FORMATTED_DESCRIPTION" >> $GITHUB_ENV
+
+      - name: Create Jira Issue for Bug
+        if: env.IS_BUG == 'true'
+        id: create_jira_bug
+        uses: atlassian/gajira-create@1ff0b6bd115a780592b47bfbb63fc4629132e6ec #v3
+        with:
+          project: AST
+          issuetype: Task
+          summary: '${{ inputs.repo }} ${{ inputs.title }}'
+          description: '${{ env.FORMATTED_DESCRIPTION }}'
+          fields: "${{ secrets.JIRA_FIELDS_BUG }}"
+
+      - name: Create Jira Issue for Enhancement
+        if: env.IS_BUG == 'false'
+        id: create_jira_enhancement
+        uses: atlassian/gajira-create@1ff0b6bd115a780592b47bfbb63fc4629132e6ec #v3
+        with:
+          project: AST
+          issuetype: Task
+          summary: '${{ inputs.repo }} ${{ inputs.title }}'
+          description: '${{ env.FORMATTED_DESCRIPTION }}'
+          fields: "${{ secrets.JIRA_FIELDS_OTHER }}"
+
+      - name: Add comment to GitHub issue
+        uses: actions/github-script@v4.0.2
+        with:
+          script: |
+            issue_id = process.env.IS_BUG == 'true' ? "${{ steps.create_jira_bug.outputs.issue }}" : "${{ steps.create_jira_enhancement.outputs.issue }}"
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: 'Internal Jira issue: [' + issue_id + '](${{ env.JIRA_URL }}/browse/' + issue_id + ')'
+            })
