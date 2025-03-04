@@ -7,6 +7,8 @@ on:
         description: "Specify a version of ast-cli-java-wrapper (leave empty for latest)"
         required: false
         type: string
+  repository_dispatch:
+    types: [java-wrapper-version-update]
 
 jobs:
   update-ast-cli-wrapper:
