@@ -140,7 +140,8 @@ public class CheckmarxInstaller extends ToolInstaller {
                 log.getLogger().println("Installer using proxy: " + proxyStr);
             }
             URL checkmarxDownloadUrl = DownloadService.getDownloadUrlForCli(version, platform);
-
+            log.getLogger().println("Checkmarx download next URL: " + checkmarxDownloadUrl);
+            log.getLogger().println("Download CLI for next platform:" + platform);
             expected.mkdirs();
             nodeChannel.call(new Downloader(checkmarxDownloadUrl, proxyStr,
                     expected.child(DownloadService.buildFileName(version, platform)),
