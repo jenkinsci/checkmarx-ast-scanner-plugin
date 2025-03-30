@@ -16,6 +16,7 @@ import hudson.tools.ToolInstallation;
 import hudson.tools.ToolInstaller;
 import hudson.tools.ToolInstallerDescriptor;
 import jenkins.security.MasterToSlaveCallable;
+import lombok.Getter;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -54,7 +55,9 @@ public class CheckmarxInstaller extends ToolInstaller {
     private static final String TIMESTAMP_FILE = ".timestamp";
     public static final String cliDefaultVersion = "2.3.16";
     private static final String cliVersionFileName = "cli.version";
+    @Getter
     private final String version;
+    @Getter
     private final Long updatePolicyIntervalHours;
     private CxLoggerAdapter log;
 
@@ -159,12 +162,8 @@ public class CheckmarxInstaller extends ToolInstaller {
     }
 
 
-    public String getVersion() {
-        return version;
-    }
-
-    public Long getUpdatePolicyIntervalHours() {
-        return updatePolicyIntervalHours;
+    public String getCliDefaultVersion() {
+        return cliDefaultVersion;
     }
 
     @Extension
