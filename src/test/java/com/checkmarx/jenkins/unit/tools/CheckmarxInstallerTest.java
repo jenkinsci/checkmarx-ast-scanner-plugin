@@ -108,6 +108,13 @@ public class CheckmarxInstallerTest {
         assertEquals(Long.valueOf(24L), installer.getUpdatePolicyIntervalHours());
     }
 
+    @Test
+    public void testConstructorWithLatestVersion() {
+        CheckmarxInstaller installer = new CheckmarxInstaller("", "latest ", 24L);
+        assertNotEquals("latest ", installer.getVersion());
+        assertEquals(Long.valueOf(24L), installer.getUpdatePolicyIntervalHours());
+    }
+
     @Test(expected = Exception.class)
     public void testInstallCheckmarxCliWhenNodeIsOffline() throws IOException, InterruptedException {
         when(node.getChannel()).thenReturn(null);

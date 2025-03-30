@@ -61,7 +61,7 @@ public class CheckmarxInstaller extends ToolInstaller {
     @DataBoundConstructor
     public CheckmarxInstaller(String label, String version, Long updatePolicyIntervalHours) {
         super(label);
-        this.version = "latest".equals(version) ? readCLILatestVersionFromVersionFile() : version;
+        this.version = "latest".equalsIgnoreCase(version.trim()) ? readCLILatestVersionFromVersionFile() : version;
         this.updatePolicyIntervalHours = updatePolicyIntervalHours;
     }
 
@@ -83,7 +83,8 @@ public class CheckmarxInstaller extends ToolInstaller {
     private String readCLILatestVersionFromVersionFile() {
         try {
             Path versionFilePath = findVersionFilePath().orElseThrow(() -> new ToolDetectionException("Could not find version file"));
-            return Files.readString(versionFilePath.resolve(cliVersionFileName));
+            String fileVersion = Files.readString(versionFilePath.resolve(cliVersionFileName));
+            return (StringUtils.isNotEmpty(fileVersion)) ? fileVersion : cliDefaultVersion;
         } catch (Exception e) {
             return cliDefaultVersion;
         }
