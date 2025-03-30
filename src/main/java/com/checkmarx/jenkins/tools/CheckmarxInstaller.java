@@ -161,11 +161,6 @@ public class CheckmarxInstaller extends ToolInstaller {
         return expected;
     }
 
-
-    public String getCliDefaultVersion() {
-        return cliDefaultVersion;
-    }
-
     @Extension
     public static final class CheckmarxInstallerDescriptor extends ToolInstallerDescriptor<CheckmarxInstaller> {
 
