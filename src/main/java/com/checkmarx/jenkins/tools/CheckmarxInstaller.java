@@ -86,7 +86,7 @@ public class CheckmarxInstaller extends ToolInstaller {
     private String readCLILatestVersionFromVersionFile() {
         try {
             Path versionFilePath = findVersionFilePath().orElseThrow(() -> new ToolDetectionException("Could not find version file"));
-            String fileVersion = Files.readString(versionFilePath.resolve(cliVersionFileName));
+            String fileVersion = Files.readString(versionFilePath.resolve(cliVersionFileName)).trim();
             return (StringUtils.isNotEmpty(fileVersion)) ? fileVersion : cliDefaultVersion;
         } catch (IOException e) {
             return cliDefaultVersion;
