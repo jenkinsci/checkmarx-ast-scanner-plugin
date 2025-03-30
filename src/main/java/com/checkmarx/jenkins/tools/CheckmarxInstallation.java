@@ -83,7 +83,7 @@ public class CheckmarxInstallation extends ToolInstallation implements Environme
 
         @Override
         public List<? extends ToolInstaller> getDefaultInstallers() {
-            return Collections.singletonList(new CheckmarxInstaller(null, null, null));
+            return Collections.singletonList(new CheckmarxInstaller(null, "", null));
         }
 
         public CheckmarxInstallation[] getInstallations() {

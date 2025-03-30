@@ -52,7 +52,7 @@ public class CheckmarxInstaller extends ToolInstaller {
 
     private static final String INSTALLED_FROM = ".installedFrom";
     private static final String TIMESTAMP_FILE = ".timestamp";
-    private static final String cliDefaultVersion = "2.3.16";
+    public static final String cliDefaultVersion = "2.3.16";
     private static final String cliVersionFileName = "cli.version";
     private final String version;
     private final Long updatePolicyIntervalHours;
@@ -61,7 +61,7 @@ public class CheckmarxInstaller extends ToolInstaller {
     @DataBoundConstructor
     public CheckmarxInstaller(String label, String version, Long updatePolicyIntervalHours) {
         super(label);
-        this.version = "latest".equalsIgnoreCase(version.trim()) ? readCLILatestVersionFromVersionFile() : version;
+        this.version = ("latest".equalsIgnoreCase(version.trim()) || version.isEmpty()) ? readCLILatestVersionFromVersionFile() : version;
         this.updatePolicyIntervalHours = updatePolicyIntervalHours;
     }
 
