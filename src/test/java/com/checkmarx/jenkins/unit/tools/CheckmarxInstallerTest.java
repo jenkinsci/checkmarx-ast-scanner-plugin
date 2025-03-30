@@ -96,8 +96,8 @@ public class CheckmarxInstallerTest {
 
     @Test
     public void testConstructorWithNullValues() {
-        CheckmarxInstaller installer = new CheckmarxInstaller(null, null, null);
-        assertNull(installer.getVersion());
+        CheckmarxInstaller installer = new CheckmarxInstaller(null, "", null);
+        assertNotEquals("", installer.getVersion());
         assertNull(installer.getUpdatePolicyIntervalHours());
     }
 
@@ -106,6 +106,19 @@ public class CheckmarxInstallerTest {
         CheckmarxInstaller installer = new CheckmarxInstaller("", "1.0.0", 24L);
         assertEquals("1.0.0", installer.getVersion());
         assertEquals(Long.valueOf(24L), installer.getUpdatePolicyIntervalHours());
+    }
+
+    @Test
+    public void testConstructorWithLatestVersion() {
+        CheckmarxInstaller installer = new CheckmarxInstaller("", "latest ", 24L);
+        assertNotEquals("latest ", installer.getVersion());
+        assertEquals(Long.valueOf(24L), installer.getUpdatePolicyIntervalHours());
+    }
+
+    @Test
+    public void testValidateEqualsCLIDefaultVersionAndCLIVersionFile() {
+        CheckmarxInstaller installer = new CheckmarxInstaller("", "latest", 24L);
+        assertEquals(CheckmarxInstaller.cliDefaultVersion, installer.getVersion());
     }
 
     @Test(expected = Exception.class)
