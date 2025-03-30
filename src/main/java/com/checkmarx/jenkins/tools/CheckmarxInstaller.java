@@ -61,7 +61,7 @@ public class CheckmarxInstaller extends ToolInstaller {
     @DataBoundConstructor
     public CheckmarxInstaller(String label, String version, Long updatePolicyIntervalHours) {
         super(label);
-        this.version = ("latest".equalsIgnoreCase(version.trim()) || version.isEmpty()) ? readCLILatestVersionFromVersionFile() : version;
+        this.version = "latest".equalsIgnoreCase(version.trim()) || version.isEmpty() ? readCLILatestVersionFromVersionFile() : version;
         this.updatePolicyIntervalHours = updatePolicyIntervalHours;
     }
 
