@@ -1,0 +1,25 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- script: echo Hello, world!
+  displayName: 'Run a one-line script'
+
+- script: |
+    echo Add other tasks to build, test, and deploy your project.
+    echo See https://aka.ms/yaml
+  displayName: 'Run a multi-line script'
+
+- task: Checkmarx AST@0
+  inputs:
+    projectName: '$(Build.Repository.Name)'
+    branchName: '$(Build.SourceBranchName)'
+    additionalParams: '--apikey eyJhbGciOiJIUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJhY2RjOGIzMy0xZDZjLTQ3NWEtOGMxMi05ODk1YzgzZDVlZWEifQ.eyJpYXQiOjE3MTA2ODIyOTEsImp0aSI6IjNhMTU5YzRmLWVkOGYtNGFmOS04NDNkLWMzY2Q0NzdmMjFlMCIsImlzcyI6Imh0dHBzOi8vZGV1LmlhbS5jaGVja21hcngubmV0L2F1dGgvcmVhbG1zL2dhbGFjdGljYSIsImF1ZCI6Imh0dHBzOi8vZGV1LmlhbS5jaGVja21hcngubmV0L2F1dGgvcmVhbG1zL2dhbGFjdGljYSIsInN1YiI6IjUwOWViODg4LWVkNDUtNGQ1MC1iMmZmLThiNzE5MGJmMGZlOSIsInR5cCI6Ik9mZmxpbmUiLCJhenAiOiJhc3QtYXBwIiwic2Vzc2lvbl9zdGF0ZSI6IjY4YzMxMjU1LWM5NDMtNGQ0Zi04NzI4LWNjNjM5NmVmNWYxOSIsInNjb3BlIjoiIG9mZmxpbmVfYWNjZXNzIiwic2lkIjoiNjhjMzEyNTUtYzk0My00ZDRmLTg3MjgtY2M2Mzk2ZWY1ZjE5In0.hK6WKRcv1KmBHtFGzkjsVJoNLw8mQO-hVWwe3ipajQg --scan-types iac-security'
