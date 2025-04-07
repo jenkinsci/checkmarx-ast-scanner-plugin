@@ -96,7 +96,7 @@ jobs:
 
       - name: override default version in CheckmarxInstaller.java
         run: |
-          sed -i 's/\(private static final String cliDefaultVersion = "\)[^"]*\(";\)/\1'"${CLI_VERSION}"'\2/' src/main/java/com/checkmarx/jenkins/tools/CheckmarxInstaller.java
+          sed -i 's/\(public static final String cliDefaultVersion = "\)[^"]*\(";\)/\1'"${CLI_VERSION}"'\2/' src/main/java/com/checkmarx/jenkins/tools/CheckmarxInstaller.java
 
       - name: Create Pull Request
         if: env.update_needed != 'false'
