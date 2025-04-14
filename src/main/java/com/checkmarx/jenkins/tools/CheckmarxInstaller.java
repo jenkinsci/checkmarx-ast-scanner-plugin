@@ -71,7 +71,7 @@ public class CheckmarxInstaller extends ToolInstaller {
     @Override
     public FilePath performInstallation(ToolInstallation toolInstallation, Node node, TaskListener taskListener) throws IOException, InterruptedException {
         log = new CxLoggerAdapter(taskListener.getLogger());
-        String versionToInstall;
+        String versionToInstall = getVersionNumber();
         FilePath expected = preferredLocation(toolInstallation, node);
 
         if (isUpToDate(expected, log)) {
@@ -79,13 +79,17 @@ public class CheckmarxInstaller extends ToolInstaller {
             return expected;
         }
 
-        if ("latest".equalsIgnoreCase(version.trim()) || version.isEmpty()) {
-            versionToInstall = readCLILatestVersionFromVersionFile();
-        } else versionToInstall = version;
-
         log.info("Installing Checkmarx AST CLI tool (version '{}')", fixEmptyAndTrim(versionToInstall));
 
         return installCheckmarxCliAsSingleBinary(versionToInstall, expected, node, taskListener);
+    }
+
+    public String getVersionNumber() {
+        if ("latest".equalsIgnoreCase(version.trim()) || version.isEmpty()) {
+            return readCLILatestVersionFromVersionFile();
+        } else {
+            return version;
+        }
     }
 
     public String readCLILatestVersionFromVersionFile() {
