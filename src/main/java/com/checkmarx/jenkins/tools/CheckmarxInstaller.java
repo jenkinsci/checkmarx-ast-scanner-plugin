@@ -56,7 +56,7 @@ public class CheckmarxInstaller extends ToolInstaller {
     public static final String cliDefaultVersion = "2.3.18";
     private static final String cliVersionFileName = "cli.version";
     @Getter
-    private final String version;
+    private String version;
     @Getter
     private final Long updatePolicyIntervalHours;
     private CxLoggerAdapter log;
@@ -64,26 +64,35 @@ public class CheckmarxInstaller extends ToolInstaller {
     @DataBoundConstructor
     public CheckmarxInstaller(String label, String version, Long updatePolicyIntervalHours) {
         super(label);
-        this.version = "latest".equalsIgnoreCase(version.trim()) || version.isEmpty() ? readCLILatestVersionFromVersionFile() : version;
+        this.version = version;
         this.updatePolicyIntervalHours = updatePolicyIntervalHours;
     }
 
     @Override
     public FilePath performInstallation(ToolInstallation toolInstallation, Node node, TaskListener taskListener) throws IOException, InterruptedException {
         log = new CxLoggerAdapter(taskListener.getLogger());
-
+        String versionToInstall = getVersionNumber();
         FilePath expected = preferredLocation(toolInstallation, node);
 
         if (isUpToDate(expected, log)) {
             log.info("Checkmarx installation is UP-TO-DATE");
             return expected;
         }
-        log.info("Installing Checkmarx AST CLI tool (version '" + fixEmptyAndTrim(version) + "')");
 
-        return installCheckmarxCliAsSingleBinary(expected, node, taskListener);
+        log.info("Installing Checkmarx AST CLI tool (version '{}')", fixEmptyAndTrim(versionToInstall));
+
+        return installCheckmarxCliAsSingleBinary(versionToInstall, expected, node, taskListener);
     }
 
-    private String readCLILatestVersionFromVersionFile() {
+    public String getVersionNumber() {
+        if ("latest".equalsIgnoreCase(version.trim()) || version.isEmpty()) {
+            return readCLILatestVersionFromVersionFile();
+        } else {
+            return version;
+        }
+    }
+
+    public String readCLILatestVersionFromVersionFile() {
         try {
             Path versionFilePath = findVersionFilePath().orElseThrow(() -> new ToolDetectionException("Could not find version file"));
             String fileVersion = Files.readString(versionFilePath.resolve(cliVersionFileName)).trim();
@@ -130,7 +139,7 @@ public class CheckmarxInstaller extends ToolInstaller {
         return timestampDifference < updateInterval;
     }
 
-    private FilePath installCheckmarxCliAsSingleBinary(FilePath expected, Node node, TaskListener log) throws IOException, InterruptedException {
+    private FilePath installCheckmarxCliAsSingleBinary(String version, FilePath expected, Node node, TaskListener log) throws IOException, InterruptedException {
         final VirtualChannel nodeChannel = node.getChannel();
         if (nodeChannel == null) {
             throw new IOException(format("Node '%s' is offline", node.getDisplayName()));

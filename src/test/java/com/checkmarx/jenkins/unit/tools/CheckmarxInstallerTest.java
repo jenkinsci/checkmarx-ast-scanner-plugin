@@ -97,7 +97,7 @@ public class CheckmarxInstallerTest {
     @Test
     public void testConstructorWithNullValues() {
         CheckmarxInstaller installer = new CheckmarxInstaller(null, "", null);
-        assertNotEquals("", installer.getVersion());
+        assertNotEquals("", installer.getVersionNumber());
         assertNull(installer.getUpdatePolicyIntervalHours());
     }
 
@@ -111,14 +111,13 @@ public class CheckmarxInstallerTest {
     @Test
     public void testConstructorWithLatestVersion() {
         CheckmarxInstaller installer = new CheckmarxInstaller("", "latest ", 24L);
-        assertNotEquals("latest ", installer.getVersion());
+        assertEquals("latest ", installer.getVersion());
         assertEquals(Long.valueOf(24L), installer.getUpdatePolicyIntervalHours());
     }
 
     @Test
     public void testValidateEqualsCLIDefaultVersionAndCLIVersionFile() {
-        CheckmarxInstaller installer = new CheckmarxInstaller("", "latest", 24L);
-        assertEquals(CheckmarxInstaller.cliDefaultVersion, installer.getVersion());
+        assertEquals(CheckmarxInstaller.cliDefaultVersion, installer.readCLILatestVersionFromVersionFile());
     }
 
     @Test(expected = Exception.class)

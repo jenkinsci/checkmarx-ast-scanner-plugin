@@ -78,7 +78,7 @@ public class DownloadServiceTest {
         CheckmarxInstaller installer = new CheckmarxInstaller("test", "latest", 24L);
         Platform platform = Platform.LINUX;
 
-        URL actualUrl = DownloadService.getDownloadUrlForCli(installer.getVersion(), platform);
+        URL actualUrl = DownloadService.getDownloadUrlForCli(installer.getVersionNumber(), platform);
         assertNotNull(actualUrl);
     }
 
