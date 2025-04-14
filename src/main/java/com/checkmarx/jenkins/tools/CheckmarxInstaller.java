@@ -64,29 +64,31 @@ public class CheckmarxInstaller extends ToolInstaller {
     @DataBoundConstructor
     public CheckmarxInstaller(String label, String version, Long updatePolicyIntervalHours) {
         super(label);
-        this.version = "latest".equalsIgnoreCase(version.trim()) || version.isEmpty() ? readCLILatestVersionFromVersionFile() : version;
+        this.version = version;
         this.updatePolicyIntervalHours = updatePolicyIntervalHours;
     }
 
     @Override
     public FilePath performInstallation(ToolInstallation toolInstallation, Node node, TaskListener taskListener) throws IOException, InterruptedException {
         log = new CxLoggerAdapter(taskListener.getLogger());
-
+        String versionToInstall;
         FilePath expected = preferredLocation(toolInstallation, node);
 
         if (isUpToDate(expected, log)) {
             log.info("Checkmarx installation is UP-TO-DATE");
             return expected;
         }
+
         if ("latest".equalsIgnoreCase(version.trim()) || version.isEmpty()) {
-            version = readCLILatestVersionFromVersionFile();
-        }
+            versionToInstall = readCLILatestVersionFromVersionFile();
+        } else versionToInstall = version;
+
         log.info("Installing Checkmarx AST CLI tool (version '" + fixEmptyAndTrim(version) + "')");
 
-        return installCheckmarxCliAsSingleBinary(expected, node, taskListener);
+        return installCheckmarxCliAsSingleBinary(versionToInstall, expected, node, taskListener);
     }
 
-    private String readCLILatestVersionFromVersionFile() {
+    public String readCLILatestVersionFromVersionFile() {
         try {
             Path versionFilePath = findVersionFilePath().orElseThrow(() -> new ToolDetectionException("Could not find version file"));
             String fileVersion = Files.readString(versionFilePath.resolve(cliVersionFileName)).trim();
@@ -133,7 +135,7 @@ public class CheckmarxInstaller extends ToolInstaller {
         return timestampDifference < updateInterval;
     }
 
-    private FilePath installCheckmarxCliAsSingleBinary(FilePath expected, Node node, TaskListener log) throws IOException, InterruptedException {
+    private FilePath installCheckmarxCliAsSingleBinary(String version, FilePath expected, Node node, TaskListener log) throws IOException, InterruptedException {
         final VirtualChannel nodeChannel = node.getChannel();
         if (nodeChannel == null) {
             throw new IOException(format("Node '%s' is offline", node.getDisplayName()));
