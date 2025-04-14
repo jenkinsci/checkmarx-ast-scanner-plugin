@@ -83,7 +83,7 @@ public class CheckmarxInstaller extends ToolInstaller {
             versionToInstall = readCLILatestVersionFromVersionFile();
         } else versionToInstall = version;
 
-        log.info("Installing Checkmarx AST CLI tool (version '" + fixEmptyAndTrim(version) + "')");
+        log.info("Installing Checkmarx AST CLI tool (version '{}')", fixEmptyAndTrim(versionToInstall));
 
         return installCheckmarxCliAsSingleBinary(versionToInstall, expected, node, taskListener);
     }
