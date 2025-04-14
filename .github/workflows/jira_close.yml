@@ -19,7 +19,7 @@ jobs:
       JIRA_URL: "https://checkmarx.atlassian.net"
     steps:
       - name: Jira Login
-        uses: atlassian/gajira-login@v3
+        uses: atlassian/gajira-login@ca13f8850ea309cf44a6e4e0c49d9aa48ac3ca4c #v3
         env:
           JIRA_BASE_URL: ${{ env.JIRA_URL }}
           JIRA_USER_EMAIL: ${{ secrets.AST_JIRA_USER_EMAIL }}
@@ -58,13 +58,13 @@ jobs:
 
       - name: Transition to In Progress (if needed)
         if: steps.get_status.outputs.jira_status == 'Open'
-        uses: atlassian/gajira-transition@v3
+        uses: atlassian/gajira-transition@4749176faf14633954d72af7a44d7f2af01cc92b #v3
         with:
           issue: ${{ steps.extract_key.outputs.jira_key }}
           transition: "Start"
 
       - name: Transition to Done
-        uses: atlassian/gajira-transition@v3
+        uses: atlassian/gajira-transition@4749176faf14633954d72af7a44d7f2af01cc92b #v3
         with:
           issue: ${{ steps.extract_key.outputs.jira_key }}
           transition: "Completed and Approved"
