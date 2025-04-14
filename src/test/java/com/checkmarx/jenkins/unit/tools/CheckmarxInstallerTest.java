@@ -95,6 +95,13 @@ public class CheckmarxInstallerTest {
     }
 
     @Test
+    public void testConstructorWithNullValues() {
+        CheckmarxInstaller installer = new CheckmarxInstaller(null, "", null);
+        assertNotEquals("", installer.getVersionNumber());
+        assertNull(installer.getUpdatePolicyIntervalHours());
+    }
+
+    @Test
     public void testConstructorWithEmptyLabel() {
         CheckmarxInstaller installer = new CheckmarxInstaller("", "1.0.0", 24L);
         assertEquals("1.0.0", installer.getVersion());
