@@ -56,7 +56,7 @@ public class CheckmarxInstaller extends ToolInstaller {
     public static final String cliDefaultVersion = "2.3.16";
     private static final String cliVersionFileName = "cli.version";
     @Getter
-    private final String version;
+    private String version;
     @Getter
     private final Long updatePolicyIntervalHours;
     private CxLoggerAdapter log;
@@ -77,6 +77,9 @@ public class CheckmarxInstaller extends ToolInstaller {
         if (isUpToDate(expected, log)) {
             log.info("Checkmarx installation is UP-TO-DATE");
             return expected;
+        }
+        if ("latest".equalsIgnoreCase(version.trim()) || version.isEmpty()) {
+            version = readCLILatestVersionFromVersionFile();
         }
         log.info("Installing Checkmarx AST CLI tool (version '" + fixEmptyAndTrim(version) + "')");
 
