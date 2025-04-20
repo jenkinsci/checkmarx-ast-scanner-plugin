@@ -1,23 +1,44 @@
 package com.checkmarx.jenkins.model;
 
 import com.checkmarx.jenkins.credentials.CheckmarxApiToken;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NonNull;
+import lombok.ToString;
 
 import java.io.Serializable;
 
 @Getter
-@Setter
+@ToString
+@EqualsAndHashCode
+@Builder
 public class ScanConfig implements Serializable {
+    private static final long serialVersionUID = 1L;
 
+    /**
+     * Constant indicating upload of project sources
+     */
     public static final String PROJECT_SOURCE_UPLOAD = "upload";
 
-    private String serverUrl;
-    private String baseAuthUrl;
-    private String tenantName;
-    private CheckmarxApiToken checkmarxToken;
-    private String projectName;
-    private String branchName;
-    private String additionalOptions;
-    private String sourceDirectory;
+    @NonNull
+    private final String serverUrl;
+
+    @NonNull
+    private final String authenticationBaseUrl;
+
+    private final String tenantName;
+
+    @NonNull
+    private final CheckmarxApiToken apiToken;
+
+    @NonNull
+    private final String projectName;
+
+    private final String branchName;
+
+    private final String additionalOptions;
+
+    @NonNull
+    private final String sourceDirectory;
 }
