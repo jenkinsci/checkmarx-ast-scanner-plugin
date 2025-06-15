@@ -374,7 +374,9 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         if (run.getActions(CheckmarxScanResultsAction.class).isEmpty()) {
             run.addAction(new CheckmarxScanResultsAction());
         }
-        run.setResult(Result.SUCCESS);
+        Result currentResult = run.getResult();
+        log.debug("Current builds status is {}",currentResult);
+        run.setResult(currentResult == null || currentResult == Result.FAILURE ? Result.FAILURE : Result.SUCCESS);
     }
 
     private void saveInArtifactAdditionalReports(ScanConfig scanConfig, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener, Run<?, ?> run, FilePath tempDir) {
