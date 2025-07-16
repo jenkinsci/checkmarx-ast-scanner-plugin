@@ -305,6 +305,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 log.error(String.format("Exit code from AST-CLI: %s", exitCode));
                 log.info("Generating failed report");
                 run.setResult(Result.FAILURE);
+                throw new AbortException("Build Failed");
             }
         } catch (InterruptedException interruptedException) {
             String logFile = fos.toString(String.valueOf(StandardCharsets.UTF_8));
@@ -374,9 +375,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         if (run.getActions(CheckmarxScanResultsAction.class).isEmpty()) {
             run.addAction(new CheckmarxScanResultsAction());
         }
-        Result currentResult = run.getResult();
-        //currentResult will be null only if the condition if (exitCode != 0) return false, meaning  exitCode is 0"
-        run.setResult(currentResult == null ?  Result.SUCCESS : Result.FAILURE);
+        run.setResult(Result.SUCCESS);
     }
 
     private void saveInArtifactAdditionalReports(ScanConfig scanConfig, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener, Run<?, ?> run, FilePath tempDir) {
