@@ -305,6 +305,14 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             if (exitCode != 0) {
                 log.error(String.format("Exit code from AST-CLI: %s", exitCode));
                 log.info("Generating failed report");
+                String logFile = fos.toString(String.valueOf(StandardCharsets.UTF_8));
+                log.info("Start to check for policy violations in the log file");
+
+                if (PluginUtils.isPolicyViolated(logFile)) {
+                    log.info("Setting build result to ABORTED due to policy violation");
+                    run.setResult(Result.ABORTED);
+                    throw new InterruptedException("Pipeline aborted due to Policy Management Violation detected in scan results and breat build set to true.");
+                }
                 run.setResult(Result.FAILURE);
                 throw new Failure("Harshjeet Build  is Failed");
             }
@@ -377,6 +385,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         if (run.getActions(CheckmarxScanResultsAction.class).isEmpty()) {
             run.addAction(new CheckmarxScanResultsAction());
         }
+        run.setResult(Result.SUCCESS);
     }
 
     private void saveInArtifactAdditionalReports(ScanConfig scanConfig, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener, Run<?, ?> run, FilePath tempDir) {
