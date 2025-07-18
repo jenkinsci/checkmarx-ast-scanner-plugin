@@ -35,6 +35,7 @@ import org.kohsuke.stapler.*;
 import org.kohsuke.stapler.verb.POST;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -305,8 +306,9 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 log.error(String.format("Exit code from AST-CLI: %s", exitCode));
                 log.info("Generating failed report");
                 run.setResult(Result.FAILURE);
-                throw new AbortException("Build Failed");
+                throw new Failure("Harshjeet Build  is Failed");
             }
+
         } catch (InterruptedException interruptedException) {
             String logFile = fos.toString(String.valueOf(StandardCharsets.UTF_8));
             String scanId = PluginUtils.getScanIdFromLogFile(logFile);
@@ -375,7 +377,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         if (run.getActions(CheckmarxScanResultsAction.class).isEmpty()) {
             run.addAction(new CheckmarxScanResultsAction());
         }
-        run.setResult(Result.SUCCESS);
     }
 
     private void saveInArtifactAdditionalReports(ScanConfig scanConfig, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener, Run<?, ?> run, FilePath tempDir) {
