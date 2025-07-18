@@ -307,6 +307,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 log.info("Generating failed report");
                 throw new RuntimeException("Scan Stage Failed");
             }
+            run.setResult(Result.FAILURE);
             String logFile = fos.toString(String.valueOf(StandardCharsets.UTF_8));
                 log.info("Start to check for policy violations in the log file");
 
