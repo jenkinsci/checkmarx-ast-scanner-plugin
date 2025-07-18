@@ -305,9 +305,10 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             if (exitCode != 0) {
                 log.error(String.format("Exit code from AST-CLI: %s", exitCode));
                 log.info("Generating failed report");
+                run.setResult(Result.FAILURE);
                 throw new RuntimeException("Scan Stage Failed");
             }
-            run.setResult(Result.FAILURE);
+
             String logFile = fos.toString(String.valueOf(StandardCharsets.UTF_8));
                 log.info("Start to check for policy violations in the log file");
 
@@ -386,7 +387,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         if (run.getActions(CheckmarxScanResultsAction.class).isEmpty()) {
             run.addAction(new CheckmarxScanResultsAction());
         }
-        run.setResult(Result.SUCCESS);
     }
 
     private void saveInArtifactAdditionalReports(ScanConfig scanConfig, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener, Run<?, ?> run, FilePath tempDir) {
