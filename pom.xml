@@ -8,7 +8,7 @@
     <version>4.88</version>
   </parent>
   <groupId>com.checkmarx.jenkins</groupId>
-  <artifactId>checkmarx-ast-scanner-27</artifactId>
+  <artifactId>checkmarx-ast-scanner-2709</artifactId>
   <version>${revision}-${changelist}</version>
   <packaging>hpi</packaging>
   <!-- More Project Information -->
