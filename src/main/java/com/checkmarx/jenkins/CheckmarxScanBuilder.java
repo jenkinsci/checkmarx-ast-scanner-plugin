@@ -277,8 +277,9 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         ByteArrayOutputStream fos = new ByteArrayOutputStream();
         arguments.add(argumentsForCommand);
 
+        int exitCode = 0;
         try {
-            int exitCode = launcher.launch().cmds(arguments).envs(envVars).stdout(
+            exitCode = launcher.launch().cmds(arguments).envs(envVars).stdout(
                     // Writing stdout to file
                     new OutputStream() {
                         @Override
@@ -302,21 +303,13 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                         }
                     }).join();
 
-            if (exitCode != 0) {
-                log.error(String.format("Exit code from AST-CLI: %s", exitCode));
-                log.info("Generating failed report");
-                run.setResult(Result.FAILURE);
-                throw new RuntimeException("Scan Stage Failed");
-            }
-
             String logFile = fos.toString(String.valueOf(StandardCharsets.UTF_8));
-                log.info("Start to check for policy violations in the log file");
-
+            log.info("Start to check for policy violations in the log file");
 
             if (PluginUtils.isPolicyViolated(logFile)) {
-                    log.info("Setting build result to ABORTED due to policy violation");
-                    run.setResult(Result.ABORTED);
-                    throw new InterruptedException("Pipeline aborted due to Policy Management Violation detected in scan results and breat build set to true.");
+                log.info("Setting build result to ABORTED due to policy violation");
+                run.setResult(Result.ABORTED);
+                throw new InterruptedException("Pipeline aborted due to Policy Management Violation detected in scan results and break build set to true.");
             }
 
         } catch (InterruptedException interruptedException) {
@@ -387,7 +380,16 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         if (run.getActions(CheckmarxScanResultsAction.class).isEmpty()) {
             run.addAction(new CheckmarxScanResultsAction());
         }
+        if (exitCode != 0) {
+            log.error(String.format("Exit code from AST-CLI: %s", exitCode));
+            log.info("Generating failed report");
+            run.setResult(Result.FAILURE);
+            throw new InterruptedException("Scan Stage Failed");
+        }else{
+            run.setResult(Result.SUCCESS);
+        }
     }
+
 
     private void saveInArtifactAdditionalReports(ScanConfig scanConfig, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener, Run<?, ?> run, FilePath tempDir) {
         if(scanConfig.getAdditionalOptions() == null || !scanConfig.getAdditionalOptions().contains("--report-format")){
