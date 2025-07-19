@@ -390,7 +390,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         }
     }
 
-
     private void saveInArtifactAdditionalReports(ScanConfig scanConfig, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener, Run<?, ?> run, FilePath tempDir) {
         if(scanConfig.getAdditionalOptions() == null || !scanConfig.getAdditionalOptions().contains("--report-format")){
             return;
