@@ -310,7 +310,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                 if (PluginUtils.isPolicyViolated(logFile)) {
                     log.info("Setting build result to ABORTED due to policy violation");
                     run.setResult(Result.ABORTED);
-                    throw new InterruptedException("Pipeline aborted due to Policy Management Violation detected in scan results and breat build set to true.");
+                    throw new AbortException("Pipeline aborted due to Policy Management Violation detected in scan results and break build set to true.");
                 }
                 run.setResult(Result.FAILURE);
             }
