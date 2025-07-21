@@ -331,6 +331,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         if (scanId.isEmpty()) {
             log.error("Scan Scan ID is empty");
             run.setResult(Result.FAILURE);
+            throw new AbortException("Scan Failed");
         }
 
         ArgumentListBuilder htmlArguments = new ArgumentListBuilder();
