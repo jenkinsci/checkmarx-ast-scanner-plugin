@@ -303,7 +303,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                         }
                     }).join();
 
-            log.error(String.format("Exit code from AST-CLI: %s", exitCode));
             String logFile = fos.toString(String.valueOf(StandardCharsets.UTF_8));
             log.info("Start to check for policy violations in the log file");
 
