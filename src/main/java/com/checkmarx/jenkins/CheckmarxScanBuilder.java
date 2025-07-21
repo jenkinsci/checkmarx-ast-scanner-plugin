@@ -35,6 +35,7 @@ import org.kohsuke.stapler.*;
 import org.kohsuke.stapler.verb.POST;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -276,8 +277,9 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         ByteArrayOutputStream fos = new ByteArrayOutputStream();
         arguments.add(argumentsForCommand);
 
+        int exitCode = 0;
         try {
-            int exitCode = launcher.launch().cmds(arguments).envs(envVars).stdout(
+            exitCode = launcher.launch().cmds(arguments).envs(envVars).stdout(
                     // Writing stdout to file
                     new OutputStream() {
                         @Override
@@ -301,11 +303,16 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
                         }
                     }).join();
 
-            if (exitCode != 0) {
-                log.error(String.format("Exit code from AST-CLI: %s", exitCode));
-                log.info("Generating failed report");
+            log.error(String.format("Exit code from AST-CLI: %s", exitCode));
+            String logFile = fos.toString(String.valueOf(StandardCharsets.UTF_8));
+            log.info("Start to check for policy violations in the log file");
+
+            if (PluginUtils.isPolicyViolated(logFile)) {
+                log.info("Setting build result to FAILURE due to policy violation");
                 run.setResult(Result.FAILURE);
+                throw new AbortException("Pipeline failed due to Policy Management Violation detected in scan results and break build set to true.");
             }
+
         } catch (InterruptedException interruptedException) {
             String logFile = fos.toString(String.valueOf(StandardCharsets.UTF_8));
             String scanId = PluginUtils.getScanIdFromLogFile(logFile);
@@ -323,8 +330,9 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         String scanId = PluginUtils.getScanIdFromLogFile(logFile);
 
         if (scanId.isEmpty()) {
-            log.error("Scan ID is empty");
-            return;
+            log.error("Scan Scan ID is empty");
+            run.setResult(Result.FAILURE);
+            throw new AbortException("Scan Failed");
         }
 
         ArgumentListBuilder htmlArguments = new ArgumentListBuilder();
@@ -374,9 +382,13 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         if (run.getActions(CheckmarxScanResultsAction.class).isEmpty()) {
             run.addAction(new CheckmarxScanResultsAction());
         }
-        Result currentResult = run.getResult();
-        //currentResult will be null only if the condition if (exitCode != 0) return false, meaning  exitCode is 0"
-        run.setResult(currentResult == null ?  Result.SUCCESS : Result.FAILURE);
+        if (exitCode != 0) {
+            run.setResult(Result.FAILURE);
+            log.info("Failed report generated");
+            throw new AbortException("Scan Failed");
+        }else{
+            run.setResult(Result.SUCCESS);
+        }
     }
 
     private void saveInArtifactAdditionalReports(ScanConfig scanConfig, FilePath workspace, EnvVars envVars, Launcher launcher, TaskListener listener, Run<?, ?> run, FilePath tempDir) {
