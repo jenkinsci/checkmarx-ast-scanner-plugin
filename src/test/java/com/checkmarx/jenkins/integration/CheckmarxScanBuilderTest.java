@@ -56,6 +56,7 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
         checkmarxScanBuilder.setBranchName(CheckmarxTestBase.BRANCH_MAIN);
         checkmarxScanBuilder.setCheckmarxInstallation(CheckmarxTestBase.JT_LATEST);
         checkmarxScanBuilder.setCredentialsId(CheckmarxTestBase.JENKINS_CREDENTIALS_TOKEN_ID);
+        checkmarxScanBuilder.setAdditionalOptions("--preset-name invalid-preset");
         checkmarxScanBuilder.setUseOwnAdditionalOptions(true);
 
         freeStyleProject.getBuildersList().add(checkmarxScanBuilder);
