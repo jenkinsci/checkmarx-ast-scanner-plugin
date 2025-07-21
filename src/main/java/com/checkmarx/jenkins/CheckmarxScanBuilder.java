@@ -382,7 +382,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             run.addAction(new CheckmarxScanResultsAction());
         }
         if (exitCode != 0) {
-            log.error(String.format("Exit code from AST-CLI: %s", exitCode));
             run.setResult(Result.FAILURE);
             log.info("Failed report generated");
             throw new AbortException("Scan Failed");
