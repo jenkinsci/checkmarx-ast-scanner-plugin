@@ -11,12 +11,14 @@ import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 import com.checkmarx.jenkins.exception.CheckmarxException;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nullable;
 
 
+@Slf4j
 public class ProxyHttpClient {
 
     public OkHttpClient getHttpClient(String proxyString, int connectionTimeoutMillis, int readTimeoutMillis) throws URISyntaxException, CheckmarxException {
@@ -27,6 +29,7 @@ public class ProxyHttpClient {
             URI proxy = new URI(proxyString);
             if (isValidProxy(proxy.getHost(), proxy.getPort())) {
                 Proxy _httpProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy.getHost(), proxy.getPort()));
+                log.info("The value of proxy is {}",_httpProxy);
                 String proxyUserInfo = proxy.getUserInfo();
                 if (StringUtils.isNotEmpty(proxyUserInfo)) {
                     String basicAuth = new String(
