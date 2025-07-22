@@ -28,6 +28,7 @@ public class PluginUtils {
     static final String CX_CLIENT_ID_ENV_KEY = "CX_CLIENT_ID";
     static final String CX_CLIENT_SECRET_ENV_KEY = "CX_CLIENT_SECRET";
     public static final String HTTP_PROXY = "HTTP_PROXY";
+    public static final String http_proxy = "http_proxy";
     public static final String defaultOutputName = "cx_result";
 
     public static CheckmarxInstallation findCheckmarxInstallation(final String checkmarxInstallation) {
@@ -126,6 +127,11 @@ public class PluginUtils {
     public static String getProxy() {
         EnvVars envVars = getEnvVars();
         String httpProxyStr = envVars.get(HTTP_PROXY);
+
+        if (httpProxyStr == null || httpProxyStr.isEmpty()) {
+            httpProxyStr = envVars.get(http_proxy);
+        }
+
         return httpProxyStr;
     }
 
