@@ -45,8 +45,8 @@
     <changelist>-SNAPSHOT</changelist>
     <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
-    <jenkins.baseline>2.452</jenkins.baseline>
-    <jenkins.version>${jenkins.baseline}.4</jenkins.version>
+    <jenkins.baseline>2.492</jenkins.baseline>
+    <jenkins.version>${jenkins.baseline}.3</jenkins.version>
     <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
     <output.dir>${project.build.directory}/output</output.dir>
     <tmp.dir>${project.build.directory}/tmp</tmp.dir>
@@ -55,10 +55,9 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
-        <artifactId>bom-${jenkins.baseline}.x</artifactId>
-        <version>3654.v237e4a_f2d8da_</version>
+        <artifactId>bom-2.504.x</artifactId>
+        <version>5054.v620b_5d2b_d5e6</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -117,6 +116,17 @@
       <artifactId>credentials</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>mailer</artifactId>
+      <version>463.vedf8358e006b_</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>5.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.jenkins-ci.plugins.workflow</groupId>
       <artifactId>workflow-step-api</artifactId>
     </dependency>
@@ -150,13 +160,13 @@
       <version>1.18.34</version>
     </dependency>
     <!--
-        Required for jenkins versions < 2.378
-        ast-cli-java-wrapper needs version 2.0.3 but jenkins uses 1.X
+        Updated SLF4J version to match ast-cli-java-wrapper dependency requirement
+        ast-cli-java-wrapper needs version 2.0.16 to avoid upper bound dependency conflicts
          -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>2.0.15</version>
+      <version>2.0.16</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
