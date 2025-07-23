@@ -129,14 +129,14 @@ public class PluginUtils {
     public static String getProxy() {
         EnvVars envVars = getEnvVars();
         String httpProxyStr = envVars.get(HTTP_PROXY);
-        log.info("The value of HTTP_PROXY:{}",HTTP_PROXY);
 
         if (httpProxyStr == null || httpProxyStr.isEmpty()) {
             httpProxyStr = envVars.get(http_proxy);
-            log.info("The value of http_proxy:{}",http_proxy);
+            log.info("The value of :{}",httpProxyStr);
         }
 
         return httpProxyStr;
+
     }
 
     private static EnvVars getEnvVars() {
