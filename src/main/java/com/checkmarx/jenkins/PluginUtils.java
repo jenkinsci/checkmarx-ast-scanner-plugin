@@ -11,6 +11,7 @@ import com.checkmarx.jenkins.tools.CheckmarxInstallation;
 import hudson.EnvVars;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
 import jenkins.model.Jenkins;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.*;
@@ -19,6 +20,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 
+@Slf4j
 public class PluginUtils {
     public static final String CHECKMARX_AST_RESULTS = "checkmarx-ast-results";
     public static final String CHECKMARX_AST_RESULTS_HTML = "checkmarx-ast-results.html";
@@ -127,9 +129,11 @@ public class PluginUtils {
     public static String getProxy() {
         EnvVars envVars = getEnvVars();
         String httpProxyStr = envVars.get(HTTP_PROXY);
+        log.info("The value of HTTP_PROXY:{}",HTTP_PROXY);
 
         if (httpProxyStr == null || httpProxyStr.isEmpty()) {
             httpProxyStr = envVars.get(http_proxy);
+            log.info("The value of http_proxy:{}",http_proxy);
         }
 
         return httpProxyStr;
