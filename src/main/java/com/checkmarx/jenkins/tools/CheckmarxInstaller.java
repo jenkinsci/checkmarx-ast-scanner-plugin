@@ -53,7 +53,7 @@ public class CheckmarxInstaller extends ToolInstaller {
 
     private static final String INSTALLED_FROM = ".installedFrom";
     private static final String TIMESTAMP_FILE = ".timestamp";
-    public static final String cliDefaultVersion = "2.3.19";
+    public static final String cliDefaultVersion = "2.3.27";
     private static final String cliVersionFileName = "cli.version";
     @Getter
     private String version;
