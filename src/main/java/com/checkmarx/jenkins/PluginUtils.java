@@ -128,15 +128,17 @@ public class PluginUtils {
     }
     public static String getProxy() {
         EnvVars envVars = getEnvVars();
-        String httpProxyStr = envVars.get(HTTP_PROXY);
 
-        if (httpProxyStr == null || httpProxyStr.isEmpty()) {
-            httpProxyStr = envVars.get(http_proxy);
-            log.info("The value of :{}",httpProxyStr);
+        // Match exactly either "http_proxy" or "HTTP_PROXY"
+        Pattern proxyPattern = Pattern.compile("^(http_proxy|HTTP_PROXY)$");
+
+        for (Map.Entry<String, String> entry : envVars.entrySet()) {
+            Matcher matcher = proxyPattern.matcher(entry.getKey());
+            if (matcher.matches()) {
+                return entry.getValue();
+            }
         }
-
-        return httpProxyStr;
-
+        return null;
     }
 
     private static EnvVars getEnvVars() {
