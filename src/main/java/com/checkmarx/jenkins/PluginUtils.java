@@ -131,16 +131,17 @@ public class PluginUtils {
     }
     public static String getProxy() {
         EnvVars envVars = getEnvVars();
-        String httpProxyStr = envVars.get(HTTP_PROXY);
+        String httpProxyStr = envVars.get("HTTP_PROXY");
+
         if (httpProxyStr != null && !httpProxyStr.isEmpty()) {
-            logger.log(Level.INFO, "Using proxy from environment variable: " + HTTP_PROXY);
+            System.out.println("Using proxy from environment variable: HTTP_PROXY");
         } else {
-            String lowerCaseProxy = envVars.get(HTTP_PROXY_LOWER);
+            String lowerCaseProxy = envVars.get("http_proxy");
             if (lowerCaseProxy != null && !lowerCaseProxy.isEmpty()) {
                 httpProxyStr = lowerCaseProxy.toUpperCase();
-                logger.log(Level.INFO, "Using proxy from environment variable: " + HTTP_PROXY_LOWER + " (converted to uppercase)");
+                System.out.println("Using proxy from environment variable: http_proxy (converted to uppercase)");
             } else {
-                logger.log(Level.WARNING, "No proxy environment variable found.");
+                System.out.println("No proxy environment variable found.");
             }
         }
 
