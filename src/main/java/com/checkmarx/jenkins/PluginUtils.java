@@ -128,19 +128,22 @@ public class PluginUtils {
     }
     public static String getProxy() {
         EnvVars envVars = getEnvVars();
+        String httpProxyStr = envVars.get("HTTP_PROXY");
 
-        // Match exactly either "http_proxy" or "HTTP_PROXY"
-        Pattern proxyPattern = Pattern.compile("^(http_proxy|HTTP_PROXY)$");
-
-        for (Map.Entry<String, String> entry : envVars.entrySet()) {
-            Matcher matcher = proxyPattern.matcher(entry.getKey());
-            if (matcher.matches()) {
-                return entry.getValue();
+        if (httpProxyStr != null && !httpProxyStr.isEmpty()) {
+            System.out.println("Using proxy from environment variable: HTTP_PROXY");
+        } else {
+            String lowerCaseProxy = envVars.get("http_proxy");
+            if (lowerCaseProxy != null && !lowerCaseProxy.isEmpty()) {
+                httpProxyStr = lowerCaseProxy.toUpperCase();
+                System.out.println("Using proxy from environment variable: http_proxy (converted to uppercase)");
+            } else {
+                System.out.println("No proxy environment variable found.");
             }
         }
-        return null;
-    }
 
+        return httpProxyStr;
+    }
     private static EnvVars getEnvVars() {
         EnvironmentVariablesNodeProperty environmentVariablesNodeProperty =
                 Jenkins.get().getGlobalNodeProperties().get(EnvironmentVariablesNodeProperty.class);
