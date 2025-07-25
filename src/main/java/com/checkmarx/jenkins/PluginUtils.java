@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -30,8 +32,9 @@ public class PluginUtils {
     static final String CX_CLIENT_ID_ENV_KEY = "CX_CLIENT_ID";
     static final String CX_CLIENT_SECRET_ENV_KEY = "CX_CLIENT_SECRET";
     public static final String HTTP_PROXY = "HTTP_PROXY";
-    public static final String http_proxy = "http_proxy";
+    public static final String HTTP_PROXY_LOWER = "HTTP_PROXY_LOWER";
     public static final String defaultOutputName = "cx_result";
+    private static final Logger logger = Logger.getLogger(PluginUtils.class.getName());
 
     public static CheckmarxInstallation findCheckmarxInstallation(final String checkmarxInstallation) {
         final CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor descriptor = Jenkins.get().getDescriptorByType(CheckmarxScanBuilder.CheckmarxScanBuilderDescriptor.class);
@@ -128,17 +131,16 @@ public class PluginUtils {
     }
     public static String getProxy() {
         EnvVars envVars = getEnvVars();
-        String httpProxyStr = envVars.get("HTTP_PROXY");
-
+        String httpProxyStr = envVars.get(HTTP_PROXY);
         if (httpProxyStr != null && !httpProxyStr.isEmpty()) {
-            System.out.println("Using proxy from environment variable: HTTP_PROXY");
+            logger.log(Level.INFO, "Using proxy from environment variable: " + HTTP_PROXY);
         } else {
-            String lowerCaseProxy = envVars.get("http_proxy");
+            String lowerCaseProxy = envVars.get(HTTP_PROXY_LOWER);
             if (lowerCaseProxy != null && !lowerCaseProxy.isEmpty()) {
                 httpProxyStr = lowerCaseProxy.toUpperCase();
-                System.out.println("Using proxy from environment variable: http_proxy (converted to uppercase)");
+                logger.log(Level.INFO, "Using proxy from environment variable: " + HTTP_PROXY_LOWER + " (converted to uppercase)");
             } else {
-                System.out.println("No proxy environment variable found.");
+                logger.log(Level.WARNING, "No proxy environment variable found.");
             }
         }
 
