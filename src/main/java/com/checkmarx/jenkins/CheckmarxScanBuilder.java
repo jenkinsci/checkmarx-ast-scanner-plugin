@@ -332,7 +332,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         if (scanId.isEmpty()) {
             log.error("Scan Scan ID is empty");
             run.setResult(Result.FAILURE);
-            throw new AbortException("Scan Failed");
         }
 
         ArgumentListBuilder htmlArguments = new ArgumentListBuilder();
@@ -385,7 +384,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         if (exitCode != 0) {
             run.setResult(Result.FAILURE);
             log.info("Failed report generated");
-            throw new AbortException("Scan Failed");
         }else{
             run.setResult(Result.SUCCESS);
         }
