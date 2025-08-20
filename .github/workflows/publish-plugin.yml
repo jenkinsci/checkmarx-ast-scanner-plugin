@@ -68,6 +68,7 @@ jobs:
       - name: Get the new tag
         id: get_new_tag
         run: |
+          git fetch --tag
           TAG_NAME=$(git describe --tags --abbrev=0)
           echo "Extracted Tag Name: $TAG_NAME"
           echo "TAG_NAME=$TAG_NAME" | tee -a $GITHUB_ENV $GITHUB_OUTPUT
@@ -119,7 +120,7 @@ jobs:
       product_name: Jenkins
       release_version: ${{ needs.release.outputs.TAG_NAME }}
       cli_release_version: ${{ needs.release.outputs.CLI_VERSION }}
-      release_author: "Phoenix Team"
+      release_author: "Sypher Team"
       release_url: https://github.com/jenkinsci/checkmarx-ast-scanner-plugin/releases/tag/${{ needs.release.outputs.TAG_NAME }}
       jira_product_name: JENKINS
     secrets: inherit
