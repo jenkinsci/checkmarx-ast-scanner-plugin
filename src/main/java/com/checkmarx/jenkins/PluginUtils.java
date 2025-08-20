@@ -101,6 +101,24 @@ public class PluginUtils {
         return "";
     }
 
+    public static boolean isPolicyViolated(String logs) {
+            // Checking if policy violation message exists in the logs
+            final String policyViolationRegex = "Policy Management Violation[:\\s-].*";
+            final Pattern policyPattern = Pattern.compile(policyViolationRegex);
+            Matcher policyMatcher = policyPattern.matcher(logs);
+
+            if (policyMatcher.find()) {
+                // Checks if "Break Build: true"
+                final String breakBuildRegex = "Break Build:\\s*true";
+                final Pattern breakBuildPattern = Pattern.compile(breakBuildRegex, Pattern.CASE_INSENSITIVE);
+                Matcher breakBuildMatcher = breakBuildPattern.matcher(logs);
+
+                return breakBuildMatcher.find();
+            }
+
+            return false;
+        }
+
     public static void insertSecretsAsEnvVars(ScanConfig scanConfig, EnvVars envVars) throws IOException, InterruptedException {
         envVars.put(CX_CLIENT_ID_ENV_KEY,scanConfig.getCheckmarxToken().getClientId());
         envVars.put(CX_CLIENT_SECRET_ENV_KEY, scanConfig.getCheckmarxToken().getToken().getPlainText());
