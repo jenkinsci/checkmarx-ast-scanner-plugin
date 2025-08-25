@@ -175,6 +175,7 @@ jobs:
         uses: satak/webrequest-action@master
         with:
           url: ${{ secrets.JIRA_RELEASE_WEBHOOK_URL }}
+          headers: '{"X-Automation-Webhook-Token": "${{ secrets.JIRA_RELEASE_WEBHOOK_TOKEN }}"}'
           method: POST
           payload: |
             {
