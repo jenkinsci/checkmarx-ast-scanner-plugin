@@ -26,9 +26,9 @@
   <!-- If you want this to appear on the plugin site page: -->
   <developers>
     <developer>
-      <id>mithilesh_pawar</id>
-      <name>Mithilesh Pawar</name>
-      <email>Mithilesh.Pawar@checkmarx.com</email>
+      <id>anurag_dalke</id>
+      <name>Anurag Dalke</name>
+      <email>anurag.dalke@checkmarx.com</email>
     </developer>
   </developers>
   <contributors/>
@@ -61,6 +61,16 @@
         <version>3654.v237e4a_f2d8da_</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>3.18.0</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.12.1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -96,7 +106,7 @@
     <dependency>
       <groupId>com.checkmarx.ast</groupId>
       <artifactId>ast-cli-java-wrapper</artifactId>
-      <version>2.4.4-test-release</version>
+      <version>2.4.8</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
