@@ -562,9 +562,8 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             String prefixPath = workspace.getRemote();
             String separator = File.separator;
             if (additionalOptions.contains("--output-path")) {
-                additionalOptions = additionalOptions.replaceFirst(
-                        "--output-path\\s+\\S+",
-                        "--output-path \"" + prefixPath + separator + "\"");
+                additionalOptions = additionalOptions.replaceAll("(--output-path\\s+)(\\S+)",
+                        "$1\"$2\"");
             } else {
                 additionalOptions += String.format(" --output-path \"%s\"", prefixPath);
             }
