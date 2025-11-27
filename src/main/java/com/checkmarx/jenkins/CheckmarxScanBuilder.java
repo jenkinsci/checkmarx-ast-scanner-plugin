@@ -561,7 +561,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
         if (fixEmptyAndTrim(additionalOptions) != null) {
             String prefixPath = workspace.getRemote();
             if (additionalOptions.contains("--output-path")) {
-                // Correctly wrap user-provided path in quotes (Windows-safe)
                 additionalOptions = additionalOptions.replaceAll(
                         "(--output-path\\s+)(\"?[^\"]+\"?)",
                         "$1\"$2\"");
