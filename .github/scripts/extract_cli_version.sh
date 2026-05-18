@@ -11,7 +11,8 @@ BINARY_NAME=$1
 echo "Starting CLI version extraction for binary: $BINARY_NAME..."
 
 # Find the installed JAR in Maven's local repository
-JAR_PATH=$(find ~/.m2/repository/com/checkmarx/ast/ast-cli-java-wrapper/ -type f -name "ast-cli-java-wrapper-*.jar" ! -name "*-javadoc.jar" | sort -V | tail -n 1)
+#JAR_PATH=$(find ~/.m2/repository/com/checkmarx/ast/ast-cli-java-wrapper/ -type f -name "ast-cli-java-wrapper-*.jar" ! -name "*-javadoc.jar" | sort -V | tail -n 1)
+JAR_PATH=$(find ~/.m2/repository/com/checkmarx/ast/ast-cli-java-wrapper/ -type f -name "ast-cli-java-wrapper-*.jar" ! -name "*-javadoc.jar" -printf "%T@ %p\n" | sort -n | tail -n 1 | cut -d' ' -f2-)
 
 if [ -z "$JAR_PATH" ]; then
     echo "Error: ast-cli-java-wrapper JAR not found in Maven dependencies."
