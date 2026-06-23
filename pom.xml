@@ -85,6 +85,23 @@
         <artifactId>gson</artifactId>
         <version>2.12.1</version>
       </dependency>
+      <!-- Security: fix CVE-2025-14813, CVE-2026-5598 (broken crypto / timing attack in Bouncy Castle).
+           1.80.2 is the Checkmarx-recommended clean version and is compatible with Java 11. -->
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk18on</artifactId>
+        <version>1.80.2</version>
+      </dependency>
+      <!-- NOTE: The following CVEs remain open and require upgrading the project Java baseline to 17:
+           - Spring Framework (spring-core, spring-expression, spring-web) 5.3.x is EOL.
+             Fix versions (6.2.19+) require Java 17 and are blocked by EnforceBytecodeVersion.
+             CVEs: CVE-2026-41848, CVE-2026-41849, CVE-2026-41850, CVE-2026-41851, CVE-2026-41845, CVE-2026-41840
+           - Spring Security (spring-security-web, spring-security-core) 5.8.x clean versions (6.5.11+)
+             also require Java 17.
+             CVEs: CVE-2026-22732, CVE-2026-47838, CVE-2026-41706, CVE-2026-41003
+           - Jetty 12.0.33 (fix for CVE-2026-2332) is controlled by Jenkins core, not this plugin.
+             Upgrade Jenkins itself or coordinate with the Jenkins LTS team.
+           Action needed: bump jenkins.baseline to 2.479+ (JDK 17 LTS line) in a coordinated release. -->
     </dependencies>
   </dependencyManagement>
   <dependencies>
@@ -119,7 +136,7 @@
     <dependency>
       <groupId>com.checkmarx.ast</groupId>
       <artifactId>ast-cli-java-wrapper</artifactId>
-      <version>2.4.23</version>
+      <version>2.4.24</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
