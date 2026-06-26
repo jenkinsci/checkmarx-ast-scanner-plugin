@@ -448,9 +448,9 @@
                                                 <div class="progress">
                                                     <div class="progress-bar bg-sast value">${resultSummary.getSastIssues()}
                                                     </div>
-                                                    <div class="progress-bar bg-kicks value">${resultSummary.getScaIssues()}
+                                                    <div class="progress-bar bg-kicks value">${resultSummary.getKicsIssues()}
                                                     </div>
-                                                    <div class="progress-bar bg-sca value">${resultSummary.getKicsIssues()}
+                                                    <div class="progress-bar bg-sca value">${resultSummary.getScaIssues()}
                                                     </div>
                                                 </div>
                                             </div>
