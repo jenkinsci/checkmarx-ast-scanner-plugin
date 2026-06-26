@@ -1,18 +1,30 @@
-name: Checkmarx AST Scan
+name: Checkmarx One Scan
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "00 7 * * *" # Every day at 07:00
 
-on: [ pull_request, workflow_dispatch ]
+permissions:
+  contents: read
 
 jobs:
   cx-scan:
-    runs-on: ubuntu-latest
+    name: Checkmarx One Scan
+    permissions:
+      contents: read
+    runs-on: cx-public-ubuntu-x64
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-      - name: Checkmarx AST CLI Action
-        uses: checkmarx/ast-github-action@fa338ce82069b297c4852ac77e2d168db9fb56d8 # main
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - name: Checkmarx One CLI Action
+        uses: checkmarx/ast-github-action@ef93013c95adc60160bc22060875e90800d3ecfc #v.2.3.19
         with:
-          base_uri: ${{ secrets.BASE_URI }}
-          cx_tenant: ${{ secrets.TENANT }}
-          cx_client_id: ${{ secrets.CLIENT_ID }}
-          cx_client_secret: ${{ secrets.CLIENT_SECRET }}
-          additional_params: --tags phoenix --threshold "sast-critical=1;sast-high=1;sast-medium=1;sast-low=1;sca-critical=1;sca-high=1;sca-medium=1;sca-low=1;iac-security-critical=1;iac-security-high=1;iac-security-medium=1;iac-security-low=1"
+          base_uri: ${{ secrets.AST_RND_SCANS_BASE_URI }}
+          cx_tenant: ${{ secrets.AST_RND_SCANS_TENANT }}
+          cx_client_id: ${{ secrets.AST_RND_SCANS_CLIENT_ID }}
+          cx_client_secret: ${{ secrets.AST_RND_SCANS_CLIENT_SECRET }}
+          additional_params: --tags sypher --threshold "sca-critical=1;sca-high=1;sca-medium=1;sca-low=1;sast-critical=1;sast-high=1;sast-medium=1;sast-low=1;iac-security-critical=1;iac-security-high=1;iac-security-medium=1;iac-security-low=1"
