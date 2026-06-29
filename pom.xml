@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>4.88</version>
+    <version>5.31</version>
   </parent>
   <groupId>com.checkmarx.jenkins</groupId>
   <artifactId>checkmarx-ast-scanner</artifactId>
@@ -45,8 +45,8 @@
     <changelist>-SNAPSHOT</changelist>
     <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
-    <jenkins.baseline>2.452</jenkins.baseline>
-    <jenkins.version>${jenkins.baseline}.4</jenkins.version>
+    <jenkins.baseline>2.516</jenkins.baseline>
+    <jenkins.version>${jenkins.baseline}.3</jenkins.version>
     <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
     <output.dir>${project.build.directory}/output</output.dir>
     <tmp.dir>${project.build.directory}/tmp</tmp.dir>
@@ -66,42 +66,23 @@
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-${jenkins.baseline}.x</artifactId>
-        <version>3654.v237e4a_f2d8da_</version>
+        <version>6210.v69ea_fd8a_f010</version>
         <type>pom</type>
         <scope>import</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>3.18.0</version>
       </dependency>
       <dependency>
         <groupId>javax.xml.bind</groupId>
         <artifactId>jaxb-api</artifactId>
         <version>2.3.1</version>
       </dependency>
-      <dependency>
-        <groupId>com.google.code.gson</groupId>
-        <artifactId>gson</artifactId>
-        <version>2.12.1</version>
-      </dependency>
-      <!-- Security: fix CVE-2025-14813, CVE-2026-5598 (broken crypto / timing attack in Bouncy Castle).
-           1.80.2 is the Checkmarx-recommended clean version and is compatible with Java 11. -->
-      <dependency>
-        <groupId>org.bouncycastle</groupId>
-        <artifactId>bcprov-jdk18on</artifactId>
-        <version>1.80.2</version>
-      </dependency>
-      <!-- NOTE: The following CVEs remain open and require upgrading the project Java baseline to 17:
-           - Spring Framework (spring-core, spring-expression, spring-web) 5.3.x is EOL.
-             Fix versions (6.2.19+) require Java 17 and are blocked by EnforceBytecodeVersion.
-             CVEs: CVE-2026-41848, CVE-2026-41849, CVE-2026-41850, CVE-2026-41851, CVE-2026-41845, CVE-2026-41840
-           - Spring Security (spring-security-web, spring-security-core) 5.8.x clean versions (6.5.11+)
-             also require Java 17.
-             CVEs: CVE-2026-22732, CVE-2026-47838, CVE-2026-41706, CVE-2026-41003
-           - Jetty 12.0.33 (fix for CVE-2026-2332) is controlled by Jenkins core, not this plugin.
-             Upgrade Jenkins itself or coordinate with the Jenkins LTS team.
-           Action needed: bump jenkins.baseline to 2.479+ (JDK 17 LTS line) in a coordinated release. -->
+      <!-- The jenkins.baseline was raised to the JDK 17 LTS line (2.516.x). This clears the previously
+           blocked Spring / Spring Security CVEs (CVE-2026-41848/49/50/51/45/40, CVE-2026-22732,
+           CVE-2026-47838, CVE-2026-41706, CVE-2026-41003) and the Jetty CVE-2026-2332, and supersedes
+           the old manual pins for commons-lang3, gson and bcprov-jdk18on: the 2.516.x BOM and the
+           Jenkins *-api wrapper plugins (commons-lang3-api, gson-api, bouncycastle-api) now bring
+           higher, clean versions (commons-lang3 3.20.0, gson 2.13.2, bcprov-jdk18on 1.83 which is
+           >= the 1.80.2 fix for CVE-2025-14813 / CVE-2026-5598). Do not re-pin those lower here; it
+           would break RequireUpperBoundDeps. Only override the BOM if a future advisory requires it. -->
     </dependencies>
   </dependencyManagement>
   <dependencies>
@@ -196,7 +177,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>2.0.15</version>
+      <version>2.0.17</version>
       <scope>compile</scope>
     </dependency>
     <dependency>

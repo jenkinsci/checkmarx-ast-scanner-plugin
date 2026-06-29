@@ -706,7 +706,7 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return this.installations.length > 0;
         }
 
-        public boolean configure(StaplerRequest req, JSONObject formData) {
+        public boolean configure(StaplerRequest2 req, JSONObject formData) {
             JSONObject pluginData = formData.getJSONObject("checkmarx");
             req.bindJSON(this, pluginData);
             save();

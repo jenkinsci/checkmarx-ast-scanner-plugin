@@ -14,7 +14,7 @@ import com.checkmarx.jenkins.exception.CheckmarxException;
 import okhttp3.*;
 import org.apache.commons.lang.StringUtils;
 
-import javax.annotation.Nullable;
+import edu.umd.cs.findbugs.annotations.Nullable;
 
 
 public class ProxyHttpClient {
