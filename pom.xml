@@ -54,16 +54,15 @@
   </properties>
   <dependencyManagement>
     <dependencies>
-      <!-- Align jackson-* with the version pulled in by ast-cli-java-wrapper to satisfy RequireUpperBoundDeps. Must precede the Jenkins BOM so this version wins. -->
+      <!-- Must precede the Jenkins BOM so this version wins over the BOM's jackson-bom. -->
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>2.21.1</version>
+        <version>2.21.4</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
-        <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-${jenkins.baseline}.x</artifactId>
         <version>6210.v69ea_fd8a_f010</version>
@@ -75,14 +74,63 @@
         <artifactId>jaxb-api</artifactId>
         <version>2.3.1</version>
       </dependency>
-      <!-- The jenkins.baseline was raised to the JDK 17 LTS line (2.516.x). This clears the previously
-           blocked Spring / Spring Security CVEs (CVE-2026-41848/49/50/51/45/40, CVE-2026-22732,
-           CVE-2026-47838, CVE-2026-41706, CVE-2026-41003) and the Jetty CVE-2026-2332, and supersedes
-           the old manual pins for commons-lang3, gson and bcprov-jdk18on: the 2.516.x BOM and the
-           Jenkins *-api wrapper plugins (commons-lang3-api, gson-api, bouncycastle-api) now bring
-           higher, clean versions (commons-lang3 3.20.0, gson 2.13.2, bcprov-jdk18on 1.83 which is
-           >= the 1.80.2 fix for CVE-2025-14813 / CVE-2026-5598). Do not re-pin those lower here; it
-           would break RequireUpperBoundDeps. Only override the BOM if a future advisory requires it. -->
+      <!-- Security pins: each entry overrides a vulnerable version shipped by the Jenkins BOM. -->
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk18on</artifactId>
+        <version>1.84</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcpg-jdk18on</artifactId>
+        <version>1.84</version>
+      </dependency>
+      <!-- bcutil + bcpkix have no CVE; pinned to 1.84 to keep the BC family aligned for RequireUpperBoundDeps. -->
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcutil-jdk18on</artifactId>
+        <version>1.84</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcpkix-jdk18on</artifactId>
+        <version>1.84</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-http</artifactId>
+        <version>12.1.7</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-server</artifactId>
+        <version>12.1.6</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-core</artifactId>
+        <version>6.2.19</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-expression</artifactId>
+        <version>6.2.19</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-web</artifactId>
+        <version>6.2.19</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-web</artifactId>
+        <version>6.5.11</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-core</artifactId>
+        <version>6.5.11</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <dependencies>
