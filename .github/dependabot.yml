@@ -4,11 +4,13 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    open-pull-requests-limit: 1
     reviewers:
       - "diogopcx"
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    open-pull-requests-limit: 1
     reviewers:
       - "diogopcx"

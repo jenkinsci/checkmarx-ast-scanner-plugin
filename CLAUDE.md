@@ -10,20 +10,20 @@ Jenkins plugin (`checkmarx-ast-scanner`) that integrates the **Checkmarx One** (
 
 ## Technology Stack
 
-| Component | Details |
-|-----------|---------|
-| Language | Java 11 (baseline) / also built against JDK 17 |
-| Build tool | Apache Maven (Jenkins parent POM `org.jenkins-ci.plugins:plugin:4.88`) |
-| Packaging | `hpi` (Jenkins plugin) |
-| Jenkins baseline | `2.452.4` (LTS) — minimum supported runtime LTS 2.263.1 |
-| Core dependency | `com.checkmarx.ast:ast-cli-java-wrapper:2.4.23` |
-| CLI version (default) | `2.3.51` (see [cli.version](cli.version) and `CheckmarxInstaller.cliDefaultVersion`) |
-| HTTP client | `okhttp` (via `okhttp-api` Jenkins plugin) for CLI download / proxy |
-| JSON | `gson` (via `gson-api`), `jackson2-api`, `json-simple` |
-| Logging | `slf4j-api` 2.0.15 wrapped by `CxLoggerAdapter` |
-| Lombok | 1.18.34 (compile-time) |
-| Test framework | JUnit + Jenkins Test Harness, Mockito 5.5.0, `mockwebserver` 4.11.0 |
-| Coverage | JaCoCo 0.8.8 |
+| Component | Details                                                                                     |
+|-----------|---------------------------------------------------------------------------------------------|
+| Language | Java 11 (baseline) / also built against JDK 17                                              |
+| Build tool | Apache Maven (Jenkins parent POM `org.jenkins-ci.plugins:plugin:4.88`)                      |
+| Packaging | `hpi` (Jenkins plugin)                                                                      |
+| Jenkins baseline | `2.452.4` (LTS) — minimum supported runtime LTS 2.263.1                                     |
+| Core dependency | `com.checkmarx.ast:ast-cli-java-wrapper:2.4.24`                                             |
+| CLI version (default) | `2.3.51` (see [cli.version](cli.version) and `CheckmarxInstaller.cliDefaultVersion`)        |
+| HTTP client | `okhttp` (via `okhttp-api` Jenkins plugin) for CLI download / proxy                         |
+| JSON | `gson` (via `gson-api`), `jackson2-api`, `json-simple`                                      |
+| Logging | `slf4j-api` 2.0.15 wrapped by `CxLoggerAdapter`                                             |
+| Lombok | 1.18.34 (compile-time)                                                                      |
+| Test framework | JUnit + Jenkins Test Harness, Mockito 5.5.0, `mockwebserver` 4.11.0                         |
+| Coverage | JaCoCo 0.8.8                                                                                |
 | CI | GitHub Actions (`.github/workflows/ci.yml`) + Jenkins pipeline ([Jenkinsfile](Jenkinsfile)) |
 
 ## Repository Structure
