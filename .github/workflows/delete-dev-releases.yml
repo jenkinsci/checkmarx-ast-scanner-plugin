@@ -13,14 +13,18 @@ on:
         description: 'Tag to delete'
         required: true
 
-permissions:
-  id-token: write
-  contents: write
-  packages: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions: {}
 
 jobs:
   delete:
+    name: Delete Dev Releases
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # for gh release delete/list and git push --delete to remove tags
     steps:
 
       - name: Delete releases and tags

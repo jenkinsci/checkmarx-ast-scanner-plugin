@@ -1,13 +1,19 @@
 name: Dependabot auto-merge
 on: pull_request
 
-permissions:
-  contents: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
 
 jobs:
   dependabot-merge:
+    name: Dependabot Auto-Merge
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'dependabot[bot]' }}
+    permissions:
+      contents: write  # for gh pr merge --auto to create the merge commit
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
     steps:
       - name: Dependabot metadata
         id: metadata

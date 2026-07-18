@@ -4,23 +4,29 @@ on:
   issues:
     types: [opened, closed]
 
+permissions: {}
+
 jobs:
   notify_jira:
     if: github.event.action == 'opened'
     name: Notify Jira
+    permissions:
+      issues: write  # ceiling for jira_notify.yml commenting the Jira link on the GitHub issue
     uses:  ./.github/workflows/jira_notify.yml
     with:
       title: ${{ github.event.issue.title }}
       body: ${{ github.event.issue.body }}
       html_url: ${{ github.event.issue.html_url }}
       repo: ${{ github.event.repository.full_name }}
-    secrets: inherit
+    secrets: inherit # zizmor: ignore[secrets-inherit]
 
   close_jira:
     if: github.event.action == 'closed'
     name: Close Jira
+    permissions:
+      issues: read  # ceiling for jira_close.yml reading issue comments for the Jira key
     uses: ./.github/workflows/jira_close.yml
     with:
       issue_number: ${{ github.event.issue.number }}
       repo: ${{ github.event.repository.full_name }}
-    secrets: inherit
+    secrets: inherit # zizmor: ignore[secrets-inherit]
