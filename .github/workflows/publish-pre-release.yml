@@ -67,11 +67,6 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Configure echo mirror for dependency resolution
-        run: |
-          sed -i 's|</settings>|<mirrors><mirror><id>echo</id><mirrorOf>central</mirrorOf><url>https://maven.echohq.com</url></mirror></mirrors></settings>|' ~/.m2/settings.xml
-
-
       - name: mvn compile and package
         run: |
           mvn package -DskipTests -Dset.changelist

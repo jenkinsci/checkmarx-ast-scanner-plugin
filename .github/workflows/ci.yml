@@ -35,10 +35,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Configure echo mirror for dependency resolution
-        run: |
-          sed -i 's|</settings>|<mirrors><mirror><id>echo</id><mirrorOf>central</mirrorOf><url>https://maven.echohq.com</url></mirror></mirrors></settings>|' ~/.m2/settings.xml
-
       - name: Install xmllint
         run: sudo apt-get install -y libxml2-utils --fix-missing
 
@@ -95,10 +91,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - name: Configure echo mirror for dependency resolution
-        run: |
-          sed -i 's|</settings>|<mirrors><mirror><id>echo</id><mirrorOf>central</mirrorOf><url>https://maven.echohq.com</url></mirror></mirrors></settings>|' ~/.m2/settings.xml
 
       - name: Install xmllint
         run: sudo apt-get install -y libxml2-utils

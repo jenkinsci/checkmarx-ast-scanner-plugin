@@ -64,10 +64,6 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Configure echo mirror for dependency resolution
-        run: |
-          sed -i 's|</settings>|<mirrors><mirror><id>echo</id><mirrorOf>central</mirrorOf><url>https://maven.echohq.com</url></mirror></mirrors></settings>|' ~/.m2/settings.xml
-
       - name: Release
         uses: jenkins-infra/jenkins-maven-cd-action@6d01e3d3f0d952c7ed2fa88df031de46426299c6  #v1.4.1
         with:
