@@ -76,7 +76,7 @@
       <dependency>
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-crypto</artifactId>
-        <version>5.8.16</version>
+        <version>5.8.17</version>
       </dependency>
       <dependency>
         <groupId>org.springframework</groupId>
@@ -86,12 +86,12 @@
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-expression</artifactId>
-        <version>6.1.14</version>
+        <version>6.2.19</version>
       </dependency>
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring-web</artifactId>
-        <version>6.1.21</version>
+        <version>6.2.19</version>
       </dependency>
       <!-- CVE Remediation: BouncyCastle Cryptography Updates -->
       <dependency>
