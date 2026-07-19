@@ -43,10 +43,11 @@
     <!-- Override the needed properties from the parent pom -->
     <revision>2.0.13</revision>
     <changelist>-SNAPSHOT</changelist>
+    <java.level>17</java.level>
     <!-- Baseline Jenkins version you use to build the plugin. Users must have this version or newer to run. -->
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
-    <jenkins.baseline>2.452</jenkins.baseline>
-    <jenkins.version>${jenkins.baseline}.4</jenkins.version>
+    <jenkins.baseline>2.479</jenkins.baseline>
+    <jenkins.version>${jenkins.baseline}.1</jenkins.version>
     <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
     <output.dir>${project.build.directory}/output</output.dir>
     <tmp.dir>${project.build.directory}/tmp</tmp.dir>
@@ -58,9 +59,51 @@
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>2.21.1</version>
+        <version>2.22.1</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <!-- CVE Remediation: Spring Framework and Security Upgrades -->
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-web</artifactId>
+        <version>6.5.11</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-core</artifactId>
+        <version>6.2.8</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-crypto</artifactId>
+        <version>6.3.8</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-core</artifactId>
+        <version>6.2.19</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-expression</artifactId>
+        <version>6.2.19</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-web</artifactId>
+        <version>6.2.19</version>
+      </dependency>
+      <!-- CVE Remediation: BouncyCastle Cryptography Updates -->
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk18on</artifactId>
+        <version>1.84</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcpkix-jdk18on</artifactId>
+        <version>1.84</version>
       </dependency>
       <dependency>
         <!-- Pick up common dependencies for the selected LTS line: https://github.com/jenkinsci/bom#usage -->
@@ -84,6 +127,24 @@
         <groupId>com.google.code.gson</groupId>
         <artifactId>gson</artifactId>
         <version>2.12.1</version>
+      </dependency>
+      <!-- Align slf4j-api to match ast-cli-java-wrapper transitive version -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>2.0.16</version>
+      </dependency>
+      <!-- Align bcutil-jdk18on to match BouncyCastle 1.84 -->
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcutil-jdk18on</artifactId>
+        <version>1.84</version>
+      </dependency>
+      <!-- Jakarta Servlet API for Jenkins 2.479+ -->
+      <dependency>
+        <groupId>jakarta.servlet</groupId>
+        <artifactId>jakarta.servlet-api</artifactId>
+        <version>6.0.0</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -119,7 +180,7 @@
     <dependency>
       <groupId>com.checkmarx.ast</groupId>
       <artifactId>ast-cli-java-wrapper</artifactId>
-      <version>2.4.23</version>
+      <version>2.4.24</version>
     </dependency>
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
@@ -179,7 +240,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>2.0.15</version>
+      <version>2.0.16</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
