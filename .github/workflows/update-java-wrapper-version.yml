@@ -10,13 +10,25 @@ on:
   repository_dispatch:
     types: [java-wrapper-version-update]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions: {}
+
 jobs:
   update-ast-cli-wrapper:
+    name: Update CLI Wrapper Version
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # for pushing changes
+      pull-requests: write  # for creating PRs
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@9bb56186c3b09b4f86b1d471b76edbe601d3fb67 # v4.1.6
+        with:
+          persist-credentials: false
 
       - name: Install xmllint
         run: sudo apt-get install -y libxml2-utils --fix-missing
@@ -45,9 +57,11 @@ jobs:
 
       - name: Determine version to use
         id: determine-version
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
         run: |
-          if [[ -n "${{ github.event.inputs.version }}" ]]; then
-            VERSION=${{ github.event.inputs.version }}
+          if [[ -n "${INPUT_VERSION}" ]]; then
+            VERSION="${INPUT_VERSION}"
             echo "Using specified version: $VERSION"
           else
             VERSION=$(curl -s "https://repo1.maven.org/maven2/com/checkmarx/ast/ast-cli-java-wrapper/maven-metadata.xml" | \
@@ -61,19 +75,24 @@ jobs:
           echo "release_tag=$VERSION" >> $GITHUB_ENV
 
       - name: Check if update is needed
+        env:
+          CURRENT_TAG: ${{ env.current_tag }}
+          RELEASE_TAG: ${{ env.release_tag }}
         run: |
-          echo "Current version: ${{ env.current_tag }}"
-          echo "Latest version: ${{ env.release_tag }}"
+          echo "Current version: ${CURRENT_TAG}"
+          echo "Latest version: ${RELEASE_TAG}"
 
-          if [[ "${{ env.current_tag }}" == "${{ env.release_tag }}" ]]; then
-            echo "✅ Already using the wanted version ${{ env.release_tag }}"
+          if [[ "${CURRENT_TAG}" == "${RELEASE_TAG}" ]]; then
+            echo "✅ Already using the wanted version ${RELEASE_TAG}"
             echo update_needed=false >> $GITHUB_ENV
           fi
 
       - name: Update ast-cli-java-wrapper version in pom.xml
-        if : env.update_needed != 'false'
+        if: env.update_needed != 'false'
+        env:
+          RELEASE_TAG: ${{ env.release_tag }}
         run: |
-          perl -i -pe 'BEGIN{undef $/;} s|<groupId>com.checkmarx.ast</groupId>\s*<artifactId>ast-cli-java-wrapper</artifactId>\s*<version>.*?</version>|<groupId>com.checkmarx.ast</groupId>\n        <artifactId>ast-cli-java-wrapper</artifactId>\n        <version>${{ env.release_tag }}</version>|sg' pom.xml
+          perl -i -pe "BEGIN{undef $/;} s|<groupId>com.checkmarx.ast</groupId>\s*<artifactId>ast-cli-java-wrapper</artifactId>\s*<version>.*?</version>|<groupId>com.checkmarx.ast</groupId>\n        <artifactId>ast-cli-java-wrapper</artifactId>\n        <version>${RELEASE_TAG}</version>|sg" pom.xml
 
       - name: Format pom.xml
         if: env.update_needed != 'false'
@@ -88,11 +107,15 @@ jobs:
           .github/scripts/extract_cli_version.sh cx-linux
 
       - name: Print Extracted CLI Version
+        env:
+          CLI_VERSION: ${{ env.CLI_VERSION }}
         run: |
-          echo "Extracted CLI Version: ${{ env.CLI_VERSION }}"
+          echo "Extracted CLI Version: ${CLI_VERSION}"
 
       - name: Write CLI Version to cli.version file
-        run: echo "${{ env.CLI_VERSION }}" > cli.version
+        env:
+          CLI_VERSION: ${{ env.CLI_VERSION }}
+        run: echo "${CLI_VERSION}" > cli.version
 
       - name: override default version in CheckmarxInstaller.java
         run: |
@@ -100,7 +123,7 @@ jobs:
 
       - name: Create Pull Request
         if: env.update_needed != 'false'
-        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c #v6
+        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c #v6  # zizmor: ignore[superfluous-actions]
         with:
           token: ${{ secrets.AUTOMATION_TOKEN }}
           branch: "other/update_java_wrapper_${{ env.release_tag }}"

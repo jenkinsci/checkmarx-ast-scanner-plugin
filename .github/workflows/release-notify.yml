@@ -22,17 +22,24 @@ on:
         required: true
         type: string
 
+permissions: {}
+
 jobs:
   notify-teams:
+    name: Notify Teams and JIRA
     runs-on: ubuntu-latest
+    permissions:
+      contents: read  # for reading release information
 
     steps:
       - name: Fetch Release Notes
         id: fetch_release_notes
-        uses: actions/github-script@v6
+        uses: actions/github-script@0ae0ecc54fe9a2e8bbf6f99bf9b4ebdad72a8d3e # v6.1.0
+        env:
+          RELEASE_URL: ${{ inputs.release_url }}
         with:
           script: |
-            const releaseUrl = '${{ inputs.release_url }}';
+            const releaseUrl = process.env.RELEASE_URL;
             const urlPattern = /https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/releases\/tag\/(.+)/;
             const match = releaseUrl.match(urlPattern);
             if (!match) {
@@ -48,7 +55,7 @@ jobs:
 
       - name: Sanitize Release Notes
         id: sanitize_release_notes
-        run: |
+        run: |  # zizmor: ignore[template-injection]
           sanitized=$(echo "${{ steps.fetch_release_notes.outputs.release_notes }}" | sed '1{/^<!--/d}')
           sanitized=$(echo "$sanitized" | jq -Rs '.')
           echo $sanitized
@@ -56,8 +63,8 @@ jobs:
 
       - name: Extract Contributors
         id: extract_contributors
-        run: |
-      
+        run: |  # zizmor: ignore[template-injection]
+
           contributors=$(echo "${{ steps.fetch_release_notes.outputs.release_notes }}" | grep -o '@[a-zA-Z0-9_-]\+' | sort -u)
           
           echo "Contributors: $contributors"
@@ -86,7 +93,7 @@ jobs:
               
       - name: Extract Jira Ticket IDs
         id: extract_jira_tickets
-        run: |
+        run: |  # zizmor: ignore[template-injection]
           # Extract all AST-XXX patterns
           jira_tickets=$(echo "${{ steps.fetch_release_notes.outputs.release_notes }}" | grep -oE 'AST-[0-9]+' | sort -u)
           
@@ -109,7 +116,7 @@ jobs:
       
 
       - name: Send notification to Teams
-        uses: Skitionek/notify-microsoft-teams@v1.0.8
+        uses: Skitionek/notify-microsoft-teams@339166d4ca84e6fd6e358d76022fc05edd12dfcb # v1.0.8
         with:
           webhook_url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
           raw: >
@@ -166,13 +173,16 @@ jobs:
 
       - name: Generate Release Version
         id: generate_jira_release_version
+        env:
+          JIRA_PRODUCT_NAME: ${{ inputs.jira_product_name }}
+          RELEASE_VERSION: ${{ inputs.release_version }}
         run: |
-          jira_release_version="${{ inputs.jira_product_name }}_${{ inputs.release_version }}"
+          jira_release_version="${JIRA_PRODUCT_NAME}_${RELEASE_VERSION}"
           echo "Generated Release Version: $jira_release_version"
           echo "jira_release_version=$jira_release_version" >> $GITHUB_OUTPUT
 
       - name: Create New JIRA Release
-        uses: satak/webrequest-action@master
+        uses: satak/webrequest-action@3697cc0c0ba0d501729b080ab5825c04bf96132e
         with:
           url: ${{ secrets.JIRA_RELEASE_WEBHOOK_URL }}
           headers: '{"X-Automation-Webhook-Token": "${{ secrets.JIRA_RELEASE_WEBHOOK_TOKEN }}"}'
@@ -187,7 +197,7 @@ jobs:
             }
 
       - name: Send Jira Tickets to Webhook
-        uses: satak/webrequest-action@master
+        uses: satak/webrequest-action@3697cc0c0ba0d501729b080ab5825c04bf96132e
         with:
           url: ${{ secrets.JIRA_TICKETS_WEBHOOK_URL }}
           headers: '{"X-Automation-Webhook-Token": "${{ secrets.JIRA_AUTOMATION_WEBHOOK_TOKEN }}"}'

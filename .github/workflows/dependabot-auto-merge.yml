@@ -1,13 +1,19 @@
 name: Dependabot auto-merge
 on: pull_request
 
-permissions:
-  contents: write
+concurrency:
+  group: ${{ github.workflow }}-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
 
 jobs:
   dependabot-merge:
+    name: Auto-merge Dependabot PRs
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'dependabot[bot]' }}
+    permissions:
+      contents: write  # for auto-merging PRs
+    if: ${{ github.actor == 'dependabot[bot]' }}  # zizmor: ignore[bot-conditions]
     steps:
       - name: Dependabot metadata
         id: metadata

@@ -2,12 +2,22 @@ name: Checkmarx AST Scan
 
 on: [ pull_request, workflow_dispatch ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
 jobs:
-  cx-scan:
+  cx-scan: # zizmor: ignore[anonymous-definition]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@9bb56186c3b09b4f86b1d471b76edbe601d3fb67 # v4.1.6
+        with:
+          persist-credentials: false
       - name: Checkmarx AST CLI Action
         uses: checkmarx/ast-github-action@fa338ce82069b297c4852ac77e2d168db9fb56d8 # main
         with:
