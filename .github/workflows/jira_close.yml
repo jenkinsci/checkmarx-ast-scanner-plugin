@@ -16,10 +16,10 @@ permissions: {}
 
 jobs:
   close_jira:
-    name: Close Jira
+    name: Close Jira issue
     runs-on: ubuntu-latest
     permissions:
-      issues: read  # for listing issue comments to extract the Jira key
+      contents: read
     env:
       JIRA_URL: "https://checkmarx.atlassian.net"
     steps:
@@ -32,14 +32,14 @@ jobs:
 
       - name: Extract Jira Issue Key
         id: extract_key
-        uses: actions/github-script@10b53a9ec6c222bb4ce97aa6bd2b5f739696b536 # v4
+        uses: actions/github-script@b7e7cbbdc98cbfe85285c2a3bece9d12a7d15b8f # v4.1.0
         env:
-          REPO: ${{ inputs.repo }}
-          ISSUE_NUMBER: ${{ inputs.issue_number }}
+          INPUTS_REPO: ${{ inputs.repo }}
+          INPUTS_ISSUE_NUMBER: ${{ inputs.issue_number }}
         with:
           script: |
-            const [owner, repo] = process.env.REPO.split('/');
-            const issue_number = parseInt(process.env.ISSUE_NUMBER, 10);
+            const [owner, repo] = process.env.INPUTS_REPO.split('/');
+            const issue_number = parseInt(process.env.INPUTS_ISSUE_NUMBER);
             const comments = await github.issues.listComments({ owner, repo, issue_number });
 
             const jiraRegex = /AST-\d{3,5}/;

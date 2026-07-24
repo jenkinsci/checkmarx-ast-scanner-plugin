@@ -24,33 +24,17 @@ jobs:
     name: Delete Dev Releases
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # for gh release delete/list and git push --delete to remove tags
+      id-token: write  # for GitHub token
+      contents: write  # for deleting releases
+      packages: write  # for package operations
     steps:
 
       - name: Delete releases and tags
         continue-on-error: true
+        uses: dev-drprasad/delete-older-releases@dfbe6be2a006e9475dfcbe5b8d201f1824c2a9fe  #v0.3.4
         env:
-          GITHUB_TOKEN: ${{ github.token }}
-          TAG: ${{ inputs.tag }}
-          REPO: ${{ github.repository }}
-        run: |
-          pattern="-${TAG}.0"
-          echo "Deleting releases and tags matching pattern: ${pattern}"
-
-          # Delete releases whose tag contains the pattern (also removes the tag via --cleanup-tag)
-          gh release list --repo "$REPO" --limit 1000 --json tagName --jq '.[].tagName' \
-            | grep -F -- "$pattern" \
-            | while read -r tag; do
-                echo "Deleting release for tag: $tag"
-                gh release delete "$tag" --repo "$REPO" --cleanup-tag --yes || true
-              done
-
-          # Delete any remaining matching tags that had no associated release
-          git ls-remote --tags origin \
-            | sed 's#.*refs/tags/##; s#\^{}##' \
-            | sort -u \
-            | grep -F -- "$pattern" \
-            | while read -r tag; do
-                echo "Deleting remaining tag: $tag"
-                git push origin --delete "$tag" || true
-              done
+          GITHUB_TOKEN: ${{ github.token}}
+        with:
+          keep_latest: 0
+          delete_tag_pattern: "-${{inputs.tag}}.0"
+          delete_tags: true
