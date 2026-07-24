@@ -16,7 +16,7 @@ Jenkins plugin (`checkmarx-ast-scanner`) that integrates the **Checkmarx One** (
 | Build tool | Apache Maven (Jenkins parent POM `org.jenkins-ci.plugins:plugin:4.88`) |
 | Packaging | `hpi` (Jenkins plugin) |
 | Jenkins baseline | `2.452.4` (LTS) — minimum supported runtime LTS 2.263.1 |
-| Core dependency | `com.checkmarx.ast:ast-cli-java-wrapper:2.4.24` |
+| Core dependency | `com.checkmarx.ast:ast-cli-java-wrapper:2.4.25` |
 | CLI version (default) | `2.3.51` (see [cli.version](cli.version) and `CheckmarxInstaller.cliDefaultVersion`) |
 | HTTP client | `okhttp` (via `okhttp-api` Jenkins plugin) for CLI download / proxy |
 | JSON | `gson` (via `gson-api`), `jackson2-api`, `json-simple` |

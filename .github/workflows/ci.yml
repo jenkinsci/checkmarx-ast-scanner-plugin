@@ -60,7 +60,7 @@ jobs:
           jacoco-csv-file: target/site/jacoco/jacoco.csv
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@5d5d22a31266ced594601afe6615016d2b6215f8 # v4.3.6
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: integration-coverage-report
           path: target/site/jacoco
@@ -117,7 +117,7 @@ jobs:
           jacoco-csv-file: target/site/jacoco/jacoco.csv
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@5d5d22a31266ced594601afe6615016d2b6215f8 # v4.3.6
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: unit-coverage-report
           path: target/site/jacoco
