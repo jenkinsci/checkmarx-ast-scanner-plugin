@@ -101,6 +101,7 @@ jobs:
         env:
           TAG_NAME: ${{ env.TAG_NAME }}
           REPO: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           UPLOAD_URL=$(gh api /repos/${REPO}/releases/tags/${TAG_NAME} --jq '.upload_url')
           if [[ -z "$UPLOAD_URL" ]]; then
@@ -108,8 +109,6 @@ jobs:
             exit 1
           fi
           echo "UPLOAD_URL=$UPLOAD_URL" | tee -a $GITHUB_ENV $GITHUB_OUTPUT
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Release Asset
         id: upload-release-asset
