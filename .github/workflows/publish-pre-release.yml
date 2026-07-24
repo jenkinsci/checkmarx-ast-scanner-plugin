@@ -64,23 +64,25 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Set up JDK 8
-        uses: actions/setup-java@f2c3ec8ddb368f3723d93c461230d51ea7a8b13e # v4.2.1
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@2dfa2011c5b2a0f1489bf9e433881c92c1631f88 # v4.3.0
         with:
           distribution: temurin
-          java-version: 11
-     
+          java-version: 17
+
       - name: mvn compile and package
         run: |
           mvn package -DskipTests -Dset.changelist
-      
+
       - name: Create Release
-        uses: softprops/action-gh-release@a74c6b72af54cfa997e81df42d94703d6313a2d0 #v2.0.6  # zizmor: ignore[superfluous-actions]
         env:
-          GITHUB_TOKEN: ${{ github.token}}
-        with:
-          name: ${{inputs.tag}}
-          tag_name: ${{inputs.tag}}
-          generate_release_notes: true
-          prerelease: true
-          files: target/checkmarx-ast-scanner.hpi
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          gh release create "$TAG" target/checkmarx-ast-scanner.hpi \
+            --title "$TAG" \
+            --target "$COMMIT_SHA" \
+            --generate-notes \
+            --prerelease
