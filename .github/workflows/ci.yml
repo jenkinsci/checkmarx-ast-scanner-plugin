@@ -9,8 +9,7 @@ concurrency:
 permissions: {}
 
 jobs:
-  integration-tests:
-    name: Integration Tests
+  integration-tests: # zizmor: ignore[anonymous-definition]    
     runs-on: ubuntu-latest
     permissions:
       contents: read
