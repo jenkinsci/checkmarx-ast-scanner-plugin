@@ -55,7 +55,10 @@ src/main/webapp/images/                 Plugin icons / banners
 src/test/java/com/checkmarx/jenkins/
   ├── integration/                      Tests that hit a real Checkmarx One tenant (need CX_* env)
   └── unit/                             Pure unit tests (no network)
-.github/workflows/                      CI, publish, dependabot auto-merge, JIRA automation
+.github/workflows/                      CI, publish, JIRA automation, Zizmor security scanning
+  ├── ci.yml                            Maven build + unit/integration tests (parallel jobs, JaCoCo coverage)
+  ├── scan-github-action.yml            Zizmor GitHub Actions security linter (runs on every PR)
+  └── ... (other workflow files)
 Jenkinsfile                             Uses jenkins-infra/pipeline-library buildPlugin (JDK 11 + 17, tests skipped)
 cli.version                             Pinned default Checkmarx CLI version consumed at install time
 pom.xml                                 Maven build config
@@ -159,6 +162,7 @@ There is **no enforced coverage gate** in CI today (coverage is computed and pri
 - **Checkmarx One platform** — OAuth-authenticated REST API. Plugin never talks to it directly; all calls go through the CLI.
 - **Jenkins Update Center** — release artifact is consumed at [plugins.jenkins.io/checkmarx-ast-scanner](https://plugins.jenkins.io/checkmarx-ast-scanner/).
 - **JIRA** ([checkmarx.atlassian.net](https://checkmarx.atlassian.net)) — issue automation in `.github/workflows/jira_notify.yml` and `jira_close.yml` syncs GitHub issues with the AST project.
+- **Zizmor** ([zizmor.sh](https://zizmor.sh)) — GitHub Actions security linter. Scans all workflows via [scan-github-action.yml](.github/workflows/scan-github-action.yml) on every PR; all workflows pass with 0 HIGH/MEDIUM severity issues. Enforces action pinning to commit SHAs, least-privilege permissions, template-injection prevention, and concurrency controls.
 
 ## Deployment
 
@@ -166,7 +170,7 @@ Release artefact is the `.hpi` produced by `mvn package` and published to the Je
 
 - **Stable release**: [.github/workflows/publish-plugin.yml](.github/workflows/publish-plugin.yml) runs `mvn -B release:prepare release:perform` on a tag push to `main` and uploads to the Update Center.
 - **Pre-release / dev build**: [.github/workflows/publish-pre-release.yml](.github/workflows/publish-pre-release.yml) attaches a snapshot `.hpi` to a GitHub pre-release for QA validation.
-- **CLI version sync**: [.github/workflows/update-java-wrapper-version.yml](.github/workflows/update-java-wrapper-version.yml) opens a PR updating both `ast-cli-java-wrapper` and [cli.version](cli.version) when a new CLI is released. Dependabot auto-merge handles benign bumps (see `dependabot-auto-merge.yml`).
+- **CLI version sync**: [.github/workflows/update-java-wrapper-version.yml](.github/workflows/update-java-wrapper-version.yml) opens a PR updating both `ast-cli-java-wrapper` and [cli.version](cli.version) when a new CLI is released.
 
 There is no service / container deployment — the plugin runs in-process inside a Jenkins controller and ships work to executor nodes.
 
