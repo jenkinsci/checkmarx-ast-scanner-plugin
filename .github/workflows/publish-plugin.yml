@@ -6,6 +6,10 @@ on:
     types:
       - completed
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions: {}
 
 jobs:
@@ -37,6 +41,7 @@ jobs:
  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   release:
+    name: Release Plugin
     runs-on: ubuntu-latest
     permissions:
       contents: write  # for pushing release tag
@@ -135,4 +140,4 @@ jobs:
       release_author: "Sypher Team"
       release_url: https://github.com/jenkinsci/checkmarx-ast-scanner-plugin/releases/tag/${{ needs.release.outputs.TAG_NAME }}
       jira_product_name: JENKINS
-    secrets: inherit
+    secrets: inherit  # zizmor: ignore[secrets-inherit]
