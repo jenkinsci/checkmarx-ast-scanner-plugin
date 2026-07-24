@@ -48,7 +48,7 @@ jobs:
       CLI_VERSION: ${{ steps.set_outputs.outputs.CLI_VERSION }}
     steps:
       - name: Check out
-        uses: actions/checkout@9bb56186c3b09b4f86b1d471b76edbe601d3fb67 # v4.1.6
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.6
         with:
           fetch-depth: 0
           persist-credentials: false
