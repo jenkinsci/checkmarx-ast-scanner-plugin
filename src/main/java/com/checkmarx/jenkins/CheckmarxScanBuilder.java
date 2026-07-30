@@ -10,7 +10,6 @@ import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import edu.umd.cs.findbugs.annotations.Nullable;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.*;
 import hudson.model.*;
 import hudson.security.ACL;
@@ -629,7 +628,6 @@ public class CheckmarxScanBuilder extends Builder implements SimpleBuildStep {
             return true;
         }
 
-        @SuppressFBWarnings("EI_EXPOSE_REP")
         public CheckmarxInstallation[] getInstallations() {
             return this.installations;
         }
