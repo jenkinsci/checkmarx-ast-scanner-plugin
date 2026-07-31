@@ -4,23 +4,29 @@ on:
   issues:
     types: [opened, closed]
 
+permissions: {}
+
 jobs:
   notify_jira:
     if: github.event.action == 'opened'
     name: Notify Jira
     uses:  ./.github/workflows/jira_notify.yml
+    permissions:
+      contents: read
     with:
       title: ${{ github.event.issue.title }}
       body: ${{ github.event.issue.body }}
       html_url: ${{ github.event.issue.html_url }}
       repo: ${{ github.event.repository.full_name }}
-    secrets: inherit
+    secrets: inherit  # zizmor: ignore[secrets-inherit]
 
   close_jira:
     if: github.event.action == 'closed'
     name: Close Jira
     uses: ./.github/workflows/jira_close.yml
+    permissions:
+      contents: read
     with:
       issue_number: ${{ github.event.issue.number }}
       repo: ${{ github.event.repository.full_name }}
-    secrets: inherit
+    secrets: inherit  # zizmor: ignore[secrets-inherit]

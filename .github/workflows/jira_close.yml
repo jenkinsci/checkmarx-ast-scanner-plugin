@@ -12,9 +12,14 @@ on:
         required: true
         type: string
 
+permissions: {}
+
 jobs:
   close_jira:
+    name: Close Jira issue
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     env:
       JIRA_URL: "https://checkmarx.atlassian.net"
     steps:
@@ -27,11 +32,14 @@ jobs:
 
       - name: Extract Jira Issue Key
         id: extract_key
-        uses: actions/github-script@v4
+        uses: actions/github-script@b7e7cbbdc98cbfe85285c2a3bece9d12a7d15b8f # v4.1.0
+        env:
+          INPUTS_REPO: ${{ inputs.repo }}
+          INPUTS_ISSUE_NUMBER: ${{ inputs.issue_number }}
         with:
           script: |
-            const [owner, repo] = "${{ inputs.repo }}".split('/');
-            const issue_number = ${{ inputs.issue_number }};
+            const [owner, repo] = process.env.INPUTS_REPO.split('/');
+            const issue_number = parseInt(process.env.INPUTS_ISSUE_NUMBER);
             const comments = await github.issues.listComments({ owner, repo, issue_number });
 
             const jiraRegex = /AST-\d{3,5}/;
@@ -46,11 +54,15 @@ jobs:
 
       - name: Get current Jira status
         id: get_status
+        env:
+          JIRA_USER_EMAIL: ${{ secrets.AST_JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.AST_JIRA_API_TOKEN }}
+          JIRA_KEY: ${{ steps.extract_key.outputs.jira_key }}
         run: |
-          RESPONSE=$(curl -s -u "${{ secrets.AST_JIRA_USER_EMAIL }}:${{ secrets.AST_JIRA_API_TOKEN }}" \
+          RESPONSE=$(curl -s -u "${JIRA_USER_EMAIL}:${JIRA_API_TOKEN}" \
             -X GET \
             -H "Accept: application/json" \
-            "${{ env.JIRA_URL }}/rest/api/3/issue/${{ steps.extract_key.outputs.jira_key }}")
+            "${JIRA_URL}/rest/api/3/issue/${JIRA_KEY}")
 
           STATUS=$(echo "$RESPONSE" | jq -r '.fields.status.name')
           echo "Current status is: $STATUS"

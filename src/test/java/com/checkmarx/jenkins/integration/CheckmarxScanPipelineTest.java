@@ -24,7 +24,7 @@ public class CheckmarxScanPipelineTest extends CheckmarxTestBase {
         project.setDefinition(new CpsFlowDefinition("" +
                 "node {" +
                 "  writeFile file: 'source.py', text: 'overwrite me' \n" +
-                "  checkmarxASTScanner additionalOptions: '--scan-types sast',  branchName: 'main', useOwnAdditionalOptions: true, useOwnServerCredentials: true, baseAuthUrl: '" + this.astBaseAuthUrl + "', checkmarxInstallation: '" + CheckmarxTestBase.JT_LATEST + "', credentialsId: '" + CheckmarxTestBase.JENKINS_CREDENTIALS_TOKEN_ID + "', projectName: 'successIntegrationJenkinsScan', serverUrl: '" + this.astServerUrl + "', tenantName: '" + this.astTenantName +
+                "  checkmarxASTScanner additionalOptions: '--scan-types sast',  branchName: 'main', useOwnAdditionalOptions: true, useOwnServerCredentials: true, baseAuthUrl: '" + this.astBaseAuthUrl + "', checkmarxInstallation: '" + CheckmarxTestBase.JT_LATEST + "', credentialsId: '" + CheckmarxTestBase.JENKINS_CREDENTIALS_TOKEN_ID + "', projectName: 'successIntegrationJenkinsScan" + CheckmarxTestBase.TEST_RUN_SUFFIX + "', serverUrl: '" + this.astServerUrl + "', tenantName: '" + this.astTenantName +
                 "'}", true));
 
         WorkflowRun workflowRun = project.scheduleBuild2(0).waitForStart();
@@ -57,7 +57,7 @@ public class CheckmarxScanPipelineTest extends CheckmarxTestBase {
         project.setDefinition(new CpsFlowDefinition("" +
                 "node {" +
                 "  writeFile file: 'source.py', text: 'overwrite me' \n" +
-                "  checkmarxASTScanner additionalOptions: '--scan-types api-security', branchName: 'main', useOwnAdditionalOptions: true, useOwnServerCredentials: true, checkmarxInstallation: '" + CheckmarxTestBase.JT_LATEST + "', credentialsId: '" + CheckmarxTestBase.JENKINS_CREDENTIALS_TOKEN_ID + "', projectName: 'checkResultsSummary', serverUrl: '" + this.astServerUrl + "', tenantName: '" + this.astTenantName +
+                "  checkmarxASTScanner additionalOptions: '--scan-types api-security', branchName: 'main', useOwnAdditionalOptions: true, useOwnServerCredentials: true, checkmarxInstallation: '" + CheckmarxTestBase.JT_LATEST + "', credentialsId: '" + CheckmarxTestBase.JENKINS_CREDENTIALS_TOKEN_ID + "', projectName: 'checkResultsSummary" + CheckmarxTestBase.TEST_RUN_SUFFIX + "', serverUrl: '" + this.astServerUrl + "', tenantName: '" + this.astTenantName +
                 "'}", true));
 
         WorkflowRun workflowRun = project.scheduleBuild2(0).waitForStart();

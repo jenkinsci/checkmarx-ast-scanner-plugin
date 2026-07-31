@@ -2,12 +2,22 @@ name: Checkmarx AST Scan
 
 on: [ pull_request, workflow_dispatch ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
 jobs:
-  cx-scan:
+  cx-scan: # zizmor: ignore[anonymous-definition]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.6
+        with:
+          persist-credentials: false
       - name: Checkmarx AST CLI Action
         uses: checkmarx/ast-github-action@fa338ce82069b297c4852ac77e2d168db9fb56d8 # main
         with:
@@ -15,4 +25,4 @@ jobs:
           cx_tenant: ${{ secrets.TENANT }}
           cx_client_id: ${{ secrets.CLIENT_ID }}
           cx_client_secret: ${{ secrets.CLIENT_SECRET }}
-          additional_params: --tags phoenix --threshold "sast-critical=1;sast-high=1;sast-medium=1;sast-low=1;sca-critical=1;sca-high=1;sca-medium=1;sca-low=1;iac-security-critical=1;iac-security-high=1;iac-security-medium=1;iac-security-low=1"
+          additional_params: --tags sypher --threshold "sast-critical=1;sast-high=1;sast-medium=1;sast-low=1;sca-critical=1;sca-high=1;sca-medium=1;sca-low=1;iac-security-critical=1;iac-security-high=1;iac-security-medium=1;iac-security-low=1"
