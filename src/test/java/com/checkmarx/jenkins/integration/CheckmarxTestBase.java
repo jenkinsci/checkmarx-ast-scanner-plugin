@@ -34,6 +34,14 @@ public class CheckmarxTestBase {
     public static final String JT_LATEST = "latest";
     public static final String BRANCH_MAIN = "main";
 
+    /**
+     * Unique per test-run suffix so AST project names never collide with a project created by a
+     * previous run (the AST platform rejects `scan create` when a project name already exists).
+     * Uses the CI run id when available so re-runs of the same PR still get a fresh name.
+     */
+    public static final String TEST_RUN_SUFFIX =
+            "-" + System.getenv().getOrDefault("GITHUB_RUN_ID", Long.toString(System.currentTimeMillis()));
+
     @Rule
     public JenkinsRule jenkins = new JenkinsRule();
 
@@ -101,7 +109,7 @@ public class CheckmarxTestBase {
 
         EnvVars envVars = ((EnvironmentVariablesNodeProperty) Jenkins.get().getGlobalNodeProperties().get(0)).getEnvVars();
         envVars.put(CX_TENANT, this.astTenantName);
-        envVars.put(CX_PROJECT_NAME, "jenkins_project_with_env_vars");
+        envVars.put(CX_PROJECT_NAME, "jenkins_project_with_env_vars" + TEST_RUN_SUFFIX);
         envVars.put(CX_BRANCH, BRANCH_MAIN);
     }
 }

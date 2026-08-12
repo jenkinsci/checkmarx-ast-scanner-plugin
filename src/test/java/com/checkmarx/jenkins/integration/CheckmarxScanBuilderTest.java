@@ -30,7 +30,7 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
     @Test
     public void successCheckmarxScan() throws Exception {
         log.info("successCheckmarxScan");
-        this.runSuccessCheckmarxScan(this.astServerUrl, "JenkinsNormalScan", astTenantName, CheckmarxTestBase.BRANCH_MAIN);
+        this.runSuccessCheckmarxScan(this.astServerUrl, "JenkinsNormalScan" + CheckmarxTestBase.TEST_RUN_SUFFIX, astTenantName, CheckmarxTestBase.BRANCH_MAIN);
     }
 
     @Test
@@ -118,7 +118,7 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
         log.info("successCheckmarxScanAndVerifyArtifacts");
 
         final FreeStyleProject freeStyleProject = createSimpleProject("JenkinsNormalScanWithReport");
-        final CheckmarxScanBuilder checkmarxScanBuilder = configureCheckmarxScanBuilder(this.astServerUrl, "JenkinsNormalScan", this.astTenantName, CheckmarxTestBase.BRANCH_MAIN);
+        final CheckmarxScanBuilder checkmarxScanBuilder = configureCheckmarxScanBuilder(this.astServerUrl, "JenkinsNormalScan" + CheckmarxTestBase.TEST_RUN_SUFFIX, this.astTenantName, CheckmarxTestBase.BRANCH_MAIN);
         checkmarxScanBuilder.setAdditionalOptions("--scan-types iac-security --report-format sarif --output-name reportTest");
 
         freeStyleProject.getBuildersList().add(checkmarxScanBuilder);
