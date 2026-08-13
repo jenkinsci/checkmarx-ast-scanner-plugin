@@ -29,7 +29,7 @@ jobs:
     steps:
       - name: Fetch Release Notes
         id: fetch_release_notes
-        uses: actions/github-script@v6
+        uses: actions/github-script@v9
         with:
           script: |
             const releaseUrl = '${{ inputs.release_url }}';

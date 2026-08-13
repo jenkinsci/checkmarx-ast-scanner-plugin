@@ -27,7 +27,7 @@ jobs:
 
       - name: Extract Jira Issue Key
         id: extract_key
-        uses: actions/github-script@v4
+        uses: actions/github-script@v9
         with:
           script: |
             const [owner, repo] = "${{ inputs.repo }}".split('/');

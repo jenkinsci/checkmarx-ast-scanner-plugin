@@ -102,7 +102,7 @@ jobs:
           fields: "${{ secrets.JIRA_FIELDS_OTHER }}"
 
       - name: Add comment to GitHub issue
-        uses: actions/github-script@v4.0.2
+        uses: actions/github-script@v9
         with:
           script: |
             issue_id = process.env.IS_BUG == 'true' ? "${{ steps.create_jira_bug.outputs.issue }}" : "${{ steps.create_jira_enhancement.outputs.issue }}"
