@@ -13,22 +13,28 @@ on:
         description: 'Tag to delete'
         required: true
 
-permissions:
-  id-token: write
-  contents: write
-  packages: write
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.repository }}-${{ github.ref }}
 
 jobs:
   delete:
+    name: Delete dev releases
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Required for OIDC token
+      contents: write # Required to delete releases and update refs
+      packages: write # Required for package management
     steps:
 
       - name: Delete releases and tags
         continue-on-error: true
-        uses: dev-drprasad/delete-older-releases@dfbe6be2a006e9475dfcbe5b8d201f1824c2a9fe  #v0.3.4
+        uses: dev-drprasad/delete-older-releases@dfbe6be2a006e9475dfcbe5b8d201f1824c2a9fe  # v0.3.4
         env:
           GITHUB_TOKEN: ${{ github.token}}
+          TAG_PATTERN: -${{ inputs.tag }}.0
         with:
           keep_latest: 0
-          delete_tag_pattern: "-${{inputs.tag}}.0"
+          delete_tag_pattern: ${{ env.TAG_PATTERN }}
           delete_tags: true

@@ -21,11 +21,23 @@ on:
         required: true
         type: string
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.repository }}-${{ github.ref }}
+
+permissions: {}
+
 jobs:
   notify_jira:
+    name: Notify Jira
     runs-on: ubuntu-latest
+    permissions:
+      issues: write # Required to comment the created Jira issue link back on the GitHub issue
     env:
       JIRA_URL: "https://checkmarx.atlassian.net/"
+      TITLE: ${{ inputs.title }}
+      BODY: ${{ inputs.body }}
+      REPO: ${{ inputs.repo }}
+      HTML_URL: ${{ inputs.html_url }}
     steps:
       - name: Jira Login
         uses: atlassian/gajira-login@ca13f8850ea309cf44a6e4e0c49d9aa48ac3ca4c #v3
@@ -37,7 +49,7 @@ jobs:
       - name: Determine Issue Type
         id: issue_type
         run: |
-          if [[ "${{ inputs.title }}" == *"[Bug]"* ]]; then
+          if [[ "$TITLE" == *"[Bug]"* ]]; then
             echo "IS_BUG=true" >> $GITHUB_ENV
             echo "Selected Issue Type: BUG"
           else
@@ -48,10 +60,10 @@ jobs:
       - name: Extract Issue Fields
         id: extract_fields
         run: |
-          ISSUE_DESCRIPTION=$(echo "${{ inputs.body }}" | awk -v RS='' '/### What happened?/{getline; print}')
-          ISSUE_VERSION=$(echo "${{ inputs.body }}" | awk -v RS='' '/### Version/{getline; print}')
-          ISSUE_OS=$(echo "${{ inputs.body }}" | awk -v RS='' '/### Operating System & Version/{getline; print}')
-          ISSUE_LOGS=$(echo "${{ inputs.body }}" | awk -v RS='' '/### Relevant log output/{getline; print}')
+          ISSUE_DESCRIPTION=$(echo "$BODY" | awk -v RS='' '/### What happened?/{getline; print}')
+          ISSUE_VERSION=$(echo "$BODY" | awk -v RS='' '/### Version/{getline; print}')
+          ISSUE_OS=$(echo "$BODY" | awk -v RS='' '/### Operating System & Version/{getline; print}')
+          ISSUE_LOGS=$(echo "$BODY" | awk -v RS='' '/### Relevant log output/{getline; print}')
 
           echo "Extracted Fields:"
           echo "What Happened: $ISSUE_DESCRIPTION"
@@ -67,15 +79,15 @@ jobs:
       - name: Format Jira Description
         id: format_description
         run: |
-          FORMATTED_DESCRIPTION="*Issue Title:* ${{ inputs.title }} \\ \\"
-          FORMATTED_DESCRIPTION+=" *Repository:* ${{ inputs.repo }} \\ \\"
+          FORMATTED_DESCRIPTION="*Issue Title:* $TITLE \\ \\"
+          FORMATTED_DESCRIPTION+=" *Repository:* $REPO \\ \\"
           FORMATTED_DESCRIPTION+=" *What Happened:* $ISSUE_DESCRIPTION \\ \\"
           FORMATTED_DESCRIPTION+=" *Version:* $ISSUE_VERSION\n"
           FORMATTED_DESCRIPTION+=" *Operating System & Version:* $ISSUE_OS \\ \\"
           if [[ -n "$ISSUE_LOGS" ]]; then
             FORMATTED_DESCRIPTION+=" *Relevant Logs:*\n{code}$ISSUE_LOGS{code} \\ \\"
           fi
-          FORMATTED_DESCRIPTION+=" [View original issue|${{ inputs.html_url }}]"
+          FORMATTED_DESCRIPTION+=" [View original issue|$HTML_URL]"
           
           echo "FORMATTED_DESCRIPTION=$FORMATTED_DESCRIPTION" >> $GITHUB_ENV
 
@@ -102,13 +114,16 @@ jobs:
           fields: "${{ secrets.JIRA_FIELDS_OTHER }}"
 
       - name: Add comment to GitHub issue
-        uses: actions/github-script@v4.0.2
+        uses: actions/github-script@a3e7071a34d7e1f219a8a4de9a5e0a34d1ee1293 # v4.0.2
+        env:
+          JIRA_BUG_ISSUE: ${{ steps.create_jira_bug.outputs.issue }}
+          JIRA_ENHANCEMENT_ISSUE: ${{ steps.create_jira_enhancement.outputs.issue }}
         with:
           script: |
-            issue_id = process.env.IS_BUG == 'true' ? "${{ steps.create_jira_bug.outputs.issue }}" : "${{ steps.create_jira_enhancement.outputs.issue }}"
+            issue_id = process.env.IS_BUG == 'true' ? process.env.JIRA_BUG_ISSUE : process.env.JIRA_ENHANCEMENT_ISSUE
             github.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Internal Jira issue: [' + issue_id + '](${{ env.JIRA_URL }}/browse/' + issue_id + ')'
+              body: 'Internal Jira issue: [' + issue_id + '](' + process.env.JIRA_URL + '/browse/' + issue_id + ')'
             })
