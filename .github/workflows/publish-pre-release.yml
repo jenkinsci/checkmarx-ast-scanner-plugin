@@ -25,10 +25,9 @@ permissions: {}
 jobs:
   delete:
     name: Delete old pre-releases
-    uses: jenkinsci/checkmarx-ast-scanner-plugin/.github/workflows/delete-dev-releases.yml@main # zizmor: ignore[unpinned-uses]
+    uses: jenkinsci/checkmarx-ast-scanner-plugin/.github/workflows/delete-dev-releases.yml@876ac69ae39d4507947870ef1b2d0dca397757e1
     with:
       tag: ${{ inputs.tag }}
-    secrets: inherit # zizmor: ignore[secrets-inherit] - Required to authenticate for deleting releases
 
   validate:
     name: Validate Release Requirements

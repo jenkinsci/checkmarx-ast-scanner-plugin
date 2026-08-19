@@ -13,7 +13,7 @@ permissions: {}
 jobs:
   zizmor:
     name: Scan repository contents
-    runs-on: cx-public-ubuntu-x64
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:

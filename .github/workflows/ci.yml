@@ -8,7 +8,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.repository }}-${{ github.ref }}
 
 jobs:
-  integration-tests: # zizmor: ignore[anonymous-definition]
+  integration-tests:
+    name: Integration Tests
     runs-on: ubuntu-latest
     permissions:
       contents: read # Allow checkout and reading repository contents
