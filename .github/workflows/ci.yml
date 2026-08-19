@@ -2,12 +2,17 @@ name: AST Scanner plugin CI
 
 on: [pull_request]
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.repository }}-${{ github.ref }}
+
 jobs:
-  integration-tests:
+  integration-tests: # zizmor: ignore[anonymous-definition]
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      packages: write
+      contents: read # Allow checkout and reading repository contents
+      packages: write # Allow publishing packages
     env:
       CX_BASE_URI: ${{ secrets.CX_BASE_URI}}
       CX_BASE_AUTH_URI: ${{ secrets.CX_BASE_AUTH_URI}}
@@ -17,10 +22,12 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
 
       - name: Set up JDK 11
-        uses: actions/setup-java@v4.2.1
+        uses: actions/setup-java@2dfa2011c5b2a0f1489bf9e433881c92c1631f88 # v4.3.0
         with:
           java-version: 11
           distribution: 'temurin'
@@ -52,16 +59,17 @@ jobs:
           jacoco-csv-file: target/site/jacoco/jacoco.csv
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: integration-coverage-report
           path: target/site/jacoco
 
   unit-tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      packages: write
+      contents: read # Allow checkout and reading repository contents
+      packages: write # Allow publishing packages
     env:
       CX_BASE_URI: ${{ secrets.CX_BASE_URI}}
       CX_BASE_AUTH_URI: ${{ secrets.CX_BASE_AUTH_URI}}
@@ -71,10 +79,12 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
 
       - name: Set up JDK 11
-        uses: actions/setup-java@v4.2.1
+        uses: actions/setup-java@2dfa2011c5b2a0f1489bf9e433881c92c1631f88 # v4.3.0
         with:
           java-version: 11
           distribution: 'temurin'
@@ -106,7 +116,7 @@ jobs:
           jacoco-csv-file: target/site/jacoco/jacoco.csv
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: unit-coverage-report
           path: target/site/jacoco

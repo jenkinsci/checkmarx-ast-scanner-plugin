@@ -12,14 +12,21 @@ on:
         required: true
         type: string
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.repository }}-${{ github.ref }}
+
+permissions:
+  issues: read # Required to list issues and comments
+
 jobs:
   close_jira:
+    name: Close Jira Issue
     runs-on: ubuntu-latest
     env:
       JIRA_URL: "https://checkmarx.atlassian.net"
     steps:
       - name: Jira Login
-        uses: atlassian/gajira-login@ca13f8850ea309cf44a6e4e0c49d9aa48ac3ca4c #v3
+        uses: atlassian/gajira-login@ca13f8850ea309cf44a6e4e0c49d9aa48ac3ca4c # v3
         env:
           JIRA_BASE_URL: ${{ env.JIRA_URL }}
           JIRA_USER_EMAIL: ${{ secrets.AST_JIRA_USER_EMAIL }}
@@ -27,11 +34,14 @@ jobs:
 
       - name: Extract Jira Issue Key
         id: extract_key
-        uses: actions/github-script@v4
+        uses: actions/github-script@10b53a9ec6c222bb4ce97aa6bd2b5f739696b536 # v4
+        env:
+          REPO: ${{ inputs.repo }}
+          ISSUE_NUMBER: ${{ inputs.issue_number }}
         with:
           script: |
-            const [owner, repo] = "${{ inputs.repo }}".split('/');
-            const issue_number = ${{ inputs.issue_number }};
+            const [owner, repo] = process.env.REPO.split('/');
+            const issue_number = parseInt(process.env.ISSUE_NUMBER);
             const comments = await github.issues.listComments({ owner, repo, issue_number });
 
             const jiraRegex = /AST-\d{3,5}/;
@@ -46,11 +56,15 @@ jobs:
 
       - name: Get current Jira status
         id: get_status
+        env:
+          JIRA_USER_EMAIL: ${{ secrets.AST_JIRA_USER_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.AST_JIRA_API_TOKEN }}
+          JIRA_KEY: ${{ steps.extract_key.outputs.jira_key }}
         run: |
-          RESPONSE=$(curl -s -u "${{ secrets.AST_JIRA_USER_EMAIL }}:${{ secrets.AST_JIRA_API_TOKEN }}" \
+          RESPONSE=$(curl -s -u "${JIRA_USER_EMAIL}:${JIRA_API_TOKEN}" \
             -X GET \
             -H "Accept: application/json" \
-            "${{ env.JIRA_URL }}/rest/api/3/issue/${{ steps.extract_key.outputs.jira_key }}")
+            "${JIRA_URL}/rest/api/3/issue/${JIRA_KEY}")
 
           STATUS=$(echo "$RESPONSE" | jq -r '.fields.status.name')
           echo "Current status is: $STATUS"

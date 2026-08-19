@@ -1,23 +1,29 @@
 name: Dependabot auto-merge
 on: pull_request
 
-permissions:
-  contents: write
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.repository }}-${{ github.ref }}
 
 jobs:
   dependabot-merge:
+    name: Enable Auto-merge for Dependabot PRs
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'dependabot[bot]' }}
+    permissions:
+      contents: write # Required to merge pull requests
+      pull-requests: write # Required to approve pull requests
+    if: ${{ github.triggering_actor == 'dependabot[bot]' }} # zizmor: ignore[bot-conditions]
     steps:
       - name: Dependabot metadata
         id: metadata
-        uses: dependabot/fetch-metadata@dbb049abf0d677abbd7f7eee0375145b417fdd34   #v2.2.0
+        uses: dependabot/fetch-metadata@dbb049abf0d677abbd7f7eee0375145b417fdd34   # v2.2.0
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
       - name: Enable auto-merge for Dependabot PRs
         env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh pr merge --auto --merge "$PR_URL"
       - name: Auto approve dependabot PRs
         uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363 # v4

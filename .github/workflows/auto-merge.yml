@@ -1,20 +1,26 @@
 name: Post-Check Actions
 on: [pull_request]
 
-permissions:
-  contents: write
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.repository }}-${{ github.ref }}
 
 jobs:
   dependabot-merge:
+    name: Enable Auto-merge for Dependabot PRs
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to merge pull requests
+      pull-requests: write # Required to approve pull requests
     if: contains(github.head_ref, 'other/update_java_wrapper')
     steps:
       - name: Enable auto-merge for Dependabot PRs
         env:
-          PR_URL: ${{github.event.pull_request.html_url}}
-          GITHUB_TOKEN: ${{secrets.PERSONAL_ACCESS_TOKEN }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: gh pr merge --auto --merge "$PR_URL"
       - name: Auto approve dependabot PRs
-        uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363 #v4
+        uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363 # v4
         with:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
