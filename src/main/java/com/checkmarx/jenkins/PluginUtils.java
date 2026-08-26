@@ -9,6 +9,8 @@ import com.checkmarx.jenkins.logger.CxLoggerAdapter;
 import com.checkmarx.jenkins.model.ScanConfig;
 import com.checkmarx.jenkins.tools.CheckmarxInstallation;
 import hudson.EnvVars;
+import hudson.PluginManager;
+import hudson.PluginWrapper;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
 import jenkins.model.Jenkins;
 
@@ -25,6 +27,12 @@ public class PluginUtils {
     public static final String CHECKMARX_AST_RESULTS_JSON = "checkmarx-ast-results.json";
     public static final String REGEX_SCAN_ID_FROM_LOGS = "\"ID\":\"([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\"";
     private static final String JENKINS = "Jenkins";
+    /**
+     * Short name of this plugin, as published in the {@code Short-Name} manifest header
+     * (derived from the Maven artifactId). Used as a fallback when the plugin cannot be
+     * resolved from its own classloader.
+     */
+    private static final String PLUGIN_SHORT_NAME = "checkmarx-ast-scanner";
     static final String CX_CLIENT_ID_ENV_KEY = "CX_CLIENT_ID";
     static final String CX_CLIENT_SECRET_ENV_KEY = "CX_CLIENT_SECRET";
     public static final String HTTP_PROXY = "HTTP_PROXY";
@@ -43,7 +51,8 @@ public class PluginUtils {
         final CxConfig cxConfig = initiateWrapperObject(scanConfig, checkmarxCliExecutable);
 
         final Map<String, String> params = new HashMap<>();
-        params.put(CxConstants.AGENT, JENKINS);
+        // The agent name is set on the CxConfig so that it is appended to every CLI
+        // invocation (scan create, scan cancel, results show, auth validate).
         params.put(CxConstants.SOURCE, scanConfig.getSourceDirectory());
         params.put(CxConstants.PROJECT_NAME, scanConfig.getProjectName());
         params.put(CxConstants.BRANCH, scanConfig.getBranchName());
@@ -87,8 +96,46 @@ public class PluginUtils {
                 .baseAuthUri(scanConfig.getBaseAuthUrl())
                 .tenant(scanConfig.getTenantName())
                 .additionalParameters(null)
+                .agentName(getAgentName())
                 .pathToExecutable(checkmarxCliExecutable)
                 .build();
+    }
+
+    public static String getAgentName() {
+        final String pluginVersion = getPluginVersion();
+        return pluginVersion.isEmpty() ? JENKINS : JENKINS + "_" + pluginVersion;
+    }
+
+    static String getPluginVersion() {
+        try {
+            final Jenkins jenkins = Jenkins.getInstanceOrNull();
+            if (jenkins == null) {
+                return "";
+            }
+            final PluginManager pluginManager = jenkins.getPluginManager();
+            PluginWrapper plugin = pluginManager.whichPlugin(com.checkmarx.jenkins.PluginUtils.class);
+            if (plugin == null) {
+                plugin = pluginManager.getPlugin(PLUGIN_SHORT_NAME);
+            }
+            return plugin != null ? sanitizeVersion(plugin.getVersion()) : "";
+        } catch (Exception | LinkageError e) {
+            // Never let user agent resolution break a scan.
+            return "";
+        }
+    }
+
+    /**
+     * Keeps only the version itself. Locally built plugins carry a build qualifier in the
+     * manifest, e.g. {@code 2.0.13-SNAPSHOT (private-abcdef12-user)}, and whitespace is not
+     * valid in the {@code --agent} value nor in a User-Agent token.
+     */
+    private static String sanitizeVersion(final String version) {
+        if (version == null) {
+            return "";
+        }
+        final String trimmed = version.trim();
+        final int firstSpace = trimmed.indexOf(' ');
+        return firstSpace > 0 ? trimmed.substring(0, firstSpace) : trimmed;
     }
 
     public static String getScanIdFromLogFile(String logs) {
