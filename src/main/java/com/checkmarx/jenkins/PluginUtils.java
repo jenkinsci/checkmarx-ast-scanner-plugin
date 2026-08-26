@@ -105,7 +105,7 @@ public class PluginUtils {
         final String pluginVersion = getPluginVersion();
         return pluginVersion.isEmpty() ? JENKINS : JENKINS + "_" + pluginVersion;
     }
-    
+
     static String getPluginVersion() {
         try {
             final Jenkins jenkins = Jenkins.getInstanceOrNull();
@@ -113,7 +113,7 @@ public class PluginUtils {
                 return "";
             }
             final PluginManager pluginManager = jenkins.getPluginManager();
-            PluginWrapper plugin = pluginManager.whichPlugin(PluginUtils.class);
+            PluginWrapper plugin = pluginManager.whichPlugin(com.checkmarx.jenkins.PluginUtils.class);
             if (plugin == null) {
                 plugin = pluginManager.getPlugin(PLUGIN_SHORT_NAME);
             }

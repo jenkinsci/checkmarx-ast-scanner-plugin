@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
  */
 public class PluginUtilsAgentArgumentTest {
 
-    private static final String PLUGIN_VERSION = "2.0.13";
+    private static final String PLUGIN_VERSION = "2.0.13-853.v1fa_8405d5991";
     private static final String EXPECTED_AGENT = "Jenkins_" + PLUGIN_VERSION;
     private static final String EXECUTABLE = "cx";
 
