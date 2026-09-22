@@ -29,7 +29,7 @@ import jenkins.tasks.SimpleBuildStep;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.*;
 import org.kohsuke.stapler.verb.POST;

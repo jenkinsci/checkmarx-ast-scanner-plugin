@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.checkmarx.jenkins.exception.CheckmarxException;
 import okhttp3.*;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
 
