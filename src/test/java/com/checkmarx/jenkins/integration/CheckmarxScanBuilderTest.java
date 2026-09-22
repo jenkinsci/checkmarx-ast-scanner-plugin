@@ -14,8 +14,8 @@ import hudson.tools.ToolProperty;
 import hudson.util.FormValidation;
 import jenkins.model.ArtifactManager;
 import org.apache.commons.lang.StringUtils;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 import java.util.logging.Logger;
 
 public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
@@ -127,11 +127,11 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
         this.jenkins.assertBuildStatus(Result.SUCCESS, build);
 
         ArtifactManager artifactManager = build.getArtifactManager();
-        assertNotNull("ArtifactManager should not be null", artifactManager);
+        assertNotNull(artifactManager, "ArtifactManager should not be null");
 
         List<String> expectedArtifacts = Arrays.asList("reportTest.sarif");
         for (String artifact : expectedArtifacts) {
-            assertTrue("Artifact " + artifact + " should be present", artifactManager.root().child(artifact).exists());
+            assertTrue(artifactManager.root().child(artifact).exists(), "Artifact " + artifact + " should be present");
         }
     }
 
@@ -225,7 +225,7 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
         CheckmarxInstallation[] installations = descriptor.getInstallations();
         
         if (installations != null && installations.length > 0) {
-            assertTrue("Should have installations available", descriptor.hasInstallationsAvailable());
+            assertTrue(descriptor.hasInstallationsAvailable(), "Should have installations available");
         } else {
             // Set up a test installation if none exists
             CheckmarxInstallation installation = new CheckmarxInstallation(
@@ -235,7 +235,7 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
             );
             descriptor.setInstallations(installation);
             
-            assertTrue("Should have installations available after adding one", descriptor.hasInstallationsAvailable());
+            assertTrue(descriptor.hasInstallationsAvailable(), "Should have installations available after adding one");
             
             // Clean up - restore original installations
             descriptor.setInstallations(installations);
@@ -243,7 +243,7 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
         
         // Test with no installations
         descriptor.setInstallations();
-        assertFalse("Should have no installations available", descriptor.hasInstallationsAvailable());
+        assertFalse(descriptor.hasInstallationsAvailable(), "Should have no installations available");
         
         // Restore original installations
         descriptor.setInstallations(installations);
@@ -266,7 +266,7 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
         );
         
         // The actual result will depend on the server response, but we can verify the method executes
-        assertNotNull("Test connection result should not be null", result);
+        assertNotNull(result, "Test connection result should not be null");
     }
 
     @Test
@@ -275,9 +275,9 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
         
         // Test getDefaultInstallers
         List<? extends ToolInstaller> defaultInstallers = descriptor.getDefaultInstallers();
-        assertNotNull("Default installers should not be null", defaultInstallers);
-        assertEquals("Should have one default installer", 1, defaultInstallers.size());
-        assertTrue("Default installer should be CheckmarxInstaller", defaultInstallers.get(0) instanceof CheckmarxInstaller);
+        assertNotNull(defaultInstallers, "Default installers should not be null");
+        assertEquals(1, defaultInstallers.size(), "Should have one default installer");
+        assertTrue(defaultInstallers.get(0) instanceof CheckmarxInstaller, "Default installer should be CheckmarxInstaller");
         
         // Test getInstallations and setInstallations
         CheckmarxInstallation[] originalInstallations = descriptor.getInstallations();
@@ -301,16 +301,16 @@ public class CheckmarxScanBuilderTest extends CheckmarxTestBase {
             
             // Verify installations were set correctly
             CheckmarxInstallation[] installations = descriptor.getInstallations();
-            assertNotNull("Installations should not be null", installations);
-            assertEquals("Should have two installations", 2, installations.length);
-            assertEquals("First installation name should match", "test-installation-1", installations[0].getName());
-            assertEquals("Second installation name should match", "test-installation-2", installations[1].getName());
-            
+            assertNotNull(installations, "Installations should not be null");
+            assertEquals(2, installations.length, "Should have two installations");
+            assertEquals("test-installation-1", installations[0].getName(), "First installation name should match");
+            assertEquals("test-installation-2", installations[1].getName(), "Second installation name should match");
+
             // Test setting empty installations
             descriptor.setInstallations();
             installations = descriptor.getInstallations();
-            assertNotNull("Installations should not be null when empty", installations);
-            assertEquals("Should have no installations", 0, installations.length);
+            assertNotNull(installations, "Installations should not be null when empty");
+            assertEquals(0, installations.length, "Should have no installations");
             
         } finally {
             // Restore original installations
