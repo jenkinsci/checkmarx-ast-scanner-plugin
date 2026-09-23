@@ -9,11 +9,10 @@ import hudson.model.Node;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import hudson.tools.ToolInstallation;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
@@ -23,14 +22,14 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.time.Instant;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class CheckmarxInstallerTest {
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    @TempDir
+    public File tempFolder;
 
     @Mock
     private Node node;
@@ -53,11 +52,10 @@ public class CheckmarxInstallerTest {
     private MockedStatic<PluginUtils> pluginUtils;
     private MockedStatic<DownloadService> downloadService;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         MockitoAnnotations.openMocks(this);
-        File tempDir = tempFolder.newFolder();
-        expectedPath = new FilePath(tempDir);
+        expectedPath = new FilePath(tempFolder);
         installer = new CheckmarxInstaller("test", "v1.0.0", 24L);
 
         pluginUtils = mockStatic(PluginUtils.class);
@@ -68,7 +66,7 @@ public class CheckmarxInstallerTest {
         when(taskListener.getLogger()).thenReturn(logger);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         if (downloadService != null) {
             downloadService.close();
@@ -120,10 +118,10 @@ public class CheckmarxInstallerTest {
         assertEquals(CheckmarxInstaller.cliDefaultVersion, installer.readCLILatestVersionFromVersionFile());
     }
 
-    @Test(expected = Exception.class)
-    public void testInstallCheckmarxCliWhenNodeIsOffline() throws IOException, InterruptedException {
+    @Test
+    public void testInstallCheckmarxCliWhenNodeIsOffline() {
         when(node.getChannel()).thenReturn(null);
-        installer.performInstallation(null, node, taskListener);
+        assertThrows(Exception.class, () -> installer.performInstallation(null, node, taskListener));
     }
 
     @Test
@@ -160,12 +158,12 @@ public class CheckmarxInstallerTest {
         assertTrue(new File(expectedPath.child(".installedFrom").getRemote()).exists());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testInstallationFailure() throws IOException, InterruptedException {
         when(toolInstallation.getHome()).thenReturn(expectedPath.getRemote());
         doThrow(new IOException("Download failed")).when(virtualChannel).call(any());
 
-        installer.performInstallation(toolInstallation, node, taskListener);
+        assertThrows(RuntimeException.class, () -> installer.performInstallation(toolInstallation, node, taskListener));
     }
 
     @Test

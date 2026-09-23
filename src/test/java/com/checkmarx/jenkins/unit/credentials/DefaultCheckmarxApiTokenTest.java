@@ -3,12 +3,11 @@ package com.checkmarx.jenkins.unit.credentials;
 import com.checkmarx.jenkins.credentials.CheckmarxApiToken;
 import com.checkmarx.jenkins.credentials.DefaultCheckmarxApiToken;
 import com.cloudbees.plugins.credentials.CredentialsScope;
-import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DefaultCheckmarxApiTokenTest {
 
@@ -55,8 +54,8 @@ public class DefaultCheckmarxApiTokenTest {
         );
 
         // Should generate UUID if id is empty
-        Assertions.assertNotEquals("", token.getId());
-        Assertions.assertNotNull(token.getId());
+        assertNotEquals("", token.getId());
+        assertNotNull(token.getId());
         assertEquals(token.getDescription(), "");
         assertEquals("", token.getClientId());
         assertEquals("", token.getToken().getPlainText());

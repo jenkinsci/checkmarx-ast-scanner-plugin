@@ -7,15 +7,15 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ProxyHttpClientTest extends CheckmarxTestBase {
 
@@ -23,14 +23,14 @@ public class ProxyHttpClientTest extends CheckmarxTestBase {
     private ProxyHttpClient proxyHttpClient;
     private static final int TIMEOUT = 10000;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         mockWebServer = new MockWebServer();
         mockWebServer.start();
         proxyHttpClient = new ProxyHttpClient();
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException {
         mockWebServer.shutdown();
     }
@@ -85,20 +85,20 @@ public class ProxyHttpClientTest extends CheckmarxTestBase {
         assertEquals("proxy.example.com", address.getHostString());
     }
 
-    @Test(expected = CheckmarxException.class)
-    public void testGetHttpClientWithInvalidProxyPort() throws URISyntaxException, CheckmarxException {
+    @Test
+    public void testGetHttpClientWithInvalidProxyPort() {
         // Create proxy URL with invalid port
         String proxyUrl = "http://proxy.example.com:5";
-        
-        proxyHttpClient.getHttpClient(proxyUrl, TIMEOUT, TIMEOUT);
+
+        assertThrows(CheckmarxException.class, () -> proxyHttpClient.getHttpClient(proxyUrl, TIMEOUT, TIMEOUT));
     }
 
-    @Test(expected = CheckmarxException.class)
-    public void testGetHttpClientWithTooHighProxyPort() throws URISyntaxException, CheckmarxException {
+    @Test
+    public void testGetHttpClientWithTooHighProxyPort() {
         // Create proxy URL with port > 65535
         String proxyUrl = "http://proxy.example.com:70000";
-        
-        proxyHttpClient.getHttpClient(proxyUrl, TIMEOUT, TIMEOUT);
+
+        assertThrows(CheckmarxException.class, () -> proxyHttpClient.getHttpClient(proxyUrl, TIMEOUT, TIMEOUT));
     }
 
     @Test
@@ -112,9 +112,9 @@ public class ProxyHttpClientTest extends CheckmarxTestBase {
         assertEquals(readTimeout, client.readTimeoutMillis());
     }
 
-    @Test(expected = CheckmarxException.class)
-    public void testGetHttpClientWithEmptyProxyHost() throws URISyntaxException, CheckmarxException {
+    @Test
+    public void testGetHttpClientWithEmptyProxyHost() {
         String proxyUrl = "http://:8080";
-        proxyHttpClient.getHttpClient(proxyUrl, TIMEOUT, TIMEOUT);
+        assertThrows(CheckmarxException.class, () -> proxyHttpClient.getHttpClient(proxyUrl, TIMEOUT, TIMEOUT));
     }
-} 
+}

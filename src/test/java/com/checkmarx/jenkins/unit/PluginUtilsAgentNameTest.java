@@ -4,12 +4,12 @@ import com.checkmarx.jenkins.PluginUtils;
 import hudson.PluginManager;
 import hudson.PluginWrapper;
 import jenkins.model.Jenkins;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -25,7 +25,7 @@ public class PluginUtilsAgentNameTest {
     private Jenkins jenkins;
     private PluginManager pluginManager;
 
-    @Before
+    @BeforeEach
     public void before() {
         jenkins = mock(Jenkins.class);
         pluginManager = mock(PluginManager.class);
@@ -35,7 +35,7 @@ public class PluginUtilsAgentNameTest {
         jenkinsStatic.when(Jenkins::getInstanceOrNull).thenReturn(jenkins);
     }
 
-    @After
+    @AfterEach
     public void after() {
         if (jenkinsStatic != null) {
             jenkinsStatic.close();

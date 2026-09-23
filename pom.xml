@@ -48,6 +48,8 @@
     <jenkins.baseline>2.452</jenkins.baseline>
     <jenkins.version>${jenkins.baseline}.4</jenkins.version>
     <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
+    <!-- https://github.com/jenkinsci/plugin-pom/pull/1178 -->
+    <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
     <output.dir>${project.build.directory}/output</output.dir>
     <tmp.dir>${project.build.directory}/tmp</tmp.dir>
     <archive.file>${project.build.directory}/archive.tar</archive.file>
@@ -215,7 +217,19 @@
     <dependency>
       <groupId>org.apache.ant</groupId>
       <artifactId>ant</artifactId>
-      <version>1.10.12</version>
+      <version>1.10.18</version>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>5.12.2</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.12.2</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
   <repositories>

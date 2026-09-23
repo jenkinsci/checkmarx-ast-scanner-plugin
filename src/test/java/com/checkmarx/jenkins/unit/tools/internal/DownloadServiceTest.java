@@ -3,12 +3,12 @@ package com.checkmarx.jenkins.unit.tools.internal;
 import com.checkmarx.jenkins.tools.CheckmarxInstaller;
 import com.checkmarx.jenkins.tools.Platform;
 import com.checkmarx.jenkins.tools.internal.DownloadService;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URL;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class DownloadServiceTest {
 
@@ -42,24 +42,24 @@ public class DownloadServiceTest {
         assertEquals(expectedFileName, actualFileName);
     }
 
-    @Test(expected = Exception.class)
+    @Test
     public void testBuildFileNameWithNullTagName() {
-        DownloadService.buildFileName(null, Platform.LINUX);
+        assertThrows(Exception.class, () -> DownloadService.buildFileName(null, Platform.LINUX));
     }
 
-    @Test(expected = Exception.class)
+    @Test
     public void testBuildFileNameWithNullPlatform() {
-        DownloadService.buildFileName("v2.0.0", null);
+        assertThrows(Exception.class, () -> DownloadService.buildFileName("v2.0.0", null));
     }
 
-    @Test(expected = Exception.class)
-    public void testGetDownloadUrlForCliWithNullVersion() throws IOException {
-        DownloadService.getDownloadUrlForCli(null, Platform.LINUX);
+    @Test
+    public void testGetDownloadUrlForCliWithNullVersion() {
+        assertThrows(Exception.class, () -> DownloadService.getDownloadUrlForCli(null, Platform.LINUX));
     }
 
-    @Test(expected = Exception.class)
-    public void testGetDownloadUrlForCliWithNullPlatform() throws IOException {
-        DownloadService.getDownloadUrlForCli("v2.0.0", null);
+    @Test
+    public void testGetDownloadUrlForCliWithNullPlatform() {
+        assertThrows(Exception.class, () -> DownloadService.getDownloadUrlForCli("v2.0.0", null));
     }
 
     @Test
