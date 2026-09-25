@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import com.checkmarx.jenkins.CheckmarxScanBuilder;
+import com.checkmarx.jenkins.StringUtils;
 import com.checkmarx.jenkins.tools.CheckmarxInstallation;
 import com.checkmarx.jenkins.tools.CheckmarxInstaller;
 import hudson.model.FreeStyleBuild;
@@ -13,7 +14,6 @@ import hudson.tools.ToolInstaller;
 import hudson.tools.ToolProperty;
 import hudson.util.FormValidation;
 import jenkins.model.ArtifactManager;
-import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import java.util.logging.Logger;
