@@ -40,7 +40,7 @@ public class ProxyHttpClient {
                                     .addHeader("Proxy-Authorization", "Basic " + basicAuth) // add auth
                                     .build();
                         }
-                    } ;
+                    };
                     return okClientBuilder.proxyAuthenticator(_httpProxyAuth).proxy(_httpProxy).build();
                 } else {
                     return okClientBuilder.proxy(_httpProxy).build();
