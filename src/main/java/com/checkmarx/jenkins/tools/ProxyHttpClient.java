@@ -10,9 +10,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
+import com.checkmarx.jenkins.StringUtils;
 import com.checkmarx.jenkins.exception.CheckmarxException;
 import okhttp3.*;
-import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nullable;
 

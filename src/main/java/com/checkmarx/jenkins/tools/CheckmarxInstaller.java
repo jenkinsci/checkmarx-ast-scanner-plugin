@@ -3,6 +3,7 @@ package com.checkmarx.jenkins.tools;
 import com.checkmarx.jenkins.exception.ToolDetectionException;
 import com.checkmarx.jenkins.logger.CxLoggerAdapter;
 import com.checkmarx.jenkins.PluginUtils;
+import com.checkmarx.jenkins.StringUtils;
 import com.checkmarx.jenkins.exception.CheckmarxException;
 import com.checkmarx.jenkins.tools.internal.DownloadService;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -31,7 +32,6 @@ import org.apache.commons.compress.compressors.CompressorStreamFactory;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.*;
@@ -53,7 +53,7 @@ public class CheckmarxInstaller extends ToolInstaller {
 
     private static final String INSTALLED_FROM = ".installedFrom";
     private static final String TIMESTAMP_FILE = ".timestamp";
-    public static final String cliDefaultVersion = "2.3.59";
+    public static final String cliDefaultVersion = "2.3.66";
     private static final String cliVersionFileName = "cli.version";
     @Getter
     private String version;
