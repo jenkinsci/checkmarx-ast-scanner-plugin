@@ -34,7 +34,7 @@ jobs:
 
       - name: Extract Jira Issue Key
         id: extract_key
-        uses: actions/github-script@10b53a9ec6c222bb4ce97aa6bd2b5f739696b536 # v4
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           REPO: ${{ inputs.repo }}
           ISSUE_NUMBER: ${{ inputs.issue_number }}
