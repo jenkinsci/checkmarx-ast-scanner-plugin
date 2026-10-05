@@ -6,9 +6,9 @@ import com.checkmarx.jenkins.model.ScanConfig;
 import hudson.PluginManager;
 import hudson.PluginWrapper;
 import jenkins.model.Jenkins;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
 import java.io.ByteArrayOutputStream;
@@ -16,8 +16,8 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -37,7 +37,7 @@ public class PluginUtilsAgentArgumentTest {
     private CxLoggerAdapter log;
     private ScanConfig scanConfig;
 
-    @Before
+    @BeforeEach
     public void before() {
         PluginWrapper wrapper = mock(PluginWrapper.class);
         when(wrapper.getVersion()).thenReturn(PLUGIN_VERSION);
@@ -61,7 +61,7 @@ public class PluginUtilsAgentArgumentTest {
         scanConfig.setSourceDirectory("/tmp/workspace");
     }
 
-    @After
+    @AfterEach
     public void after() {
         if (jenkinsStatic != null) {
             jenkinsStatic.close();
@@ -70,9 +70,9 @@ public class PluginUtilsAgentArgumentTest {
 
     private static void assertCarriesAgent(List<String> arguments) {
         int index = arguments.indexOf("--agent");
-        assertTrue("expected --agent in " + arguments, index >= 0);
+        assertTrue(index >= 0, "expected --agent in " + arguments);
         assertEquals(EXPECTED_AGENT, arguments.get(index + 1));
-        assertEquals("--agent must not be passed twice", index, arguments.lastIndexOf("--agent"));
+        assertEquals(index, arguments.lastIndexOf("--agent"), "--agent must not be passed twice");
     }
 
     @Test

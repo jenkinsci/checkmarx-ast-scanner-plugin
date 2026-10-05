@@ -3,18 +3,18 @@ package com.checkmarx.jenkins.unit.tools.internal;
 import com.checkmarx.jenkins.exception.CheckmarxException;
 import com.checkmarx.jenkins.tools.ProxyHttpClient;
 import okhttp3.OkHttpClient;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.net.URISyntaxException;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ProxyHttpClientTest {
 
     private ProxyHttpClient proxyHttpClient;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         proxyHttpClient = new ProxyHttpClient();
     }
@@ -41,19 +41,22 @@ public class ProxyHttpClientTest {
         assertNotNull(client.proxyAuthenticator());
     }
 
-    @Test(expected = CheckmarxException.class)
-    public void testGetHttpClientWithInvalidProxyPort() throws URISyntaxException, CheckmarxException {
-        proxyHttpClient.getHttpClient("http://proxy.example.com:5", 1000, 1000);
+    @Test
+    public void testGetHttpClientWithInvalidProxyPort() {
+        assertThrows(CheckmarxException.class,
+                () -> proxyHttpClient.getHttpClient("http://proxy.example.com:5", 1000, 1000));
     }
 
-    @Test(expected = CheckmarxException.class)
-    public void testGetHttpClientWithTooHighProxyPort() throws URISyntaxException, CheckmarxException {
-        proxyHttpClient.getHttpClient("http://proxy.example.com:65536", 1000, 1000);
+    @Test
+    public void testGetHttpClientWithTooHighProxyPort() {
+        assertThrows(CheckmarxException.class,
+                () -> proxyHttpClient.getHttpClient("http://proxy.example.com:65536", 1000, 1000));
     }
 
-    @Test(expected = Exception.class)
-    public void testGetHttpClientWithInvalidProxyUrl() throws URISyntaxException, CheckmarxException {
-        proxyHttpClient.getHttpClient("not-a-valid-url", 1000, 1000);
+    @Test
+    public void testGetHttpClientWithInvalidProxyUrl() {
+        assertThrows(Exception.class,
+                () -> proxyHttpClient.getHttpClient("not-a-valid-url", 1000, 1000));
     }
 
     @Test
@@ -80,13 +83,15 @@ public class ProxyHttpClientTest {
         assertEquals(readTimeout, client.readTimeoutMillis());
     }
 
-    @Test(expected = CheckmarxException.class)
-    public void testGetHttpClientWithEmptyProxyHost() throws URISyntaxException, CheckmarxException {
-        proxyHttpClient.getHttpClient("http://:8080", 1000, 1000);
+    @Test
+    public void testGetHttpClientWithEmptyProxyHost() {
+        assertThrows(CheckmarxException.class,
+                () -> proxyHttpClient.getHttpClient("http://:8080", 1000, 1000));
     }
 
-    @Test(expected = Exception.class)
-    public void testGetHttpClientWithMalformedProxyUrl() throws URISyntaxException, CheckmarxException {
-        proxyHttpClient.getHttpClient("http://proxy.example.com:80:80/invalid-///path", 1000, 1000);
+    @Test
+    public void testGetHttpClientWithMalformedProxyUrl() {
+        assertThrows(Exception.class,
+                () -> proxyHttpClient.getHttpClient("http://proxy.example.com:80:80/invalid-///path", 1000, 1000));
     }
-} 
+}

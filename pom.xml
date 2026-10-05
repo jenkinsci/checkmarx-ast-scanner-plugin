@@ -48,6 +48,8 @@
     <jenkins.baseline>2.452</jenkins.baseline>
     <jenkins.version>${jenkins.baseline}.4</jenkins.version>
     <gitHubRepo>jenkinsci/${project.artifactId}-plugin</gitHubRepo>
+    <!-- https://github.com/jenkinsci/plugin-pom/pull/1178 -->
+    <ban-junit4-imports.skip>false</ban-junit4-imports.skip>
     <output.dir>${project.build.directory}/output</output.dir>
     <tmp.dir>${project.build.directory}/tmp</tmp.dir>
     <archive.file>${project.build.directory}/archive.tar</archive.file>

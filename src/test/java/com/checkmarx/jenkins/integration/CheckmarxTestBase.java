@@ -12,15 +12,16 @@ import hudson.model.FreeStyleProject;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
 import hudson.tools.InstallSourceProperty;
 import jenkins.model.Jenkins;
-import org.junit.Before;
-import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
 import org.jvnet.hudson.test.JenkinsRule;
 import org.jvnet.hudson.test.SingleFileSCM;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+@WithJenkins
 public class CheckmarxTestBase {
 
     public static final String CX_BASE_URI = "CX_BASE_URI";
@@ -42,8 +43,7 @@ public class CheckmarxTestBase {
     public static final String TEST_RUN_SUFFIX =
             "-" + System.getenv().getOrDefault("GITHUB_RUN_ID", Long.toString(System.currentTimeMillis()));
 
-    @Rule
-    public JenkinsRule jenkins = new JenkinsRule();
+    public JenkinsRule jenkins;
 
     protected String astServerUrl;
     protected String astBaseAuthUrl;
@@ -51,8 +51,9 @@ public class CheckmarxTestBase {
     protected String astClientSecret;
     protected String astClientId;
 
-    @Before
-    public void before() throws IOException {
+    @BeforeEach
+    public void before(JenkinsRule rule) throws IOException {
+        this.jenkins = rule;
         this.astServerUrl = System.getenv(CX_BASE_URI);
         this.astBaseAuthUrl = System.getenv(CX_BASE_AUTH_URI);
         this.astTenantName = System.getenv(CX_TENANT);

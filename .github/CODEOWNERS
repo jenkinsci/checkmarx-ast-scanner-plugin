@@ -1,1 +1,5 @@
-* @jenkinsci/ast-scanner-plugin-developers
+# Codeowners file
+# Each line is a file pattern followed by one or more owners
+
+# Specify the default owners for the entire repository
+*       @Checkmarx/cx-maintainers

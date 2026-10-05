@@ -8,30 +8,32 @@ import hudson.model.Result;
 import hudson.util.FormValidation;
 import hudson.tasks.Builder;
 import hudson.tools.ToolProperty;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.jvnet.hudson.test.JenkinsRule;
+import org.jvnet.hudson.test.junit.jupiter.WithJenkins;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
+@WithJenkins
 public class CheckmarxScanBuilderTest {
 
-    @Rule
-    public JenkinsRule j = new JenkinsRule();
+    private JenkinsRule j;
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+    @TempDir
+    public File tempFolder;
 
     private CheckmarxScanBuilder scanBuilder;
     private CheckmarxScanBuilderDescriptor descriptor;
 
-    @Before
-    public void before() throws IOException {
+    @BeforeEach
+    public void before(JenkinsRule rule) throws IOException {
+        this.j = rule;
         scanBuilder = new CheckmarxScanBuilder();
         descriptor = new CheckmarxScanBuilderDescriptor();
         j.jenkins.getDescriptorList(Builder.class).add(descriptor);
@@ -195,8 +197,8 @@ public class CheckmarxScanBuilderTest {
         scanBuilder.setUseOwnAdditionalOptions(true);
         
         String retrievedOptions = scanBuilder.getAdditionalOptions();
-        assertTrue("Should contain test parameter", retrievedOptions.contains("--test-param value"));
-        assertEquals("Additional options should match", options, retrievedOptions);
+        assertTrue(retrievedOptions.contains("--test-param value"), "Should contain test parameter");
+        assertEquals(options, retrievedOptions, "Additional options should match");
     }
 
     @Test
@@ -204,7 +206,7 @@ public class CheckmarxScanBuilderTest {
         // Test with explicit branch name
         String branchName = "feature/test-branch";
         scanBuilder.setBranchName(branchName);
-        assertEquals("Branch name should match", branchName, scanBuilder.getBranchName());
+        assertEquals(branchName, scanBuilder.getBranchName(), "Branch name should match");
         
         // Test with empty branch name (should use environment variables)
         scanBuilder.setBranchName("");
@@ -218,13 +220,13 @@ public class CheckmarxScanBuilderTest {
         // Test server URL configuration
         String serverUrl = "https://checkmarx.example.com";
         descriptor.setServerUrl(serverUrl);
-        assertEquals("Server URL should match", serverUrl, descriptor.getServerUrl());
-        
+        assertEquals(serverUrl, descriptor.getServerUrl(), "Server URL should match");
+
         // Test authentication URL configuration
         String authUrl = "https://auth.example.com";
         descriptor.setBaseAuthUrl(authUrl);
         descriptor.setUseAuthenticationUrl(true);
-        assertEquals("Auth URL should match", authUrl, descriptor.getBaseAuthUrl());
-        assertTrue("Should use authentication URL", descriptor.getUseAuthenticationUrl());
+        assertEquals(authUrl, descriptor.getBaseAuthUrl(), "Auth URL should match");
+        assertTrue(descriptor.getUseAuthenticationUrl(), "Should use authentication URL");
     }
 } 
