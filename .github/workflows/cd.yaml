@@ -1,0 +1,111 @@
+# Manual-only release workflow: https://www.jenkins.io/redirect/continuous-delivery-of-plugins
+---
+name: cd
+on:
+  workflow_dispatch:
+    inputs:
+      validate_only:
+        required: false
+        type: boolean
+        description: |
+          Run validation with release drafter only
+          → Skip the release job
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.repository }}-${{ github.ref }}
+
+# Each job below declares its own permissions instead of a blanket workflow-level grant.
+permissions: {}
+
+jobs:
+  maven-cd:
+    permissions:
+      checks: read # Required by verify-ci-status-action to read the triggering check run
+      contents: write # Required by jenkins-maven-cd-action to create the release tag and publish the GitHub release
+    uses: jenkins-infra/github-reusable-workflows/.github/workflows/maven-cd.yml@c2470861b1ad94810dc0d207b011e0b57bb91bbb # v1
+    with:
+      validate_only: ${{ inputs.validate_only == true }}
+    secrets:
+      MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+      MAVEN_TOKEN: ${{ secrets.MAVEN_TOKEN }}
+
+  # Attaches the built .hpi to the GitHub release, which jenkins-maven-cd-action doesn't do itself.
+  attach-release-assets:
+    name: Attach hpi asset to release
+    needs: maven-cd
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required to upload the built .hpi as a release asset
+    steps:
+      - name: Check out
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # Skips every later step when no release happened this run (e.g. a validate_only run).
+      - name: Determine if a release tag was created
+        id: get_new_tag
+        run: |
+          git fetch --tags --force
+          TAG_NAME=$(git tag --points-at HEAD | sort -V | tail -n 1)
+          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_OUTPUT"
+          if [ -z "$TAG_NAME" ]; then
+            echo "No release tag found on HEAD, skipping asset upload."
+          else
+            echo "Found release tag: $TAG_NAME"
+          fi
+
+      - name: Set up JDK 11
+        if: steps.get_new_tag.outputs.TAG_NAME != ''
+        uses: actions/setup-java@2dfa2011c5b2a0f1489bf9e433881c92c1631f88 # v4.3.0
+        with:
+          distribution: temurin
+          java-version: 11
+
+      - name: Ensure Maven Dependencies are Downloaded
+        if: steps.get_new_tag.outputs.TAG_NAME != ''
+        run: mvn dependency:resolve
+
+      - name: Build plugin package
+        if: steps.get_new_tag.outputs.TAG_NAME != ''
+        run: mvn -B package -DskipTests -Dset.changelist
+
+      - name: Extract CLI version
+        if: steps.get_new_tag.outputs.TAG_NAME != ''
+        run: |
+          chmod +x .github/scripts/extract_cli_version.sh
+          .github/scripts/extract_cli_version.sh cx-linux
+
+      - name: Print Extracted CLI Version
+        if: steps.get_new_tag.outputs.TAG_NAME != ''
+        run: |
+          echo "Extracted CLI Version: $CLI_VERSION"
+
+      - name: Get GitHub Release Upload URL
+        if: steps.get_new_tag.outputs.TAG_NAME != ''
+        id: get-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ steps.get_new_tag.outputs.TAG_NAME }}
+        run: |
+          UPLOAD_URL=$(gh api /repos/$GITHUB_REPOSITORY/releases/tags/$TAG_NAME --jq '.upload_url')
+          if [[ -z "$UPLOAD_URL" ]]; then
+            echo "ERROR: Failed to retrieve upload URL"
+            exit 1
+          fi
+          echo "UPLOAD_URL=$UPLOAD_URL" >> "$GITHUB_ENV"
+
+      - name: Upload Release Asset
+        if: steps.get_new_tag.outputs.TAG_NAME != ''
+        uses: shogo82148/actions-upload-release-asset@8f032eff0255912cc9c8455797fd6d72f25c7ab7 #v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          github_token: ${{ github.token }}
+          upload_url: ${{ env.UPLOAD_URL }}
+          asset_path: ./target/checkmarx-ast-scanner.hpi
+          asset_name: checkmarx-ast-scanner.hpi
+          asset_content_type: application/multipart-core
+          overwrite: true
