@@ -19,7 +19,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Checkmarx AST CLI Action
-        uses: checkmarx/ast-github-action@fa338ce82069b297c4852ac77e2d168db9fb56d8 # main
+        uses: checkmarx/ast-github-action@882c03f380f4bdddae2d068540cbd73efe0796ac # main
         with:
           base_uri: ${{ secrets.BASE_URI }}
           cx_tenant: ${{ secrets.TENANT }}
