@@ -126,7 +126,7 @@ jobs:
       
 
       - name: Send notification to Teams
-        uses: Skitionek/notify-microsoft-teams@9c67757f64d610fb6748d8ff3c11f284355ed7ec # v1.0.8
+        uses: Skitionek/notify-microsoft-teams@e7661ab77b77471f47be0180171bd4aca7994348 # v1.3.4
         env:
           WEBHOOK_URL: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
           PRODUCT_NAME: ${{ inputs.product_name }}
